@@ -107,8 +107,8 @@ export default function PrivacyPage() {
               </li>
               {isSupabaseConfigured ? (
                 <li>
-                  <strong className="text-ink">Menu na dziś.</strong> Dzisiejsze menu i zdjęcia dań pobieramy z bazy
-                  danych prowadzonej w usłudze Supabase. Przy wejściu na stronę Twoja przeglądarka łączy się wtedy z
+                  <strong className="text-ink">Menu na dziś i wydarzenia.</strong> Dzisiejsze menu, zdjęcia dań i
+                  wydarzenia pobieramy z bazy danych prowadzonej w usłudze Supabase. Przy wejściu na stronę Twoja przeglądarka łączy się wtedy z
                   serwerami Supabase, które – jak każdy serwer – widzą adres IP. Nie przekazujemy tam żadnych innych
                   danych o Tobie.
                 </li>

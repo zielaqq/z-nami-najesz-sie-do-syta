@@ -22,10 +22,10 @@ export function LoginForm() {
       const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
       if (error) {
         const text = /invalid login credentials/i.test(error.message)
-          ? "Nieprawidłowy e-mail lub hasło."
+          ? "Nieprawidłowy e-mail lub hasło. Wpisz oba ręcznie, bez spacji na końcu."
           : /email not confirmed/i.test(error.message)
-            ? "Ten adres e-mail nie został jeszcze potwierdzony."
-            : "Nie udało się zalogować. Spróbuj ponownie.";
+            ? "Ten adres e-mail nie został jeszcze potwierdzony (potwierdź konto w Supabase)."
+            : `Nie udało się zalogować (kod: ${error.code ?? error.status ?? "nieznany"}: ${error.message}).`;
         setNotice({ tone: "error", text });
       }
       // Po udanym logowaniu panel sam przechodzi dalej (zmiana stanu sesji).

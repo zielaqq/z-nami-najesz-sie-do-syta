@@ -4,21 +4,23 @@ import { Contact } from "@/components/sections/Contact";
 import { Events } from "@/components/sections/Events";
 import { Gallery } from "@/components/sections/Gallery";
 import { Hero } from "@/components/sections/Hero";
+import { LiveEvents } from "@/components/sections/LiveEvents";
 import { Menu } from "@/components/sections/Menu";
 import { Reviews } from "@/components/sections/Reviews";
 import { Social } from "@/components/sections/Social";
 import { getUpcomingEvents } from "@/lib/content";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 
-// Strona jest statyczna i odświeża się raz na dobę – dzięki temu miniona data
-// wydarzenia automatycznie znika z listy. (Musi być literałem: patrz dokumentacja Next.js.)
+// Strona jest statyczna i odświeża się raz na dobę (tryb bez bazy: miniona data wydarzenia z pliku znika sama).
+// (Musi być literałem: patrz dokumentacja Next.js.)
 export const revalidate = 86400;
 
 export default async function HomePage() {
-  const upcomingEvents = await getUpcomingEvents();
-  const hasEvents = upcomingEvents.length > 0;
+  // Z bazą (panel klientki): wydarzenia wczytuje przeglądarka na żywo. Bez bazy: z pliku src/data/events.ts.
+  const upcomingEvents = isSupabaseConfigured ? [] : await getUpcomingEvents();
 
-  // Naprzemienne tła sekcji: gdy brak wydarzeń, sekcje poniżej zamieniają się tłem,
-  // żeby dwie sąsiednie sekcje nigdy nie miały tego samego koloru.
+  // Tła sekcji naprzemiennie: opinie (paper) → wydarzenia (sand, opcjonalne) → social (cream) → kontakt (paper).
+  // „Sand” odcina się od sąsiadów, więc kolory pozostałych sekcji nie zależą od tego, czy wydarzenia są.
   return (
     <>
       <Hero />
@@ -27,9 +29,9 @@ export default async function HomePage() {
       <CateringDelivery />
       <Gallery />
       <Reviews />
-      <Events events={upcomingEvents} tone="cream" />
-      <Social tone={hasEvents ? "paper" : "cream"} />
-      <Contact tone={hasEvents ? "cream" : "paper"} />
+      {isSupabaseConfigured ? <LiveEvents /> : <Events events={upcomingEvents} />}
+      <Social tone="cream" />
+      <Contact tone="paper" />
     </>
   );
 }

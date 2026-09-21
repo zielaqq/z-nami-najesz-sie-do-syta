@@ -2,40 +2,41 @@ import type { CSSProperties } from "react";
 
 import { Photo } from "@/components/ui/Photo";
 import { Phone } from "@/components/ui/icons";
-import { Section, SectionHeading, type SectionTone } from "@/components/ui/Section";
+import { Section, SectionHeading } from "@/components/ui/Section";
 import type { RestaurantEvent } from "@/data/events";
 import { siteConfig } from "@/data/site";
 import { formatEventDate } from "@/lib/format";
 
-interface EventsProps {
-  /** Nadchodzące wydarzenia (z `getUpcomingEvents`). Puste = sekcja się nie wyświetla. */
+interface EventsViewProps {
+  /** Nadchodzące wydarzenia. */
   events: RestaurantEvent[];
-  tone?: SectionTone;
+  /** Animacja wejścia przy przewijaniu; wyłączona dla treści doładowywanych z bazy (patrz SectionHeading). */
+  reveal?: boolean;
 }
 
-/** Sekcja znika całkowicie, gdy nie ma żadnych nadchodzących wydarzeń. */
-export function Events({ events, tone = "cream" }: EventsProps) {
-  if (events.length === 0) return null;
-
+/** Wygląd sekcji „Wydarzenia” (wspólny dla wydarzeń z pliku i z bazy). Tło „sand” – patrz Section. */
+export function EventsView({ events, reveal = true }: EventsViewProps) {
   return (
-    <Section id="wydarzenia" labelledBy="events-title" tone={tone}>
+    <Section id="wydarzenia" labelledBy="events-title" tone="sand">
       <SectionHeading
         id="events-title"
         eyebrow="Wydarzenia"
         title="Co u nas się dzieje"
         lead="Muzyka na żywo, degustacje i wydarzenia specjalne – sprawdź najbliższe terminy."
         titleWidth="max-w-[14ch]"
+        reveal={reveal}
       />
 
       <ol className="mt-12 divide-y divide-ink/15 border-y border-ink/15 lg:mt-16">
         {events.map((event, index) => {
           const date = formatEventDate(event.date);
+          const end = event.endDate && event.endDate !== event.date ? formatEventDate(event.endDate) : null;
           return (
             <li
               key={event.id}
               className="grid gap-5 py-8 sm:grid-cols-[7rem_1fr] sm:gap-10 lg:grid-cols-[8rem_1fr_11rem]"
-              data-reveal
-              style={{ "--reveal-delay": `${index * 90}ms` } as CSSProperties}
+              {...(reveal ? { "data-reveal": "" } : {})}
+              style={reveal ? ({ "--reveal-delay": `${index * 90}ms` } as CSSProperties) : undefined}
             >
               <div className="flex items-baseline gap-3 sm:block">
                 <p aria-hidden="true" className="tabular font-serif text-[3.5rem] leading-none text-ink">
@@ -55,13 +56,19 @@ export function Events({ events, tone = "cream" }: EventsProps) {
                     </span>
                   ) : null}
                 </div>
-                <p className="mt-2 text-sm text-mute">
+                <p className="mt-2 text-sm text-ink-soft">
                   <time dateTime={event.date}>
                     {date.weekday}, {date.long}
                   </time>
+                  {end ? (
+                    <>
+                      {" – "}
+                      <time dateTime={event.endDate}>{end.long}</time>
+                    </>
+                  ) : null}
                   {event.time ? <span> · {event.time}</span> : null}
                 </p>
-                <p className="mt-3 max-w-[56ch] text-ink-soft">{event.description}</p>
+                {event.description ? <p className="mt-3 max-w-[56ch] text-ink-soft">{event.description}</p> : null}
                 <a
                   href={siteConfig.contact.phoneHref}
                   aria-label={`Zapytaj o wydarzenie „${event.title}”: ${siteConfig.contact.phoneDisplay}`}
@@ -88,4 +95,10 @@ export function Events({ events, tone = "cream" }: EventsProps) {
       </ol>
     </Section>
   );
+}
+
+/** Wydarzenia z pliku `src/data/events.ts` (tryb bez bazy). Sekcja znika, gdy nie ma nadchodzących wydarzeń. */
+export function Events({ events }: { events: RestaurantEvent[] }) {
+  if (events.length === 0) return null;
+  return <EventsView events={events} />;
 }

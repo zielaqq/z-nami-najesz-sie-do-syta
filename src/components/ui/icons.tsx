@@ -24,6 +24,7 @@ export {
   Play,
   Plus,
   Search,
+  Trash2,
   Undo2,
   Utensils,
   X as CloseIcon,

@@ -1,6 +1,9 @@
 /**
  * ============================================================================
- *  WYDARZENIA – JEDNO MIEJSCE DO EDYCJI
+ *  WYDARZENIA PRZYKŁADOWE (wersja zapasowa)
+ *
+ *  Prawdziwe wydarzenia dodaje klientka w panelu (/panel → „Wydarzenia”) – patrz docs/PANEL-MENU.md.
+ *  Ten plik jest używany tylko wtedy, gdy panel (baza Supabase) nie jest jeszcze podłączony.
  *
  *  ⚠ Poniższe wydarzenia są DEMO (`demo: true`) – na stronie mają plakietkę „DEMO”.
  *    Usuń je i dodaj prawdziwe.

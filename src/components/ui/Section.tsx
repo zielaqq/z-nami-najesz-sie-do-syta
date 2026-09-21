@@ -2,11 +2,13 @@ import type { ReactNode } from "react";
 
 import { cx } from "@/lib/cx";
 
-export type SectionTone = "cream" | "paper" | "ink";
+export type SectionTone = "cream" | "paper" | "sand" | "ink";
 
 const tones: Record<SectionTone, string> = {
   cream: "bg-cream",
   paper: "bg-paper",
+  // Cieplejszy beż: sekcja opcjonalna (np. „Wydarzenia”) zawsze odcina się od sąsiadów, niezależnie od tego, czy jest.
+  sand: "bg-sand",
   ink: "on-dark bg-ink text-cream",
 };
 
@@ -41,6 +43,11 @@ interface SectionHeadingProps {
   className?: string;
   /** Maksymalna szerokość tytułu (klasa Tailwind) */
   titleWidth?: string;
+  /**
+   * Animacja wejścia przy przewijaniu. Wyłącz (`false`) w treściach doładowywanych po wczytaniu strony
+   * (np. wydarzenia z bazy) – skrypt animacji nie obejmuje elementów, które pojawiły się później.
+   */
+  reveal?: boolean;
 }
 
 export function SectionHeading({
@@ -51,10 +58,11 @@ export function SectionHeading({
   tone = "cream",
   className,
   titleWidth = "max-w-[20ch]",
+  reveal = true,
 }: SectionHeadingProps) {
   const onDark = tone === "ink";
   return (
-    <div className={cx("max-w-3xl", className)} data-reveal>
+    <div className={cx("max-w-3xl", className)} {...(reveal ? { "data-reveal": "" } : {})}>
       <p className={cx("eyebrow flex items-center gap-3", onDark && "!text-accent-on-dark")}>
         <span aria-hidden="true" className="h-px w-8 bg-current" />
         {eyebrow}

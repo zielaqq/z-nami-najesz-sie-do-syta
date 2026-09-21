@@ -10,7 +10,8 @@ jest w kilku plikach w folderze `src/data/`. Po zmianie zapisz plik – strona (
 | menu przykładowe (dopóki panel nie jest podłączony) | `src/data/menu.ts` |
 | galerię zdjęć | `src/data/gallery.ts` |
 | nagrania z Facebooka (Reels) pod galerią | `src/data/videos.ts` |
-| wydarzenia | `src/data/events.ts` |
+| **wydarzenia** (dodawanie, zmiana, usuwanie) | **panel** pod adresem `/panel/`, zakładka „Wydarzenia” – [PANEL-MENU.md](./PANEL-MENU.md) |
+| wydarzenia przykładowe (dopóki panel nie jest podłączony) | `src/data/events.ts` |
 | teksty „O nas”, „Catering i dowóz” i hasło w hero | `src/data/about.ts` |
 | kolory i czcionki | `src/app/globals.css` (kolory) i `src/app/layout.tsx` (czcionki) |
 
@@ -31,8 +32,9 @@ Każde danie to jeden wiersz:
 ```
 
 * **Cena** – liczba w złotych: `16` albo `16.5` (wyświetli się „16,50 zł”).
-* **Kategoria** – jedna z: `zupy`, `dania-glowne`, `dania-miesne`, `dania-bezmiesne`, `dodatki`, `salatki`, `desery`, `napoje`.
-  Edytor kodu podpowie/podkreśli literówkę. Nową kategorię dodajesz w tablicy `menuCategories`.
+* **Kategoria** – jedna z (jak na tablicy w restauracji): `zupy`, `drugie-dania`, `pierogi`, `napoje`, `piwo`.
+  Edytor kodu podpowie/podkreśli literówkę. Nową kategorię dodajesz w tablicy `menuCategories` (oraz w regule
+  `category` w `supabase/schema.sql`, jeśli używasz panelu).
 * **Zdjęcie** – patrz niżej. Najprościej podmienić plik o tej samej nazwie.
 * **Opis** (opcjonalnie): dopisz `description: "…"` – pojawi się pod nazwą. Nie wpisuj składników ani alergenów,
   jeśli nie masz pewności, że są prawdziwe.
@@ -51,7 +53,7 @@ AVIF/WebP dla każdego urządzenia; **wgrywaj JPG/PNG/WebP, nie GIF**):
 | Folder / plik | Do czego | Proporcje i rozmiar |
 | --- | --- | --- |
 | `menu/*.jpg` | zdjęcia dań | **4:3**, min. 1200 × 900 px (na telefonie widać je jako kwadrat – danie na środku) |
-| `gallery/*.jpg` | galeria | dowolne proporcje, najlepiej min. 1200 px szerokości; realne wymiary wpisz w `gallery.ts` (`width`/`height` – kafelek ma proporcje zdjęcia) |
+| `gallery/*.jpg` | galeria | dowolne proporcje, najlepiej min. 1200 px szerokości; realne wymiary wpisz w `gallery.ts` (`width`/`height`); kafelki w siatce mają proporcje 4:5, a w powiększeniu widać całe zdjęcie |
 | `hero/hero-main.jpg` | duże zdjęcie na górze strony | ok. **1800 × 1800 px**; najważniejsze rzeczy na środku (przycinane do 5:4 na telefonie i 6:7 na desktopie) |
 | `hero/hero-inset.jpg` | małe zdjęcie „wsunięte” | kwadrat, min. 900 × 900 px |
 | `about/about-1.jpg`, `about-2.jpg` | sekcja „O nas” | 4:5 (1000 × 1250) i 4:3 (1000 × 750) |
@@ -61,8 +63,10 @@ AVIF/WebP dla każdego urządzenia; **wgrywaj JPG/PNG/WebP, nie GIF**):
 **Jak podmienić:** wrzuć nowy plik z **tą samą nazwą i rozszerzeniem** (np. `rosol-domowy.jpg`). Jeśli plik ma inne
 rozszerzenie, zmień ścieżkę w pliku danych.
 
-**Galeria:** ma już prawdziwe zdjęcia. Nowe zdjęcie: wrzuć plik do `public/images/gallery/` i dopisz wpis w `gallery.ts`
-(nazwa pliku, `width`/`height`, oraz `alt` – krótki opis tego, co widać; ważne dla osób niewidomych i dla SEO).
+**Galeria:** ma już prawdziwe zdjęcia (wnętrze, ogródek, dania) i filtr „Wnętrze / Ogródek / Dania”. Nowe zdjęcie: wrzuć plik
+do `public/images/gallery/` i dopisz wpis w `gallery.ts`: nazwa pliku, `width`/`height`, `category` (`wnetrze`, `ogrodek` albo
+`dania`) oraz `alt` – krótki opis tego, co widać (ważne dla osób niewidomych i dla SEO). Opcjonalnie `focus` (np. `"50% 60%"`) –
+którą część zdjęcia zachować w kafelku 4:5. Na zdjęciach z gośćmi lub personelem zadbaj o ich zgodę albo zamaż twarze.
 
 > Obrazy dań w menu oraz w sekcjach „hero” i „O nas” to nadal **ilustracje poglądowe** wygenerowane skryptem
 > `npm run images:placeholders`. Nie uruchamiaj go po wgraniu własnych zdjęć – nadpisałby pliki o tych samych nazwach
@@ -114,10 +118,15 @@ W `src/data/site.ts`: tablica `openingHours` (dni: 0 = niedziela … 6 = sobota)
 Zmiana godzin automatycznie zmienia: sekcję Kontakt, stopkę, wskaźnik „Otwarte teraz / Zamknięte” oraz dane dla Google.
 Wskaźnik liczy według regularnych godzin – **nie zna świąt**, dlatego w sekcji Kontakt jest prośba o telefon w razie wątpliwości.
 
-## Wydarzenia (`src/data/events.ts`)
+## Wydarzenia
 
-Dodaj obiekt z datą `RRRR-MM-DD`, tytułem i opisem; usuń przykładowe wydarzenia oznaczone `demo: true`.
-Minione wydarzenia znikają same (lista odświeża się co dobę), a **gdy nie ma żadnego – cała sekcja „Wydarzenia” się nie wyświetla**.
+> **Gdy podłączony jest panel (baza Supabase), wydarzenia dodaje i zmienia klientka w panelu** (zakładka „Wydarzenia”:
+> tytuł, data albo zakres dat, godzina, opis) – patrz [PANEL-MENU.md](./PANEL-MENU.md). Poniższy plik jest wtedy tylko wersją
+> przykładową, używaną, dopóki panel nie jest podłączony.
+
+**Plik `src/data/events.ts`:** dodaj obiekt z datą `RRRR-MM-DD`, tytułem i opisem; usuń przykładowe wydarzenia oznaczone
+`demo: true`. Minione wydarzenia znikają same, a **gdy nie ma żadnego – cała sekcja „Wydarzenia” (i jej link w stopce)
+się nie wyświetla**. Wydarzenie jest widoczne do końca swojego dnia (albo do dnia zakończenia, jeśli trwa kilka dni).
 
 ## Opinie Google i Facebook
 

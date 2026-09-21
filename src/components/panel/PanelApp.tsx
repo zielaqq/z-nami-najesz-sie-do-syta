@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { DishLibrary } from "@/components/panel/DishLibrary";
+import { EventsManager } from "@/components/panel/EventsManager";
 import { LoginForm } from "@/components/panel/LoginForm";
 import { TodayEditor } from "@/components/panel/TodayEditor";
 import { buttonClasses } from "@/components/ui/Button";
@@ -20,15 +21,16 @@ type Auth =
   | { status: "error" }
   | { status: "ready"; email: string };
 
-type Tab = "today" | "dishes";
+type Tab = "today" | "dishes" | "events";
 
 const tabs: Array<{ id: Tab; label: string }> = [
   { id: "today", label: "Menu na dziś" },
   { id: "dishes", label: "Baza dań" },
+  { id: "events", label: "Wydarzenia" },
 ];
 
 /**
- * Panel klientki (/panel): logowanie → wybór dań na dziś (kafelki ze zdjęciami) i baza dań.
+ * Panel klientki (/panel): logowanie → wybór dań na dziś (kafelki ze zdjęciami), baza dań i wydarzenia.
  * Wszystko działa w przeglądarce; dostępu do zapisu pilnują reguły w bazie (supabase/schema.sql).
  */
 export function PanelApp() {
@@ -124,7 +126,7 @@ function ConfiguredPanel() {
 
       {auth.status === "ready" ? (
         <>
-          <nav aria-label="Sekcje panelu" className="flex gap-2 border-b border-ink/15">
+          <nav aria-label="Sekcje panelu" className="no-scrollbar flex gap-1 overflow-x-auto border-b border-ink/15 sm:gap-2">
             {tabs.map((item) => (
               <button
                 key={item.id}
@@ -132,7 +134,7 @@ function ConfiguredPanel() {
                 aria-current={tab === item.id ? "page" : undefined}
                 onClick={() => setTab(item.id)}
                 className={cx(
-                  "min-h-12 border-b-[3px] px-4 text-[0.9375rem] font-semibold transition-colors",
+                  "min-h-12 shrink-0 whitespace-nowrap border-b-[3px] px-3 text-[0.9375rem] font-semibold transition-colors sm:px-4",
                   tab === item.id
                     ? "border-accent text-ink"
                     : "border-transparent text-mute hover:text-ink",
@@ -143,7 +145,9 @@ function ConfiguredPanel() {
             ))}
           </nav>
           <div className="mt-8">
-            {tab === "today" ? <TodayEditor onOpenLibrary={() => setTab("dishes")} /> : <DishLibrary />}
+            {tab === "today" ? <TodayEditor onOpenLibrary={() => setTab("dishes")} /> : null}
+            {tab === "dishes" ? <DishLibrary /> : null}
+            {tab === "events" ? <EventsManager /> : null}
           </div>
         </>
       ) : null}

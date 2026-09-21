@@ -1,27 +1,37 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useRef, useState, type KeyboardEvent, type MouseEvent, type TouchEvent } from "react";
+import { useCallback, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode, type TouchEvent } from "react";
 
 import { ChevronLeft, ChevronRight, CloseIcon } from "@/components/ui/icons";
-import type { GalleryImage } from "@/data/gallery";
+import { galleryCategories, type GalleryCategory, type GalleryImage } from "@/data/gallery";
 import { withBase } from "@/lib/base-path";
+import { cx } from "@/lib/cx";
 
 interface GalleryGridProps {
   images: GalleryImage[];
 }
 
+type Filter = "all" | GalleryCategory;
+
 /**
- * Mozaika zdjęć (kolumny CSS – każde zdjęcie zachowuje własne proporcje)
- * z lightboxem opartym o natywny <dialog>: pułapka fokusu, Esc, powrót fokusu.
- * Dodatkowo: strzałki ←/→ oraz przesunięcie palcem na telefonie.
+ * Siatka zdjęć o jednakowych kafelkach (4:5) z filtrem „Wnętrze / Ogródek / Dania”
+ * i lightboxem opartym o natywny <dialog>: pułapka fokusu, Esc, powrót fokusu.
+ * W powiększeniu widać całe zdjęcie; strzałki ←/→ oraz przesunięcie palcem przełączają zdjęcia.
  */
 export function GalleryGrid({ images }: GalleryGridProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const touchStartX = useRef<number | null>(null);
+  const [filter, setFilter] = useState<Filter>("all");
   const [current, setCurrent] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+
+  const visible = filter === "all" ? images : images.filter((image) => image.category === filter);
+  // Przyciski filtra tylko dla kategorii, w których są zdjęcia (i tylko gdy jest z czego wybierać).
+  const categories = galleryCategories
+    .map((category) => ({ ...category, count: images.filter((image) => image.category === category.id).length }))
+    .filter((category) => category.count > 0);
 
   const openAt = (index: number, trigger: HTMLButtonElement) => {
     triggerRef.current = trigger;
@@ -33,8 +43,8 @@ export function GalleryGrid({ images }: GalleryGridProps) {
   const close = () => dialogRef.current?.close();
 
   const step = useCallback(
-    (delta: number) => setCurrent((index) => (index + delta + images.length) % images.length),
-    [images.length],
+    (delta: number) => setCurrent((index) => (index + delta + visible.length) % visible.length),
+    [visible.length],
   );
 
   const onKeyDown = (event: KeyboardEvent<HTMLDialogElement>) => {
@@ -64,20 +74,43 @@ export function GalleryGrid({ images }: GalleryGridProps) {
     if (Math.abs(distance) > 50) step(distance < 0 ? 1 : -1);
   };
 
-  const active = images[current];
+  const active = visible[current];
 
   return (
     <>
-      <ul className="mt-12 columns-2 gap-3 sm:gap-4 lg:mt-16 lg:columns-3 lg:gap-5" aria-label="Zdjęcia z restauracji">
-        {images.map((image, index) => (
-          <li key={image.src} className="mb-3 break-inside-avoid sm:mb-4 lg:mb-5">
+      {categories.length > 1 ? (
+        <div
+          role="group"
+          aria-label="Filtruj zdjęcia według kategorii"
+          className="no-scrollbar mt-10 flex gap-2 overflow-x-auto pb-1 lg:mt-14"
+        >
+          <FilterChip pressed={filter === "all"} onClick={() => setFilter("all")}>
+            Wszystkie ({images.length})
+          </FilterChip>
+          {categories.map((category) => (
+            <FilterChip key={category.id} pressed={filter === category.id} onClick={() => setFilter(category.id)}>
+              {category.label} ({category.count})
+            </FilterChip>
+          ))}
+        </div>
+      ) : null}
+
+      <ul
+        key={filter}
+        className={cx(
+          "menu-swap grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-5",
+          categories.length > 1 ? "mt-6" : "mt-12 lg:mt-16",
+        )}
+        aria-label="Zdjęcia z restauracji"
+      >
+        {visible.map((image, index) => (
+          <li key={image.src}>
             <button
               type="button"
               onClick={(event) => openAt(index, event.currentTarget)}
               aria-label={`Powiększ zdjęcie: ${image.alt}`}
               aria-haspopup="dialog"
-              className="zoom-on-hover group relative block w-full cursor-zoom-in overflow-hidden bg-sand"
-              style={{ aspectRatio: `${image.width} / ${image.height}` }}
+              className="zoom-on-hover group relative block aspect-[4/5] w-full cursor-zoom-in overflow-hidden bg-sand"
             >
               <Image
                 src={withBase(image.src)}
@@ -86,6 +119,7 @@ export function GalleryGrid({ images }: GalleryGridProps) {
                 sizes="(min-width: 1024px) 30vw, 50vw"
                 loading="lazy"
                 className="object-cover"
+                style={{ objectPosition: image.focus }}
               />
               <span
                 aria-hidden="true"
@@ -110,7 +144,7 @@ export function GalleryGrid({ images }: GalleryGridProps) {
         <div className="flex h-full flex-col">
           <div className="flex shrink-0 items-center justify-between px-4 py-3 sm:px-6">
             <p className="tabular text-sm text-on-dark-mute" aria-live="polite">
-              {current + 1} / {images.length}
+              {current + 1} / {visible.length}
             </p>
             <button
               type="button"
@@ -167,5 +201,31 @@ export function GalleryGrid({ images }: GalleryGridProps) {
         </div>
       </dialog>
     </>
+  );
+}
+
+function FilterChip({
+  pressed,
+  onClick,
+  children,
+}: {
+  pressed: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={pressed}
+      onClick={onClick}
+      className={cx(
+        "min-h-11 shrink-0 rounded-[3px] border px-4 text-sm font-semibold tracking-[0.02em] whitespace-nowrap transition-colors duration-200",
+        pressed
+          ? "border-ink bg-ink text-cream"
+          : "border-ink/25 bg-transparent text-ink hover:border-ink hover:bg-ink/5",
+      )}
+    >
+      {children}
+    </button>
   );
 }

@@ -92,8 +92,9 @@ Klucz trafia do przeglądarki, więc ograniczenia są obowiązkowe.
 * **Facebook:** w sekcji „Obserwuj nas” są **same nagrania** (Reels) w oficjalnym odtwarzaczu Facebooka (bez tokenów), bez
   treści postów; lista w `src/data/videos.ts`. Wtyczka z osią czasu (posty) została usunięta. Integracja przez Graph API
   zwykle wymaga aplikacji Meta i tokenu strony, dlatego jej nie udaję.
-* **Menu na dziś:** ustawia je klientka w panelu `/panel` (baza Supabase, zdjęcia dań, reguły dostępu w bazie) – patrz
-  [docs/PANEL-MENU.md](docs/PANEL-MENU.md). Strona nie pokazuje wczorajszego menu jako dzisiejszego.
+* **Menu na dziś i wydarzenia:** ustawia je klientka w panelu `/panel` (baza Supabase, zdjęcia dań, reguły dostępu w bazie) –
+  patrz [docs/PANEL-MENU.md](docs/PANEL-MENU.md). Kategorie menu jak na tablicy w restauracji: zupy, drugie dania, pierogi,
+  napoje, piwo. Strona nie pokazuje wczorajszego menu jako dzisiejszego, a minione wydarzenia znikają same.
 * **Prywatność:** mapa Google ładuje się **po kliknięciu**. Nagrania z Facebooka ładują się **od razu** (gdy sekcja jest blisko
   ekranu) – na życzenie właściciela; Facebook (Meta) może wtedy zapisywać cookies bez zgody użytkownika, więc rozważ baner zgody
   (albo tryb „po kliknięciu”: `siteConfig.embeds.facebookLoadOnClick = true`). Strona sama nie używa cookies ani analityki.

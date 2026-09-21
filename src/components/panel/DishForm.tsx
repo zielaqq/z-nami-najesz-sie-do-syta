@@ -29,7 +29,7 @@ interface DishFormProps {
 export function DishForm({ dish, onClose, onSaved }: DishFormProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [name, setName] = useState(dish?.name ?? "");
-  const [category, setCategory] = useState<MenuCategoryId>(dish?.category ?? "dania-glowne");
+  const [category, setCategory] = useState<MenuCategoryId>(dish?.category ?? "drugie-dania");
   const [price, setPrice] = useState(dish?.price != null ? String(dish.price).replace(".", ",") : "");
   const [description, setDescription] = useState(dish?.description ?? "");
   const [photo, setPhoto] = useState<File | null>(null);

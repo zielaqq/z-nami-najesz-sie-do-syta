@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { EventsNavItem } from "@/components/layout/EventsNavItem";
 import { Logo } from "@/components/layout/Logo";
 import { ButtonLink } from "@/components/ui/Button";
 import { FacebookIcon, MapPin, Phone } from "@/components/ui/icons";
@@ -14,7 +15,6 @@ interface FooterProps {
 export function Footer({ hasEvents }: FooterProps) {
   const { address, contact, links } = siteConfig;
   const year = new Date().getFullYear();
-  const footerLinks = hasEvents ? [...navItems, { id: "wydarzenia", label: "Wydarzenia" }] : navItems;
 
   return (
     <footer className="on-dark bg-ink text-cream">
@@ -39,13 +39,14 @@ export function Footer({ hasEvents }: FooterProps) {
           <nav aria-label="Nawigacja w stopce" className="lg:col-span-2">
             <h2 className="eyebrow !text-accent-on-dark font-sans">Na stronie</h2>
             <ul className="mt-5 space-y-3">
-              {footerLinks.map((item) => (
+              {navItems.map((item) => (
                 <li key={item.id}>
                   <a href={withBase(`/#${item.id}`)} className="link-underline text-cream/90 hover:text-cream">
                     {item.label}
                   </a>
                 </li>
               ))}
+              <EventsNavItem staticHasEvents={hasEvents} />
             </ul>
           </nav>
 
@@ -114,9 +115,15 @@ export function Footer({ hasEvents }: FooterProps) {
           <p>
             © {year} {siteConfig.name}. Wszelkie prawa zastrzeżone.
           </p>
-          <Link href="/polityka-prywatnosci" className="link-underline self-start hover:text-cream sm:self-auto">
-            Polityka prywatności
-          </Link>
+          <div className="flex flex-wrap gap-x-6 gap-y-2 self-start sm:self-auto">
+            <Link href="/polityka-prywatnosci" className="link-underline hover:text-cream">
+              Polityka prywatności
+            </Link>
+            {/* Logowanie właścicielki do panelu menu – dyskretnie, w stopce (strona /panel jest ukryta przed wyszukiwarkami). */}
+            <Link href="/panel" rel="nofollow" className="link-underline hover:text-cream">
+              Panel menu (logowanie)
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

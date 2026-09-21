@@ -23,6 +23,15 @@ i jest ukryty przed wyszukiwarkami.
 4. Jeśli nic nie zaznaczysz, na stronie pojawi się „Dzisiejsze menu pojawi się wkrótce” i telefon do restauracji.
    Strona **nigdy nie pokazuje wczorajszego menu** jako dzisiejszego.
 
+**Kategorie dań** są takie jak na tablicy w restauracji: **Zupy, Drugie dania, Pierogi, Napoje, Piwo.**
+
+### Wydarzenia
+
+Zakładka **„Wydarzenia” → „Dodaj wydarzenie”**: tytuł, data (albo „Do dnia”, jeśli trwa kilka dni), godzina i opis.
+Wydarzenie widać na stronie do jego dnia i **znika samo**, więc nie trzeba go usuwać (minione zobaczysz po włączeniu
+„Pokaż minione”). Gdy nie ma żadnego nadchodzącego, cała sekcja „Wydarzenia” na stronie jest ukryta.
+Ołówek zmienia wydarzenie, kosz je usuwa.
+
 ### Nowe danie
 
 Zakładka **„Baza dań” → „Dodaj danie”**: nazwa, kategoria, cena (nieobowiązkowa), krótki opis (nieobowiązkowy) i zdjęcie
@@ -41,7 +50,8 @@ Baza działa w usłudze **Supabase** (darmowy plan wystarcza). Projekt jest już
 
 1. **Schemat bazy.** Supabase → **SQL Editor** → **New query** → wklej całą zawartość pliku
    [`supabase/schema.sql`](../supabase/schema.sql) → **Run**. Powinno pojawić się „Success”. Można uruchomić ponownie
-   (niczego nie kasuje).
+   (niczego nie kasuje). **Uruchom go ponownie po każdej aktualizacji tego pliku** – tak dopisała się np. tabela wydarzeń
+   i nowe kategorie (dania ze starych kategorii są przy tym automatycznie przenoszone do „Drugich dań”).
 2. **Konto klientki.** **Authentication → Users → Add user → Create new user**: adres e-mail klientki i mocne hasło,
    zaznacz **„Auto Confirm User”**. Hasło przekaż klientce osobiście.
 3. **Uprawnienia do edycji.** W **SQL Editor** uruchom (wpisz e-mail klientki):
@@ -93,7 +103,10 @@ krok 3.
 
 ## Dla programisty
 
-* Schemat i reguły: `supabase/schema.sql` (tabele `dishes`, `daily_menu`, `admins`, bucket `dish-photos`).
+* Schemat i reguły: `supabase/schema.sql` (tabele `dishes`, `daily_menu`, `events`, `admins`, bucket `dish-photos`).
+* Wydarzenia: publiczny odczyt `src/lib/events-live.ts` (jedno zapytanie na wejście na stronę), sekcja
+  `src/components/sections/LiveEvents.tsx`; panel: `EventsManager` i `EventForm` (+ `src/lib/panel-events.ts`).
+  Sekcja „Wydarzenia” ma tło „sand”, więc kolory sąsiednich sekcji nie zależą od tego, czy wydarzenia są.
 * Publiczne menu: `src/components/sections/LiveMenu.tsx` + `src/lib/daily-menu.ts` – zwykły `fetch` do PostgREST
   (bez biblioteki Supabase). Data „dziś” liczona w strefie Europe/Warsaw.
 * Panel: `src/app/(panel)/panel/page.tsx` + `src/components/panel/*`, dane w `src/lib/panel-data.ts`. Biblioteka

@@ -11,7 +11,7 @@ export async function Gallery() {
         id="gallery-title"
         eyebrow="Galeria"
         title="Zajrzyj do nas"
-        lead="Dania, wnętrze i atmosfera naszej restauracji w Lesznie. Kliknij zdjęcie, aby je powiększyć."
+        lead="Wnętrze, ogródek i dania z naszej restauracji w Lesznie. Kliknij zdjęcie, aby je powiększyć."
       />
       <GalleryGrid images={images} />
       {isPlaceholder ? (

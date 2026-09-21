@@ -1,16 +1,17 @@
 -- =============================================================================
---  Z nami najesz się do syta – baza menu (Supabase / PostgreSQL)
+--  Z nami najesz się do syta – baza menu i wydarzeń (Supabase / PostgreSQL)
 --
---  Uruchom RAZ: Supabase → SQL Editor → New query → wklej cały plik → Run.
---  Skrypt można bezpiecznie uruchomić ponownie (nic nie kasuje).
+--  Uruchom: Supabase → SQL Editor → New query → wklej cały plik → Run.
+--  Skrypt można bezpiecznie uruchamiać wielokrotnie (nic nie kasuje) – także po jego aktualizacji:
+--  dopisuje nowe tabele i przenosi istniejące dania na aktualne kategorie.
 --  Dalsze kroki (konto klientki, klucze, panel): docs/PANEL-MENU.md
 --
 --  Bezpieczeństwo: klucz „anon/publishable” jest publiczny, więc dostępu pilnują reguły
---  Row Level Security (RLS) poniżej: każdy może CZYTAĆ menu, ale ZMIENIAĆ je może tylko
---  osoba z listy `admins` (kto jest na liście – patrz krok 5 w docs/PANEL-MENU.md).
+--  Row Level Security (RLS) poniżej: każdy może CZYTAĆ menu i wydarzenia, ale ZMIENIAĆ je może
+--  tylko osoba z listy `admins` (kto jest na liście – patrz krok 3 w docs/PANEL-MENU.md).
 -- =============================================================================
 
--- 1) Lista osób, które mogą edytować menu ------------------------------------------
+-- 1) Lista osób, które mogą edytować menu i wydarzenia -----------------------------
 create table if not exists public.admins (
   user_id uuid primary key references auth.users (id) on delete cascade
 );
@@ -40,15 +41,25 @@ grant select on public.admins to authenticated;
 create table if not exists public.dishes (
   id uuid primary key default gen_random_uuid(),
   name text not null check (char_length(btrim(name)) between 1 and 120),
-  category text not null check (
-    category in ('zupy', 'dania-glowne', 'dania-miesne', 'dania-bezmiesne', 'dodatki', 'salatki', 'desery', 'napoje')
-  ),
+  category text not null check (category in ('zupy', 'drugie-dania', 'pierogi', 'napoje', 'piwo')),
   price numeric(7, 2) check (price is null or price >= 0),
   description text check (description is null or char_length(description) <= 300),
   photo_path text,
   archived boolean not null default false,
   created_at timestamptz not null default now()
 );
+
+-- Kategorie zgodne z tablicą w restauracji: zupy, drugie dania, pierogi, napoje, piwo.
+-- Starsze kategorie (dania główne/mięsne/bezmięsne, dodatki, sałatki, desery) trafiają do „drugich dań”,
+-- a ograniczenie jest zakładane od nowa. Bezpieczne przy ponownym uruchomieniu.
+alter table public.dishes drop constraint if exists dishes_category_check;
+update public.dishes
+   set category = 'drugie-dania'
+ where category in ('dania-glowne', 'dania-miesne', 'dania-bezmiesne', 'dodatki', 'salatki', 'desery');
+alter table public.dishes
+  add constraint dishes_category_check
+  check (category in ('zupy', 'drugie-dania', 'pierogi', 'napoje', 'piwo'));
+
 alter table public.dishes enable row level security;
 
 drop policy if exists "dishes_public_read" on public.dishes;
@@ -114,7 +125,45 @@ create policy "daily_menu_admin_delete" on public.daily_menu
 grant select on public.daily_menu to anon;
 grant select, insert, update, delete on public.daily_menu to authenticated;
 
--- 4) Zdjęcia dań (Storage: publiczny odczyt, zapis tylko dla administratora) ---------
+-- 4) Wydarzenia (edytowane w panelu; minione znikają ze strony same) ------------------
+create table if not exists public.events (
+  id uuid primary key default gen_random_uuid(),
+  title text not null check (char_length(btrim(title)) between 1 and 120),
+  date date not null,
+  end_date date,
+  time_label text check (time_label is null or char_length(time_label) <= 40),
+  description text not null default '' check (char_length(description) <= 600),
+  created_at timestamptz not null default now(),
+  constraint events_dates_check check (end_date is null or end_date >= date)
+);
+create index if not exists events_date_idx on public.events (date);
+alter table public.events enable row level security;
+
+drop policy if exists "events_public_read" on public.events;
+create policy "events_public_read" on public.events
+  for select to anon, authenticated
+  using (true);
+
+drop policy if exists "events_admin_insert" on public.events;
+create policy "events_admin_insert" on public.events
+  for insert to authenticated
+  with check (public.is_admin());
+
+drop policy if exists "events_admin_update" on public.events;
+create policy "events_admin_update" on public.events
+  for update to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop policy if exists "events_admin_delete" on public.events;
+create policy "events_admin_delete" on public.events
+  for delete to authenticated
+  using (public.is_admin());
+
+grant select on public.events to anon;
+grant select, insert, update, delete on public.events to authenticated;
+
+-- 5) Zdjęcia dań (Storage: publiczny odczyt, zapis tylko dla administratora) ---------
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('dish-photos', 'dish-photos', true, 3145728, array['image/jpeg', 'image/png', 'image/webp'])
 on conflict (id) do update
