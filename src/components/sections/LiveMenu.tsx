@@ -64,7 +64,7 @@ export function LiveMenu() {
     );
   }
 
-  const groups: MenuBrowserGroup[] = groupDishes(state.dishes).map((group) => ({
+  const groups: MenuBrowserGroup[] = groupDishes(state.dishes, "keep").map((group) => ({
     id: group.id,
     label: group.label,
     items: group.dishes.map((dish) => ({

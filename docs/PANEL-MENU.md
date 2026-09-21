@@ -23,8 +23,17 @@ i jest ukryty przed wyszukiwarkami.
 4. Jeśli nic nie zaznaczysz, na stronie pojawi się „Dzisiejsze menu pojawi się wkrótce” i telefon do restauracji.
    Strona **nigdy nie pokazuje wczorajszego menu** jako dzisiejszego.
 
-**Kategorie dań** są takie jak na tablicy w restauracji: **Obiad dnia, Zupy, Drugie dania, Pierogi, Napoje, Piwo.**
+**Kategorie dań:** **Obiad dnia, Danie specjalne, Zupy, Drugie dania, Ryby, Pierogi, Napoje, Piwo.**
 W „Obiedzie dnia” wpisz zestaw jako jedno danie (np. „Pomidorowa + schabowy”, cena zestawu, ewentualnie opis).
+„Danie specjalne” jest na to, co nie pasuje do żadnej innej kategorii (np. propozycja szefa kuchni na dziś).
+**Napoje i piwo** pokazują się na stronie jako zwykła lista „nazwa … cena” – bez zdjęć, więc nie trzeba ich fotografować.
+
+### Kolejność dań na stronie
+
+Nad kafelkami są dwa widoki: **„Wybór dań”** (zaznaczasz, co jest dziś) i **„Kolejność na stronie”**. W drugim każde
+wybrane danie ma dwie strzałki: **w lewo** przesuwa je wcześniej, **w prawo** później. Na stronie dania układają się
+od lewej do prawej, rząd po rzędzie (na telefonie od góry do dołu). Kolejność ustawiasz osobno w każdej kategorii,
+zapisuje się sama, a **„Skopiuj z poprzedniego dnia”** kopiuje ją razem z daniami. Nowo dodane danie ląduje na końcu swojej kategorii.
 
 ### Wydarzenia
 
@@ -52,7 +61,8 @@ Baza działa w usłudze **Supabase** (darmowy plan wystarcza). Projekt jest już
 1. **Schemat bazy.** Supabase → **SQL Editor** → **New query** → wklej całą zawartość pliku
    [`supabase/schema.sql`](../supabase/schema.sql) → **Run**. Powinno pojawić się „Success”. Można uruchomić ponownie
    (niczego nie kasuje). **Uruchom go ponownie po każdej aktualizacji tego pliku** – tak dopisała się np. tabela wydarzeń
-   i nowe kategorie (dania ze starych kategorii są przy tym automatycznie przenoszone do „Drugich dań”).
+   kolejność dań i nowe kategorie (dania ze starych kategorii są przy tym automatycznie przenoszone do „Drugich dań”).
+   Dopóki nie uruchomisz aktualnego pliku, strona nadal pokazuje menu (alfabetycznie), ale panel nie zapisze wyboru dań.
 2. **Konto klientki.** **Authentication → Users → Add user → Create new user**: adres e-mail klientki i mocne hasło,
    zaznacz **„Auto Confirm User”**. Hasło przekaż klientce osobiście.
 3. **Uprawnienia do edycji.** W **SQL Editor** uruchom (wpisz e-mail klientki):

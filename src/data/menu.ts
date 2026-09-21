@@ -7,7 +7,7 @@
  *
  *  ⚠ PRZYKŁADOWE DANE. Dania i ceny poniżej są tylko demonstracją układu strony.
  *
- *  KATEGORIE zgodne z tablicą w restauracji: Obiad dnia, Zupy, Drugie dania, Pierogi, Napoje, Piwo.
+ *  KATEGORIE: Obiad dnia, Danie specjalne (to, co nie pasuje do innych), Zupy, Drugie dania, Ryby, Pierogi, Napoje, Piwo.
  *  JAK ZMIENIĆ CENĘ?      Zmień liczbę w polu `price` (w zł, np. 18 albo 18.5).
  *  JAK ZMIENIĆ ZDJĘCIE?   Wrzuć plik do `public/images/menu/` (najlepiej JPG,
  *                         min. 1200 × 900 px, format 4:3) i wpisz jego nazwę w polu `image`.
@@ -26,8 +26,10 @@ export const menuMeta = {
 /** Kategorie w kolejności wyświetlania – jak na tablicy w restauracji. */
 export const menuCategories = [
   { id: "obiad-dnia", label: "Obiad dnia" },
+  { id: "danie-specjalne", label: "Danie specjalne" },
   { id: "zupy", label: "Zupy" },
   { id: "drugie-dania", label: "Drugie dania" },
+  { id: "ryby", label: "Ryby" },
   { id: "pierogi", label: "Pierogi" },
   { id: "napoje", label: "Napoje" },
   { id: "piwo", label: "Piwo" },

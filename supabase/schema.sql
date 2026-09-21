@@ -41,7 +41,7 @@ grant select on public.admins to authenticated;
 create table if not exists public.dishes (
   id uuid primary key default gen_random_uuid(),
   name text not null check (char_length(btrim(name)) between 1 and 120),
-  category text not null check (category in ('obiad-dnia', 'zupy', 'drugie-dania', 'pierogi', 'napoje', 'piwo')),
+  category text not null check (category in ('obiad-dnia', 'danie-specjalne', 'zupy', 'drugie-dania', 'ryby', 'pierogi', 'napoje', 'piwo')),
   price numeric(7, 2) check (price is null or price >= 0),
   description text check (description is null or char_length(description) <= 300),
   photo_path text,
@@ -49,7 +49,7 @@ create table if not exists public.dishes (
   created_at timestamptz not null default now()
 );
 
--- Kategorie zgodne z tablicą w restauracji: obiad dnia, zupy, drugie dania, pierogi, napoje, piwo.
+-- Kategorie zgodne z tablicą w restauracji: obiad dnia, danie specjalne, zupy, drugie dania, ryby, pierogi, napoje, piwo.
 -- Starsze kategorie (dania główne/mięsne/bezmięsne, dodatki, sałatki, desery) trafiają do „drugich dań”,
 -- a ograniczenie jest zakładane od nowa. Bezpieczne przy ponownym uruchomieniu.
 alter table public.dishes drop constraint if exists dishes_category_check;
@@ -58,7 +58,7 @@ update public.dishes
  where category in ('dania-glowne', 'dania-miesne', 'dania-bezmiesne', 'dodatki', 'salatki', 'desery');
 alter table public.dishes
   add constraint dishes_category_check
-  check (category in ('obiad-dnia', 'zupy', 'drugie-dania', 'pierogi', 'napoje', 'piwo'));
+  check (category in ('obiad-dnia', 'danie-specjalne', 'zupy', 'drugie-dania', 'ryby', 'pierogi', 'napoje', 'piwo'));
 
 alter table public.dishes enable row level security;
 
@@ -99,6 +99,23 @@ create table if not exists public.daily_menu (
   primary key (day, dish_id)
 );
 create index if not exists daily_menu_dish_id_idx on public.daily_menu (dish_id);
+
+-- Kolejność dań na stronie (klientka ustawia ją strzałkami w panelu). Mniejsza liczba = wcześniej.
+alter table public.daily_menu add column if not exists sort_order integer not null default 0;
+
+-- Dni zapisane przed dodaniem kolejności dostają kolejność alfabetyczną (tak wyglądały dotąd).
+-- Dotyczy tylko dni, w których wszystkie dania mają jeszcze 0, więc ponowne uruchomienie niczego nie zmienia.
+update public.daily_menu dm
+   set sort_order = ranked.pos
+  from (
+    select m.day, m.dish_id, (row_number() over (partition by m.day order by d.name) - 1)::integer as pos
+      from public.daily_menu m
+      join public.dishes d on d.id = m.dish_id
+  ) ranked
+ where dm.day = ranked.day
+   and dm.dish_id = ranked.dish_id
+   and dm.day in (select day from public.daily_menu group by day having count(*) > 1 and max(sort_order) = 0);
+
 alter table public.daily_menu enable row level security;
 
 drop policy if exists "daily_menu_public_read" on public.daily_menu;

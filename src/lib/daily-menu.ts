@@ -38,17 +38,30 @@ export interface DishGroup {
   dishes: Dish[];
 }
 
-/** Grupuje dania według kategorii (w kolejności z `menuCategories`), w grupach alfabetycznie. */
-export function groupDishes(dishes: Dish[]): DishGroup[] {
+/**
+ * Grupuje dania według kategorii (w kolejności z `menuCategories`).
+ * `alphabetical` (domyślnie) sortuje dania w grupach po nazwie; `keep` zachowuje kolejność wejściową
+ * (np. kolejność ustawioną przez klientkę w menu na dany dzień).
+ */
+export function groupDishes(dishes: Dish[], order: "alphabetical" | "keep" = "alphabetical"): DishGroup[] {
   return menuCategories
-    .map((category) => ({
-      id: category.id,
-      label: category.label,
-      dishes: dishes
-        .filter((dish) => dish.category === category.id)
-        .sort((a, b) => a.name.localeCompare(b.name, "pl")),
-    }))
+    .map((category) => {
+      const inCategory = dishes.filter((dish) => dish.category === category.id);
+      return {
+        id: category.id,
+        label: category.label,
+        dishes: order === "keep" ? inCategory : inCategory.sort((a, b) => a.name.localeCompare(b.name, "pl")),
+      };
+    })
     .filter((group) => group.dishes.length > 0);
+}
+
+/** Kolejność dań: najpierw `sortOrder` (ustawiany strzałkami w panelu), przy remisie alfabetycznie. */
+export function compareByOrder(
+  a: { sortOrder: number; name: string },
+  b: { sortOrder: number; name: string },
+): number {
+  return a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, "pl");
 }
 
 /**
@@ -57,13 +70,22 @@ export function groupDishes(dishes: Dish[]): DishGroup[] {
  */
 export async function fetchDailyMenu(day: string, signal?: AbortSignal): Promise<Dish[]> {
   if (!supabaseConfig) throw new Error("Supabase nie jest skonfigurowany");
-  const params = new URLSearchParams({ select: `dishes(${DISH_COLUMNS})`, day: `eq.${day}` });
-  const response = await fetch(`${supabaseConfig.url}/rest/v1/daily_menu?${params}`, {
-    headers: { apikey: supabaseConfig.key, Accept: "application/json" },
-    cache: "no-store",
-    signal,
-  });
+  const { url, key } = supabaseConfig;
+  const request = (select: string) =>
+    fetch(`${url}/rest/v1/daily_menu?${new URLSearchParams({ select, day: `eq.${day}` })}`, {
+      headers: { apikey: key, Accept: "application/json" },
+      cache: "no-store",
+      signal,
+    });
+
+  let response = await request(`sort_order,dishes(${DISH_COLUMNS})`);
+  // Baza sprzed dodania kolejności (schema.sql jeszcze nie uruchomiony ponownie): menu działa, tylko alfabetycznie.
+  if (response.status === 400) response = await request(`dishes(${DISH_COLUMNS})`);
   if (!response.ok) throw new Error(`Menu na dziś: HTTP ${response.status}`);
-  const rows = (await response.json()) as Array<{ dishes: Dish | null }>;
-  return rows.flatMap((row) => (row.dishes ? [row.dishes] : []));
+
+  const rows = (await response.json()) as Array<{ sort_order?: number; dishes: Dish | null }>;
+  return rows
+    .flatMap((row) => (row.dishes ? [{ dish: row.dishes, sortOrder: row.sort_order ?? 0, name: row.dishes.name }] : []))
+    .sort(compareByOrder)
+    .map((entry) => entry.dish);
 }

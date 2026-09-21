@@ -17,6 +17,9 @@ export function describeError(error: unknown): string {
   if (code === "PGRST205" || /could not find the table|schema cache/i.test(message)) {
     return "W bazie brakuje tabeli. Administrator strony musi uruchomić aktualny plik supabase/schema.sql (SQL Editor w Supabase).";
   }
+  if (code === "42703" || /column .*sort_order/i.test(message)) {
+    return "W bazie brakuje nowej kolumny. Administrator strony musi uruchomić aktualny plik supabase/schema.sql (SQL Editor w Supabase).";
+  }
   if (code === "23514" || /violates check constraint/i.test(message)) {
     return /category/i.test(message)
       ? "Baza jeszcze nie zna tej kategorii. Administrator strony musi uruchomić aktualny plik supabase/schema.sql."
@@ -47,20 +50,27 @@ export async function listDishes(includeArchived: boolean): Promise<Dish[]> {
   return (data ?? []) as Dish[];
 }
 
-/** Identyfikatory dań wybranych na dany dzień. */
-export async function listSelected(day: string): Promise<string[]> {
-  const supabase = await getSupabase();
-  const { data, error } = await supabase.from("daily_menu").select("dish_id").eq("day", day);
-  if (error) throw error;
-  return (data ?? []).map((row) => row.dish_id as string);
+/** Danie wybrane na dany dzień wraz z jego miejscem w kolejności (`sortOrder`: mniej = wcześniej). */
+export interface SelectedDish {
+  id: string;
+  sortOrder: number;
 }
 
-export async function setSelected(day: string, dishId: string, selected: boolean): Promise<void> {
+/** Dania wybrane na dany dzień. */
+export async function listSelected(day: string): Promise<SelectedDish[]> {
+  const supabase = await getSupabase();
+  const { data, error } = await supabase.from("daily_menu").select("dish_id,sort_order").eq("day", day);
+  if (error) throw error;
+  return (data ?? []).map((row) => ({ id: row.dish_id as string, sortOrder: (row.sort_order as number) ?? 0 }));
+}
+
+/** Dodaje danie do menu dnia (na wskazanym miejscu kolejności `sortOrder`) albo je usuwa. */
+export async function setSelected(day: string, dishId: string, selected: boolean, sortOrder = 0): Promise<void> {
   const supabase = await getSupabase();
   if (selected) {
     const { error } = await supabase
       .from("daily_menu")
-      .upsert({ day, dish_id: dishId }, { onConflict: "day,dish_id", ignoreDuplicates: true });
+      .upsert({ day, dish_id: dishId, sort_order: sortOrder }, { onConflict: "day,dish_id", ignoreDuplicates: true });
     if (error) throw error;
   } else {
     const { error } = await supabase.from("daily_menu").delete().eq("day", day).eq("dish_id", dishId);
@@ -75,13 +85,28 @@ export async function clearDay(day: string): Promise<void> {
 }
 
 /**
- * Kopiuje wybór z ostatniego wcześniejszego dnia, który ma zapisane menu (dania się powtarzają).
- * Dodaje tylko dania widoczne w panelu (`allowedIds`). Zwraca null, gdy nie ma wcześniejszego menu.
+ * Zapisuje kolejność dań na dzień: `orderedIds` to wszystkie dania dnia we wskazanej kolejności.
+ * Jedno zapytanie (wszystko albo nic); przy okazji porządkuje ewentualne luki i remisy w numeracji.
+ */
+export async function saveOrder(day: string, orderedIds: string[]): Promise<void> {
+  if (orderedIds.length === 0) return;
+  const supabase = await getSupabase();
+  const { error } = await supabase
+    .from("daily_menu")
+    .upsert(orderedIds.map((dish_id, sort_order) => ({ day, dish_id, sort_order })), { onConflict: "day,dish_id" });
+  if (error) throw error;
+}
+
+/**
+ * Kopiuje wybór (razem z kolejnością) z ostatniego wcześniejszego dnia, który ma zapisane menu.
+ * Dodaje tylko dania widoczne w panelu (`allowedIds`), których jeszcze nie ma w `current`, na koniec kolejności.
+ * Zwraca null, gdy nie ma wcześniejszego menu.
  */
 export async function copyFromPreviousDay(
   day: string,
   allowedIds: Set<string>,
-): Promise<{ from: string; ids: string[] } | null> {
+  current: SelectedDish[],
+): Promise<{ from: string; added: SelectedDish[] } | null> {
   const supabase = await getSupabase();
   const { data: previous, error } = await supabase
     .from("daily_menu")
@@ -93,16 +118,29 @@ export async function copyFromPreviousDay(
   const from = previous?.[0]?.day as string | undefined;
   if (!from) return null;
 
-  const { data: rows, error: rowsError } = await supabase.from("daily_menu").select("dish_id").eq("day", from);
+  const { data: rows, error: rowsError } = await supabase
+    .from("daily_menu")
+    .select("dish_id,sort_order")
+    .eq("day", from)
+    .order("sort_order", { ascending: true });
   if (rowsError) throw rowsError;
-  const ids = (rows ?? []).map((row) => row.dish_id as string).filter((id) => allowedIds.has(id));
-  if (ids.length > 0) {
+
+  const present = new Set(current.map((item) => item.id));
+  let next = current.reduce((max, item) => Math.max(max, item.sortOrder + 1), 0);
+  const added: SelectedDish[] = (rows ?? [])
+    .map((row) => row.dish_id as string)
+    .filter((id) => allowedIds.has(id) && !present.has(id))
+    .map((id) => ({ id, sortOrder: next++ }));
+  if (added.length > 0) {
     const { error: insertError } = await supabase
       .from("daily_menu")
-      .upsert(ids.map((dish_id) => ({ day, dish_id })), { onConflict: "day,dish_id", ignoreDuplicates: true });
+      .upsert(added.map((item) => ({ day, dish_id: item.id, sort_order: item.sortOrder })), {
+        onConflict: "day,dish_id",
+        ignoreDuplicates: true,
+      });
     if (insertError) throw insertError;
   }
-  return { from, ids };
+  return { from, added };
 }
 
 export interface DishInput {
