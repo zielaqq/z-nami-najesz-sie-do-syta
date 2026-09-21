@@ -116,14 +116,17 @@ export default function PrivacyPage() {
                   danych o Tobie.
                 </li>
               ) : null}
-              <li>
-                <strong className="text-ink">Opinie z Google.</strong> Ocena i opinie w sekcji „Opinie” pochodzą z
-                Google Maps. Pobieramy je z Google w chwili, gdy sekcja zbliża się do widoku, i nie zapisujemy ich na
-                naszym serwerze. Zdjęcia profilowe autorów opinii są ładowane bezpośrednio z serwerów Google.
-              </li>
+              {isSupabaseConfigured ? (
+                <li>
+                  <strong className="text-ink">Panel logowania.</strong> Panel do zmiany menu, wydarzeń i galerii
+                  (adres /panel/) jest przeznaczony wyłącznie dla właścicieli restauracji. Po zalogowaniu przeglądarka
+                  zapisuje w pamięci lokalnej sesję logowania (jest niezbędna do działania panelu); zwykli odwiedzający
+                  strony jej nie mają.
+                </li>
+              ) : null}
             </ul>
             <p>
-              Korzystanie z map i opinii Google podlega warunkom Google:{" "}
+              Korzystanie z map Google podlega warunkom Google:{" "}
               <a href="https://www.google.com/help/terms_maps/" target="_blank" rel="noopener noreferrer" className={linkClass}>
                 Dodatkowe Warunki Usługi Google Maps
               </a>{" "}
