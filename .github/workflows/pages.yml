@@ -62,6 +62,11 @@ jobs:
           # Podgląd zawiera przykładowe dane – prosimy wyszukiwarki, by go nie indeksowały.
           # Gdy strona będzie docelowa (prawdziwe menu, własna domena), usuń tę linię.
           NEXT_PUBLIC_NOINDEX: "true"
+          # Menu na dziś i panel klientki (Supabase). Klucz „publishable/anon” jest publiczny z założenia, ale
+          # trzymamy go w zmiennych repozytorium (Settings → Secrets and variables → Actions → Variables:
+          # SUPABASE_URL i SUPABASE_ANON_KEY), nie w kodzie. Bez nich strona pokazuje menu przykładowe.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
 
       - name: Plik .nojekyll (GitHub nie przetwarza folderu _next przez Jekylla)
         run: touch out/.nojekyll

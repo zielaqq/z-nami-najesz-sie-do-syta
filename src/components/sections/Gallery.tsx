@@ -1,5 +1,4 @@
 import { GalleryGrid } from "@/components/sections/GalleryGrid";
-import { GalleryVideos } from "@/components/sections/GalleryVideos";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { getGallery } from "@/lib/content";
 
@@ -18,7 +17,6 @@ export async function Gallery() {
       {isPlaceholder ? (
         <p className="mt-8 text-sm text-mute">Część zdjęć jest poglądowa – wkrótce zastąpimy je własnymi.</p>
       ) : null}
-      <GalleryVideos />
     </Section>
   );
 }

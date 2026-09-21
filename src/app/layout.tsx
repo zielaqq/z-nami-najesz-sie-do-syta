@@ -2,13 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Figtree, Fraunces } from "next/font/google";
 
-import { Footer } from "@/components/layout/Footer";
-import { Header } from "@/components/layout/Header";
-import { JsonLd } from "@/components/seo/JsonLd";
-import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { siteConfig } from "@/data/site";
-import { getUpcomingEvents } from "@/lib/content";
-import { buildStructuredData } from "@/lib/schema";
 import { getSiteUrl, isNoIndex } from "@/lib/site-url";
 
 import "./globals.css";
@@ -91,29 +85,17 @@ export const viewport: Viewport = {
  */
 const revealGate = `document.documentElement.classList.add("js");window.setTimeout(function(){if(!window.__revealReady){document.documentElement.classList.add("no-reveal")}},5000);`;
 
-export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
-  const upcomingEvents = await getUpcomingEvents();
-
+/**
+ * Układ główny: czcionki, metadane i znacznik „JS działa”. Nagłówek i stopka strony publicznej są w
+ * `SiteChrome` (używa go `(site)/layout.tsx`), dzięki czemu panel klientki (/panel) ma własny, czysty widok.
+ */
+export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="pl" className={`${figtree.variable} ${fraunces.variable} ${frauncesItalic.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: revealGate }} />
       </head>
-      <body>
-        <a
-          href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-[3px] focus:bg-ink focus:px-5 focus:py-3 focus:font-semibold focus:text-cream"
-        >
-          Przejdź do treści
-        </a>
-        <Header />
-        <main id="main" tabIndex={-1} className="outline-none">
-          {children}
-        </main>
-        <Footer hasEvents={upcomingEvents.length > 0} />
-        <ScrollReveal />
-        <JsonLd data={buildStructuredData()} />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

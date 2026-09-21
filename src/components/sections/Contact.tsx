@@ -81,7 +81,7 @@ export function Contact({ tone = "cream" }: { tone?: SectionTone }) {
             street={address.street}
             locality={`${address.postalCode} ${address.city}`}
             title={`Mapa dojazdu do restauracji ${name}`}
-            loadOnClick={siteConfig.embeds.loadOnClick}
+            loadOnClick={siteConfig.embeds.mapLoadOnClick}
           />
         </div>
       </div>

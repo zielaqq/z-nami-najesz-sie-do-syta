@@ -1,20 +1,21 @@
 /**
- * NAGRANIA z Facebooka (Reels / wideo) – wyświetlane w sekcji „Galeria”, pod zdjęciami.
+ * NAGRANIA z Facebooka (Reels / wideo) – wyświetlane w sekcji „Obserwuj nas”. Widać same nagrania
+ * (odtwarzacz), bez treści postów.
  *
  * Jak dodać nagranie: skopiuj adres wideo z Facebooka (menu „⋯” → „Kopiuj link”) i dopisz
  * kolejny wpis poniżej. Nagranie musi być PUBLICZNE, inaczej odtwarzacz się nie wyświetli.
- * Jak usunąć: skasuj wpis. Pusta lista = cały blok „Nagrania” znika ze strony.
+ * Jak usunąć: skasuj wpis. Pusta lista = z sekcji znikają nagrania (zostaje przycisk do profilu).
  * Nagrania są pionowe (Reels, proporcje 9:16).
  *
- * Wideo ładuje się z Facebooka dopiero po kliknięciu (ochrona prywatności) – patrz
- * `siteConfig.embeds.loadOnClick` w `src/data/site.ts`.
+ * Domyślnie odtwarzacz ładuje się od razu (gdy sekcja jest blisko ekranu); zmiana na „po kliknięciu”:
+ * `siteConfig.embeds.facebookLoadOnClick` w `src/data/site.ts`.
  */
 export interface VideoItem {
   id: string;
-  /** Krótki tytuł widoczny na kafelku przed odtworzeniem */
+  /** Krótki tytuł: nazwa odtwarzacza dla czytników ekranu (i napis na kafelku w trybie „po kliknięciu”) */
   title: string;
-  /** Opis pod nagraniem */
-  caption: string;
+  /** Opcjonalny opis dla czytników ekranu (nie jest wyświetlany na stronie) */
+  caption?: string;
   /** Adres wideo / reela na Facebooku */
   facebookUrl: string;
   /**

@@ -16,6 +16,8 @@ interface PhotoProps {
   /** Zdjęcie widoczne od razu po wejściu na stronę (LCP) – ładuj z wysokim priorytetem */
   eager?: boolean;
   quality?: 75 | 90;
+  /** Zdjęcie z zewnętrznego adresu (np. baza menu) – bez optymalizatora Next.js */
+  remote?: boolean;
 }
 
 /**
@@ -31,15 +33,17 @@ export function Photo({
   imageClassName,
   eager = false,
   quality = 75,
+  remote = false,
 }: PhotoProps) {
   return (
     <div className={cx("relative overflow-hidden bg-sand", ratio, className)}>
       <Image
-        src={withBase(src)}
+        src={remote ? src : withBase(src)}
         alt={alt}
         fill
         sizes={sizes}
         quality={quality}
+        unoptimized={remote}
         loading={eager ? "eager" : "lazy"}
         fetchPriority={eager ? "high" : "auto"}
         className={cx("object-cover", imageClassName)}

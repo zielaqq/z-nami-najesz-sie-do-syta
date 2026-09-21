@@ -43,3 +43,20 @@ export function formatEventDate(isoDate: string) {
 export function todayInWarsaw(now: Date = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Warsaw" }).format(now);
 }
+
+/** Etykieta dnia, np. „wtorek, 22 września” (strefa Europe/Warsaw). */
+export function formatDayLabel(isoDate: string): string {
+  return new Intl.DateTimeFormat("pl-PL", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    timeZone: "Europe/Warsaw",
+  }).format(new Date(`${isoDate}T12:00:00Z`));
+}
+
+/** Przesuwa datę ISO (RRRR-MM-DD) o `days` dni; wartość może być ujemna. */
+export function shiftDay(isoDate: string, days: number): string {
+  const date = new Date(`${isoDate}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}

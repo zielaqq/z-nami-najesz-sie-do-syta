@@ -10,13 +10,17 @@ import { cx } from "@/lib/cx";
 
 interface VideoEmbedProps {
   video: VideoItem;
-  /** true = wideo ładuje się z Facebooka dopiero po kliknięciu (domyślnie – patrz siteConfig.embeds) */
+  /**
+   * false = odtwarzacz Facebooka ładuje się sam, gdy kafelek zbliża się do ekranu (od razu widoczny);
+   * true = najpierw kafelek „Odtwórz”, połączenie z Facebookiem dopiero po kliknięciu.
+   */
   loadOnClick: boolean;
 }
 
 /**
  * Adres oficjalnego odtwarzacza Facebooka (wtyczka „Video Player”, bez tokenów i aplikacji Meta).
- * Szerokość musi mieścić się w przedziale 220–750 px; Reel ma proporcje 9:16.
+ * Szerokość musi mieścić się w przedziale 220–750 px; Reel ma proporcje 9:16. `show_text=false`
+ * ukrywa tekst posta – widać samo nagranie.
  */
 function playerUrl(facebookUrl: string, width: number, autoplay: boolean) {
   const w = Math.min(750, Math.max(220, Math.round(width)));
@@ -30,26 +34,41 @@ function playerUrl(facebookUrl: string, width: number, autoplay: boolean) {
 }
 
 /**
- * Nagranie z Facebooka w trybie „dwuklik”: przeglądarka nie łączy się z Facebookiem,
- * dopóki użytkownik nie kliknie kafelka (ochrona prywatności + szybsza strona).
- * Pod nagraniem zawsze jest zwykły link do wideo – na wypadek, gdyby osadzenie nie działało.
+ * Samo nagranie z Facebooka (bez treści posta). Domyślnie widoczne od razu: odtwarzacz wczytuje się,
+ * gdy kafelek jest blisko ekranu, więc nie spowalnia pierwszego wejścia na stronę.
+ * Tryb `loadOnClick` (dwuklik) chroni prywatność – połączenie z Facebookiem dopiero po kliknięciu.
  */
 export function VideoEmbed({ video, loadOnClick }: VideoEmbedProps) {
   const boxRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLIFrameElement>(null);
-  const [src, setSrc] = useState<string | null>(() =>
-    loadOnClick ? null : playerUrl(video.facebookUrl, 300, false),
-  );
+  const [src, setSrc] = useState<string | null>(null);
   const [clicked, setClicked] = useState(false);
   const dark = Boolean(video.poster);
 
-  // Po kliknięciu przycisk znika – przenosimy fokus na odtwarzacz, żeby nie „uciekł” na początek strony.
+  // Tryb automatyczny: wczytaj odtwarzacz, gdy kafelek zbliża się do ekranu (z zapasem 500 px).
+  useEffect(() => {
+    if (loadOnClick) return;
+    const box = boxRef.current;
+    if (!box) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        // Odtwarzacz dostaje dokładną szerokość kafelka, dzięki czemu nic się nie ucina.
+        setSrc(playerUrl(video.facebookUrl, box.clientWidth || 300, false));
+        observer.disconnect();
+      },
+      { rootMargin: "500px 0px" },
+    );
+    observer.observe(box);
+    return () => observer.disconnect();
+  }, [loadOnClick, video.facebookUrl]);
+
+  // Tryb „dwuklik”: po kliknięciu przycisk znika – przenosimy fokus na odtwarzacz.
   useEffect(() => {
     if (clicked) frameRef.current?.focus();
   }, [clicked]);
 
   const play = () => {
-    // Odtwarzacz dostaje dokładną szerokość kafelka, dzięki czemu nic się nie ucina.
     setSrc(playerUrl(video.facebookUrl, boxRef.current?.clientWidth ?? 300, true));
     setClicked(true);
   };
@@ -71,11 +90,10 @@ export function VideoEmbed({ video, loadOnClick }: VideoEmbedProps) {
             title={`Nagranie „${video.title}” – odtwarzacz Facebooka`}
             allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
             allowFullScreen
-            loading="lazy"
             referrerPolicy="strict-origin-when-cross-origin"
             className="absolute inset-0 size-full border-0"
           />
-        ) : (
+        ) : loadOnClick ? (
           <button
             type="button"
             onClick={play}
@@ -113,19 +131,26 @@ export function VideoEmbed({ video, loadOnClick }: VideoEmbedProps) {
               Nagranie z Facebooka
             </span>
           </button>
+        ) : (
+          <>
+            {/* Miejsce na odtwarzacz, dopóki się nie wczyta (albo gdy JavaScript jest wyłączony). */}
+            <div className="absolute inset-0 grid place-items-center text-mute" aria-hidden="true">
+              <Play className="size-10 opacity-40" />
+            </div>
+            <noscript>
+              <a
+                href={video.facebookUrl}
+                className="absolute inset-0 grid place-items-center p-6 text-center text-sm font-medium text-ink underline"
+              >
+                Obejrzyj nagranie na Facebooku
+              </a>
+            </noscript>
+          </>
         )}
       </div>
-      <figcaption className="mt-3 text-sm leading-relaxed text-ink-soft">
-        {video.caption}{" "}
-        <a
-          href={video.facebookUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="link-underline whitespace-nowrap font-medium text-ink"
-        >
-          Zobacz na Facebooku
-          <span className="sr-only"> (otwiera się w nowej karcie)</span>
-        </a>
+      <figcaption className="sr-only">
+        {video.title}
+        {video.caption ? `. ${video.caption}` : ""}
       </figcaption>
     </figure>
   );

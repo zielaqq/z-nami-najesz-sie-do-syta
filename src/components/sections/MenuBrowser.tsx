@@ -3,18 +3,33 @@
 import { useState, type ReactNode } from "react";
 
 import { Photo } from "@/components/ui/Photo";
-import type { MenuCategoryId, MenuItem } from "@/data/menu";
+import { Utensils } from "@/components/ui/icons";
+import type { MenuCategoryId } from "@/data/menu";
 import { cx } from "@/lib/cx";
 import { formatPrice } from "@/lib/format";
 
-interface MenuGroup {
+/** Pozycja menu w formie potrzebnej do wyświetlenia (z pliku z danymi albo z bazy menu). */
+export interface MenuBrowserItem {
+  key: string;
+  name: string;
+  /** Brak ceny = cena nie jest wyświetlana */
+  price?: number | null;
+  /** Brak zdjęcia = neutralny kafelek */
+  image?: string | null;
+  /** true = zdjęcie spoza folderu `public` (np. z bazy menu) */
+  remoteImage?: boolean;
+  alt?: string;
+  description?: string | null;
+}
+
+export interface MenuBrowserGroup {
   id: MenuCategoryId;
   label: string;
-  items: MenuItem[];
+  items: MenuBrowserItem[];
 }
 
 interface MenuBrowserProps {
-  groups: MenuGroup[];
+  groups: MenuBrowserGroup[];
   /** Menu przykładowe – pokazuje dyskretną informację pod filtrami */
   isSample: boolean;
 }
@@ -83,7 +98,7 @@ export function MenuBrowser({ groups, isSample }: MenuBrowserProps) {
             </div>
             <ul className="mt-2 grid sm:mt-8 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-10 lg:grid-cols-3 lg:gap-x-10 lg:gap-y-12">
               {group.items.map((item) => (
-                <MenuRow key={`${group.id}-${item.name}`} item={item} />
+                <MenuRow key={item.key} item={item} />
               ))}
             </ul>
           </div>
@@ -119,25 +134,37 @@ function FilterChip({
   );
 }
 
-function MenuRow({ item }: { item: MenuItem }) {
+function MenuRow({ item }: { item: MenuBrowserItem }) {
   return (
     <li className="group grid grid-cols-[6rem_1fr] items-center gap-4 border-b border-ink/10 py-4 sm:block sm:border-b-0 sm:py-0">
       <div className="zoom-on-hover">
-        <Photo
-          src={item.image}
-          alt={item.alt ?? item.name}
-          sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, 96px"
-          ratio="aspect-square sm:aspect-[4/3]"
-        />
+        {item.image ? (
+          <Photo
+            src={item.image}
+            remote={item.remoteImage}
+            alt={item.alt ?? item.name}
+            sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, 96px"
+            ratio="aspect-square sm:aspect-[4/3]"
+          />
+        ) : (
+          <div
+            aria-hidden="true"
+            className="grid aspect-square place-items-center bg-sand text-mute sm:aspect-[4/3]"
+          >
+            <Utensils className="size-8 opacity-50" />
+          </div>
+        )}
       </div>
       <div className="min-w-0 sm:mt-4 sm:border-b sm:border-ink/15 sm:pb-3">
         <div className="flex items-baseline justify-between gap-4">
           <p className="font-serif text-[1.125rem] leading-snug tracking-[-0.005em] text-ink sm:text-[1.25rem]">
             {item.name}
           </p>
-          <p className="tabular shrink-0 text-[1rem] font-semibold text-accent sm:text-[1.0625rem]">
-            {formatPrice(item.price)}
-          </p>
+          {item.price != null ? (
+            <p className="tabular shrink-0 text-[1rem] font-semibold text-accent sm:text-[1.0625rem]">
+              {formatPrice(item.price)}
+            </p>
+          ) : null}
         </div>
         {item.description ? <p className="mt-1 text-sm text-mute">{item.description}</p> : null}
       </div>

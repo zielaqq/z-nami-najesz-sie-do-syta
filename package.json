@@ -15,6 +15,7 @@
     "places:find": "node scripts/find-place-id.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.116.0",
     "lucide-react": "^1.47.0",
     "next": "16.3.5",
     "react": "19.2.8",

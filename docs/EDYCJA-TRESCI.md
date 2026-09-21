@@ -6,7 +6,8 @@ jest w kilku plikach w folderze `src/data/`. Po zmianie zapisz plik – strona (
 | Chcę zmienić… | Plik |
 | --- | --- |
 | telefon, adres, godziny otwarcia, linki (Facebook, Google), logo, tytuł i opis SEO | `src/data/site.ts` |
-| **menu**: nazwa, cena, kategoria, zdjęcie dania | `src/data/menu.ts` |
+| **menu na dziś** – codziennie: wybór dań, nowe dania, ceny, zdjęcia | **panel** pod adresem `/panel/` – instrukcja: [PANEL-MENU.md](./PANEL-MENU.md) |
+| menu przykładowe (dopóki panel nie jest podłączony) | `src/data/menu.ts` |
 | galerię zdjęć | `src/data/gallery.ts` |
 | nagrania z Facebooka (Reels) pod galerią | `src/data/videos.ts` |
 | wydarzenia | `src/data/events.ts` |
@@ -17,7 +18,11 @@ Po edycji zdjęć uruchom `npm run images:check` – sprawdzi, czy wszystkie wsk
 
 ---
 
-## Menu (`src/data/menu.ts`)
+## Menu (`src/data/menu.ts`) – wersja przykładowa
+
+> **Gdy podłączony jest panel (baza Supabase), menu na stronie pochodzi z bazy i ustawia je klientka w panelu**
+> – patrz [PANEL-MENU.md](./PANEL-MENU.md). Ten plik to wtedy tylko wersja przykładowa, używana, dopóki panel nie jest
+> podłączony (zmienne `NEXT_PUBLIC_SUPABASE_URL` i `NEXT_PUBLIC_SUPABASE_ANON_KEY`).
 
 Każde danie to jeden wiersz:
 
@@ -65,7 +70,8 @@ rozszerzenie, zmień ścieżkę w pliku danych.
 
 ## Nagrania z Facebooka (`src/data/videos.ts`)
 
-Pod galerią jest blok „Nagrania z lokalu” z pionowymi filmami (Reels) z Facebooka. Każde nagranie to jeden wpis:
+W sekcji „Obserwuj nas” są **same nagrania** – pionowe filmy (Reels) z Facebooka w odtwarzaczu, bez treści postów.
+Każde nagranie to jeden wpis:
 
 ```ts
 {
@@ -77,11 +83,14 @@ Pod galerią jest blok „Nagrania z lokalu” z pionowymi filmami (Reels) z Fac
 ```
 
 * **Adres:** na Facebooku kliknij „⋯” przy filmie → „Kopiuj link”. Nagranie musi być **publiczne**, inaczej odtwarzacz się nie wyświetli.
-* **Dodać / usunąć:** dopisz albo skasuj wpis. Gdy lista jest pusta, cały blok znika.
-* **Miniatura (opcjonalnie):** kadr z filmu (pion 9:16) wgraj do `public/images/video/` i dopisz `poster: "/images/video/nazwa.jpg"` –
-  pojawi się na kafelku zamiast jednolitego tła.
-* Odtwarzacz Facebooka ładuje się dopiero po kliknięciu kafelka (ochrona prywatności). Pod każdym nagraniem jest też zwykły
-  link „Zobacz na Facebooku” – działa nawet wtedy, gdy osadzenie nie zadziała.
+* **Dodać / usunąć:** dopisz albo skasuj wpis. Gdy lista jest pusta, w sekcji zostaje tylko przycisk do profilu.
+* `title` i `caption` służą czytnikom ekranu (na stronie nie są wyświetlane).
+* **Profil Facebooka:** adres jest w `src/data/site.ts` (`links.facebook`, `links.facebookReels`) – używają go przycisk
+  „Odwiedź nas na Facebooku”, link „Wszystkie nagrania”, stopka i dane dla Google.
+* **Od razu widoczne:** odtwarzacz ładuje się sam, gdy sekcja zbliża się do ekranu. Wersja „najpierw kafelek Odtwórz,
+  połączenie z Facebookiem po kliknięciu” (ochrona prywatności): `embeds.facebookLoadOnClick: true` w `src/data/site.ts`.
+* **Miniatura (opcjonalnie, tylko w trybie „po kliknięciu”):** kadr z filmu (pion 9:16) wgraj do `public/images/video/`
+  i dopisz `poster: "/images/video/nazwa.jpg"`.
 
 ## Logo
 

@@ -87,18 +87,25 @@ export const siteConfig = {
   geo: { lat: 52.2590698, lng: 20.5932767 },
 
   links: {
-    facebook: "https://www.facebook.com/p/Z-nami-najesz-si%C4%99-do-syta-61573512807191/",
+    facebook: "https://www.facebook.com/profile.php?id=61594297121966",
+    /** Zakładka „Rolki” (nagrania) na profilu – link „Wszystkie nagrania”. */
+    facebookReels: "https://www.facebook.com/profile.php?id=61594297121966&sk=reels_tab",
     googleMaps: "https://maps.app.goo.gl/bthUqZ2Jk3dYWZ5z9",
   },
 
-  /** Ustawienia osadzanych treści zewnętrznych (mapa Google, Facebook). */
+  /** Ustawienia osadzanych treści zewnętrznych (mapa Google, nagrania z Facebooka). */
   embeds: {
     /**
-     * true  = mapa i Facebook ładują się dopiero po kliknięciu (RODO/ePrivacy, szybsza strona,
-     *         brak cookies od stron trzecich bez zgody).
-     * false = ładują się automatycznie po przewinięciu do sekcji – wtedy dodaj baner zgody na cookies.
+     * Mapa Google. true = wczytuje się dopiero po kliknięciu (RODO/ePrivacy, szybsza strona, brak cookies
+     * od stron trzecich bez zgody); false = ładuje się automatycznie po przewinięciu do sekcji.
      */
-    loadOnClick: true,
+    mapLoadOnClick: true,
+    /**
+     * Nagrania z Facebooka. false = od razu widoczne (odtwarzacz ładuje się sam, gdy sekcja jest blisko ekranu);
+     * true = najpierw kafelek „Odtwórz” i dopiero po kliknięciu połączenie z Facebookiem.
+     * ⚠ Przy false Facebook (Meta) może zapisywać cookies bez zgody użytkownika – rozważ baner zgody.
+     */
+    facebookLoadOnClick: false,
   },
 } as const;
 

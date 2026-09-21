@@ -42,7 +42,8 @@ rano**, żeby minione wydarzenia znikały z listy (na Pages nie działa automaty
 | Zdjęcia | AVIF/WebP, małe wersje dla telefonu | oryginalne pliki – na telefonie wolniej |
 | Nagłówki bezpieczeństwa | tak | nie (GitHub Pages nie pozwala ich ustawiać) |
 | Indeksowanie przez Google | tak | **wyłączone** (patrz niżej) |
-| Mapa, Facebook, nagrania, menu, galeria, kontakt | działają | działają tak samo |
+| Menu na dziś i panel klientki (`/panel/`) | działają | działają (dane pobiera przeglądarka z bazy); wymagają dwóch zmiennych repozytorium – patrz [PANEL-MENU.md](./PANEL-MENU.md) |
+| Mapa, nagrania z Facebooka, galeria, kontakt | działają | działają tak samo |
 
 ### Dlaczego podgląd jest ukryty przed wyszukiwarkami
 

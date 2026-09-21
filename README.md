@@ -42,12 +42,14 @@ src/
 │  ├─ google-places.ts    pobieranie opinii z Google (serwer, bez cache'u)
 │  ├─ hours.ts · format.ts · maps.ts · schema.ts (JSON-LD) · rate-limit.ts · site-url.ts
 ├─ components/
-│  ├─ layout/             Header, MobileNav (dialog), Logo, Footer
-│  ├─ sections/           Hero, About, Menu(+MenuBrowser), CateringDelivery, Gallery(+GalleryGrid),
-│  │                      Reviews(+ReviewsLive), Events, Social(+FacebookEmbed), Contact(+MapEmbed)
+│  ├─ layout/             Header, MobileNav (dialog), Logo, Footer, SiteChrome
+│  ├─ sections/           Hero, About, Menu(+MenuBrowser, LiveMenu), CateringDelivery, Gallery(+GalleryGrid),
+│  │                      Reviews(+ReviewsLive), Events, Social(+VideoEmbed), Contact(+MapEmbed)
+│  ├─ panel/              panel klientki: PanelApp, LoginForm, TodayEditor, DishLibrary, DishForm
 │  └─ ui/                 Button, Section, Photo, Stars, OpenStatus, ScrollReveal, icons
-└─ app/                   layout.tsx (SEO, fonty), page.tsx, sitemap/robots/manifest, /api/google-reviews,
-                          /polityka-prywatnosci, not-found
+└─ app/                   layout.tsx (SEO, fonty), sitemap/robots/manifest, /api/google-reviews, not-found,
+                          (site)/ – strona główna i /polityka-prywatnosci, (panel)/panel – panel klientki
+supabase/schema.sql       schemat bazy menu (tabele, reguły dostępu, zdjęcia) – uruchamiany raz w Supabase
 public/images/            zdjęcia (menu/, gallery/, hero/, about/, og-image.jpg)
 scripts/                  przygotowanie logo, generatory obrazów/ikon, kontrola obrazów, wyszukiwanie Place ID
 docs/                     EDYCJA-TRESCI.md · GOOGLE-OPINIE.md · GITHUB-PAGES.md
@@ -55,8 +57,10 @@ docs/                     EDYCJA-TRESCI.md · GOOGLE-OPINIE.md · GITHUB-PAGES.m
 materialy/                surowe pliki (filmy, oryginały logo) – wyłączone z Gita, nie trafiają na GitHuba
 ```
 
-**Podłączanie CMS-a / panelu:** komponenty czytają dane wyłącznie przez asynchroniczne funkcje z `src/lib/content.ts`
-(`getMenu`, `getGallery`, `getUpcomingEvents`). Wystarczy zmienić ich wnętrze – kształt danych zostaje.
+**Menu na dziś** pochodzi z bazy i jest edytowane w panelu `/panel` (gdy ustawione są zmienne Supabase) – patrz
+[docs/PANEL-MENU.md](docs/PANEL-MENU.md). **Pozostałe treści** (galeria, wydarzenia, nagrania, teksty) komponenty czytają
+przez asynchroniczne funkcje z `src/lib/content.ts` (`getGallery`, `getUpcomingEvents`, `getVideos`) – wystarczy zmienić
+ich wnętrze, żeby podłączyć CMS; kształt danych zostaje.
 
 ## Zmienne środowiskowe
 
@@ -65,6 +69,7 @@ materialy/                surowe pliki (filmy, oryginały logo) – wyłączone 
 | `NEXT_PUBLIC_SITE_URL` | **tak (produkcja)** | canonical, Open Graph, sitemap, robots, JSON-LD |
 | `GOOGLE_PLACES_API_KEY`, `GOOGLE_PLACE_ID` | nie | opinie z Google na żywo – [docs/GOOGLE-OPINIE.md](docs/GOOGLE-OPINIE.md) |
 | `NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY` | nie | oficjalne Maps Embed API (klucz publiczny – ogranicz go do swojej domeny) |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | nie | „Menu na dziś” i panel klientki `/panel` – [docs/PANEL-MENU.md](docs/PANEL-MENU.md) (klucz publishable/anon; **nigdy** `service_role`) |
 
 Klucze nigdy nie są zapisane w kodzie. Bez opcjonalnych kluczy strona działa w pełni (mapa: osadzenie bez klucza,
 opinie: placeholdery).
@@ -84,11 +89,15 @@ Klucz trafia do przeglądarki, więc ograniczenia są obowiązkowe.
   ilustracje (skrypt `scripts/generate-placeholders.mjs`) – układ jest gotowy na prawdziwe fotografie.
 * **Opinie Google bez cache’u** – regulamin Google zabrania cache’owania treści Places, więc są pobierane na żywo dopiero
   po przewinięciu do sekcji (uzasadnienie i konfiguracja: [docs/GOOGLE-OPINIE.md](docs/GOOGLE-OPINIE.md)).
-* **Facebook:** oficjalna wtyczka *Page Plugin* (bez tokenów) pokazuje aktualne posty. Integracja przez Graph API zwykle wymaga
-  aplikacji Meta i tokenu strony, dlatego jej nie udaję.
-* **Prywatność:** mapa Google i Facebook ładują się **po kliknięciu** (bez cookies stron trzecich bez wiedzy użytkownika).
-  Strona sama nie używa cookies ani analityki. Wyłączenie: `siteConfig.embeds.loadOnClick` – jeśli zostawisz ładowanie
-  automatyczne albo dodasz analitykę, dodaj baner zgody.
+* **Facebook:** w sekcji „Obserwuj nas” są **same nagrania** (Reels) w oficjalnym odtwarzaczu Facebooka (bez tokenów), bez
+  treści postów; lista w `src/data/videos.ts`. Wtyczka z osią czasu (posty) została usunięta. Integracja przez Graph API
+  zwykle wymaga aplikacji Meta i tokenu strony, dlatego jej nie udaję.
+* **Menu na dziś:** ustawia je klientka w panelu `/panel` (baza Supabase, zdjęcia dań, reguły dostępu w bazie) – patrz
+  [docs/PANEL-MENU.md](docs/PANEL-MENU.md). Strona nie pokazuje wczorajszego menu jako dzisiejszego.
+* **Prywatność:** mapa Google ładuje się **po kliknięciu**. Nagrania z Facebooka ładują się **od razu** (gdy sekcja jest blisko
+  ekranu) – na życzenie właściciela; Facebook (Meta) może wtedy zapisywać cookies bez zgody użytkownika, więc rozważ baner zgody
+  (albo tryb „po kliknięciu”: `siteConfig.embeds.facebookLoadOnClick = true`). Strona sama nie używa cookies ani analityki.
+  Jeśli dodasz analitykę, dodaj baner zgody.
 * **Dostępność:** semantyczny HTML, skip-link, focus-visible, natywne `<dialog>` (menu mobilne, lightbox) z pułapką fokusu,
   `prefers-reduced-motion`, kontrasty WCAG AA (sprawdzone), audyt axe-core: 0 naruszeń.
 * **Wydajność:** strona statyczna (ISR co dobę), `next/image` (AVIF/WebP, lazy), czcionki hostowane lokalnie,
