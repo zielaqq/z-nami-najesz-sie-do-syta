@@ -50,7 +50,8 @@ src/
                           /polityka-prywatnosci, not-found
 public/images/            zdjęcia (menu/, gallery/, hero/, about/, og-image.jpg)
 scripts/                  przygotowanie logo, generatory obrazów/ikon, kontrola obrazów, wyszukiwanie Place ID
-docs/                     EDYCJA-TRESCI.md · GOOGLE-OPINIE.md
+docs/                     EDYCJA-TRESCI.md · GOOGLE-OPINIE.md · GITHUB-PAGES.md
+.github/workflows/        pages.yml – automatyczna publikacja podglądu na GitHub Pages
 materialy/                surowe pliki (filmy, oryginały logo) – wyłączone z Gita, nie trafiają na GitHuba
 ```
 
@@ -110,3 +111,9 @@ Klucz trafia do przeglądarki, więc ograniczenia są obowiązkowe.
 1. Zaimportuj repozytorium, ustaw zmienne środowiskowe z tabeli wyżej (co najmniej `NEXT_PUBLIC_SITE_URL`).
 2. Deploy. Strona `/` odświeża się co 24 h (`export const revalidate = 86400`), dzięki czemu miniona data wydarzenia znika sama.
 3. Endpoint `/api/google-reviews` działa jako funkcja serwerowa (dynamiczna, `no-store`).
+
+### Podgląd na GitHub Pages
+
+Workflow `.github/workflows/pages.yml` publikuje **wersję podglądową** (statyczny eksport, bez żywych opinii, z blokadą
+indeksowania) pod adresem `https://<konto>.github.io/<repozytorium>/`. Włączenie: Settings → Pages → Source: **GitHub Actions**.
+Szczegóły, ograniczenia i przejście na własną domenę: [docs/GITHUB-PAGES.md](docs/GITHUB-PAGES.md).
