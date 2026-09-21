@@ -35,12 +35,13 @@ Bez konfiguracji pokazuje wyraźnie oznaczone placeholdery („Dane do podłącz
 ## 3. Architektura (bez cache’u, tanio i bezpiecznie)
 
 ```
-Przeglądarka ──(sekcja „Opinie” zbliża się do ekranu)──▶ /api/google-reviews  ──▶ Google Places API (New)
+Przeglądarka ──(klik „Pokaż opinie z Google”)──▶ /api/google-reviews  ──▶ Google Places API (New)
                                                         (route handler, klucz TYLKO tu)
 ```
 
-* Strona jest statyczna i szybka. Opinie ładuje **wyspa kliencka** (`ReviewsLive`) dopiero, gdy użytkownik
-  przewinie do sekcji – więc płatne wywołanie API dostają tylko osoby, które naprawdę oglądają opinie.
+* Strona jest statyczna i szybka. Opinie ładuje **wyspa kliencka** (`ReviewsLive`) dopiero **po kliknięciu**
+  „Pokaż opinie z Google” – samo wejście na stronę (także przewinięcie do sekcji) nie wysyła żadnego zapytania.
+  Płatne wywołanie API generuje więc tylko osoba, która chce zobaczyć opinie.
 * Klucz API jest wyłącznie po stronie serwera (`GOOGLE_PLACES_API_KEY`, **bez** prefiksu `NEXT_PUBLIC_`).
 * Endpoint zwraca `Cache-Control: no-store`, odrzuca wywołania z obcych stron (`Sec-Fetch-Site`) i ma
   prosty limit zapytań (6/min na IP, 20/min łącznie). To tylko pierwsza warstwa – **prawdziwy bezpiecznik kosztów
@@ -80,7 +81,7 @@ Przeglądarka ──(sekcja „Opinie” zbliża się do ekranu)──▶ /api/g
 
 * Pola `rating`, `userRatingCount`, `reviews` należą do SKU **Place Details Enterprise + Atmosphere**:
   wg cennika ze stycznia–września 2026 to **1 000 bezpłatnych zapytań miesięcznie**, potem ok. **25 USD / 1 000**.
-* Jedno zapytanie = jedna osoba, która przewinęła do sekcji „Opinie”.
+* Jedno zapytanie = jedno kliknięcie „Pokaż opinie z Google” (samo wejście na stronę zapytania nie generuje).
 * **Koniecznie ustaw:**
   1. **Dzienny limit zapytań:** *APIs & Services → Places API (New) → Quotas* → np. 300 zapytań/dzień.
   2. **Alert budżetu:** *Billing → Budgets & alerts* (np. 10 USD).

@@ -89,10 +89,11 @@ export const siteConfig = {
   /** Ustawienia osadzanych treści zewnętrznych (mapa Google, nagrania z Facebooka). */
   embeds: {
     /**
-     * Mapa Google. true = wczytuje się dopiero po kliknięciu (RODO/ePrivacy, szybsza strona, brak cookies
-     * od stron trzecich bez zgody); false = ładuje się automatycznie po przewinięciu do sekcji.
+     * Mapa Google. false = od razu widoczna (ładuje się sama, gdy sekcja „Kontakt” jest blisko ekranu);
+     * true = najpierw kafelek „Załaduj mapę Google” i dopiero po kliknięciu połączenie z Google.
+     * ⚠ Przy false Google może zapisywać cookies bez zgody użytkownika – rozważ baner zgody.
      */
-    mapLoadOnClick: true,
+    mapLoadOnClick: false,
     /**
      * Nagrania z Facebooka. false = od razu widoczne (odtwarzacz ładuje się sam, gdy sekcja jest blisko ekranu);
      * true = najpierw kafelek „Odtwórz” i dopiero po kliknięciu połączenie z Facebookiem.

@@ -6,7 +6,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 /**
  * ⚠ SZABLON DO WERYFIKACJI. Tekst opisuje faktyczne działanie tej strony (brak formularzy,
- * cookies i analityki; mapa Google ładowana po kliknięciu, nagrania Facebooka – zgodnie z ustawieniem
+ * cookies i analityki; mapa Google i nagrania Facebooka – zgodnie z ustawieniem
  * `embeds` w src/data/site.ts), ale nie jest poradą
  * prawną. Przed publikacją uzupełnij dane podmiotu prowadzącego działalność (pełna nazwa, NIP)
  * i – jeśli to możliwe – poproś o weryfikację prawnika. Google wymaga też publicznej polityki
@@ -85,8 +85,12 @@ export default function PrivacyPage() {
             <h2 id="p-zewnetrzne">Treści zewnętrzne</h2>
             <ul>
               <li>
-                <strong className="text-ink">Mapa Google.</strong> Ładuje się dopiero po kliknięciu „Załaduj mapę
-                Google”. Dostawcą jest Google LLC, który może zapisywać pliki cookies. Więcej:{" "}
+                <strong className="text-ink">Mapa Google.</strong>{" "}
+                {siteConfig.embeds.mapLoadOnClick
+                  ? "Ładuje się dopiero po kliknięciu „Załaduj mapę Google”."
+                  : "Ładuje się automatycznie, gdy przewiniesz do sekcji „Kontakt” – Twoja przeglądarka łączy się wtedy z serwerami Google."}{" "}
+                Dostawcą jest Google LLC, który może zapisywać pliki cookies i przetwarzać dane o Twoich odwiedzinach.
+                Więcej:{" "}
                 <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className={linkClass}>
                   Polityka prywatności Google
                 </a>

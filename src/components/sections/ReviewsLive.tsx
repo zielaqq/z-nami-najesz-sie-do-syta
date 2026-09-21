@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { ReviewCard } from "@/components/sections/ReviewCard";
-import { ButtonLink } from "@/components/ui/Button";
+import { ButtonLink, buttonClasses } from "@/components/ui/Button";
 import { ArrowUpRight } from "@/components/ui/icons";
 import { Stars } from "@/components/ui/Stars";
 import type { GoogleReviewsPayload } from "@/lib/google-reviews-types";
@@ -20,62 +20,42 @@ interface ReviewsLiveProps {
 }
 
 /**
- * Opinie z Google pobierane NA ŻYWO z /api/google-reviews.
- * Regulamin Google zabrania cache'owania treści Places, dlatego opinie nie są
- * wbudowane w statyczną stronę. Zapytanie wysyłamy dopiero, gdy sekcja zbliża
- * się do widoku (mniej zbędnych, płatnych wywołań API).
+ * Opinie z Google pobierane NA ŻYWO z /api/google-reviews, dopiero PO KLIKNIĘCIU „Pokaż opinie z Google”.
+ * Regulamin Google zabrania cache'owania treści Places, więc opinie nie są zapisywane ani wbudowane w stronę.
+ * Samo wejście na stronę (nawet przewinięcie do sekcji) nie wysyła żadnego zapytania do Google – płatne
+ * wywołanie API generuje tylko osoba, która chce te opinie zobaczyć.
  */
 export function ReviewsLive({ googleUrl }: ReviewsLiveProps) {
   const [state, setState] = useState<State>({ status: "waiting" });
-  const rootRef = useRef<HTMLDivElement>(null);
+  const controllerRef = useRef<AbortController | null>(null);
 
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
+  useEffect(() => () => controllerRef.current?.abort(), []);
 
+  const load = async () => {
+    controllerRef.current?.abort();
     const controller = new AbortController();
-    let started = false;
-
-    const load = async () => {
-      setState({ status: "loading" });
-      try {
-        const response = await fetch("/api/google-reviews", { cache: "no-store", signal: controller.signal });
-        const body = (await response.json()) as { status: string } & Partial<GoogleReviewsPayload>;
-        if (!response.ok || body.status !== "ok") throw new Error(body.status);
-        setState({
-          status: "ready",
-          data: {
-            rating: body.rating ?? null,
-            ratingCount: body.ratingCount ?? null,
-            mapsUri: body.mapsUri ?? null,
-            reviews: body.reviews ?? [],
-          },
-        });
-      } catch {
-        if (!controller.signal.aborted) setState({ status: "error" });
-      }
-    };
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting) && !started) {
-          started = true;
-          observer.disconnect();
-          void load();
-        }
-      },
-      { rootMargin: "500px 0px" },
-    );
-    observer.observe(root);
-
-    return () => {
-      observer.disconnect();
-      controller.abort();
-    };
-  }, []);
+    controllerRef.current = controller;
+    setState({ status: "loading" });
+    try {
+      const response = await fetch("/api/google-reviews", { cache: "no-store", signal: controller.signal });
+      const body = (await response.json()) as { status: string } & Partial<GoogleReviewsPayload>;
+      if (!response.ok || body.status !== "ok") throw new Error(body.status);
+      setState({
+        status: "ready",
+        data: {
+          rating: body.rating ?? null,
+          ratingCount: body.ratingCount ?? null,
+          mapsUri: body.mapsUri ?? null,
+          reviews: body.reviews ?? [],
+        },
+      });
+    } catch {
+      if (!controller.signal.aborted) setState({ status: "error" });
+    }
+  };
 
   return (
-    <div ref={rootRef} className="mt-12 lg:mt-16" aria-live="polite" aria-busy={state.status === "loading"}>
+    <div className="mt-12 lg:mt-16" aria-live="polite" aria-busy={state.status === "loading"}>
       {state.status === "ready" ? (
         <ReviewsContent data={state.data} googleUrl={googleUrl} />
       ) : state.status === "error" ? (
@@ -86,8 +66,21 @@ export function ReviewsLive({ googleUrl }: ReviewsLiveProps) {
             Zobacz opinie w Google
           </ButtonLink>
         </div>
-      ) : (
+      ) : state.status === "loading" ? (
         <ReviewsSkeleton />
+      ) : (
+        <div className="max-w-xl border-t-2 border-ink bg-white p-6 sm:p-8">
+          <p className="text-ink">Opinie naszych gości z Google Maps.</p>
+          <p className="mt-2 text-mute">Pobieramy je na żywo z Google dopiero po kliknięciu.</p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <button type="button" onClick={() => void load()} className={buttonClasses("primary", "md")}>
+              Pokaż opinie z Google
+            </button>
+            <ButtonLink href={googleUrl} external variant="secondary" icon={<ArrowUpRight />}>
+              Zobacz w Google
+            </ButtonLink>
+          </div>
+        </div>
       )}
     </div>
   );

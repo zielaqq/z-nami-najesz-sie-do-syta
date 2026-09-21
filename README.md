@@ -95,9 +95,9 @@ Klucz trafia do przeglądarki, więc ograniczenia są obowiązkowe.
 * **Menu na dziś i wydarzenia:** ustawia je klientka w panelu `/panel` (baza Supabase, zdjęcia dań, reguły dostępu w bazie) –
   patrz [docs/PANEL-MENU.md](docs/PANEL-MENU.md). Kategorie menu: obiad dnia, danie specjalne, zupy, drugie dania, ryby, pierogi,
   napoje, piwo. Strona nie pokazuje wczorajszego menu jako dzisiejszego, a minione wydarzenia znikają same.
-* **Prywatność:** mapa Google ładuje się **po kliknięciu**. Nagrania z Facebooka ładują się **od razu** (gdy sekcja jest blisko
-  ekranu) – na życzenie właściciela; Facebook (Meta) może wtedy zapisywać cookies bez zgody użytkownika, więc rozważ baner zgody
-  (albo tryb „po kliknięciu”: `siteConfig.embeds.facebookLoadOnClick = true`). Strona sama nie używa cookies ani analityki.
+* **Prywatność:** mapa Google i nagrania z Facebooka ładują się **od razu** (gdy sekcja jest blisko ekranu) – na życzenie
+  właściciela; Google i Facebook (Meta) mogą wtedy zapisywać cookies bez zgody użytkownika, więc rozważ baner zgody
+  (albo tryb „po kliknięciu”: `siteConfig.embeds.mapLoadOnClick = true` i `facebookLoadOnClick = true`). Strona sama nie używa cookies ani analityki.
   Jeśli dodasz analitykę, dodaj baner zgody.
 * **Dostępność:** semantyczny HTML, skip-link, focus-visible, natywne `<dialog>` (menu mobilne, lightbox) z pułapką fokusu,
   `prefers-reduced-motion`, kontrasty WCAG AA (sprawdzone), audyt axe-core: 0 naruszeń.
