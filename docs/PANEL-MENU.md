@@ -23,7 +23,8 @@ i jest ukryty przed wyszukiwarkami.
 4. Jeśli nic nie zaznaczysz, na stronie pojawi się „Dzisiejsze menu pojawi się wkrótce” i telefon do restauracji.
    Strona **nigdy nie pokazuje wczorajszego menu** jako dzisiejszego.
 
-**Kategorie dań** są takie jak na tablicy w restauracji: **Zupy, Drugie dania, Pierogi, Napoje, Piwo.**
+**Kategorie dań** są takie jak na tablicy w restauracji: **Obiad dnia, Zupy, Drugie dania, Pierogi, Napoje, Piwo.**
+W „Obiedzie dnia” wpisz zestaw jako jedno danie (np. „Pomidorowa + schabowy”, cena zestawu, ewentualnie opis).
 
 ### Wydarzenia
 

@@ -41,7 +41,7 @@ grant select on public.admins to authenticated;
 create table if not exists public.dishes (
   id uuid primary key default gen_random_uuid(),
   name text not null check (char_length(btrim(name)) between 1 and 120),
-  category text not null check (category in ('zupy', 'drugie-dania', 'pierogi', 'napoje', 'piwo')),
+  category text not null check (category in ('obiad-dnia', 'zupy', 'drugie-dania', 'pierogi', 'napoje', 'piwo')),
   price numeric(7, 2) check (price is null or price >= 0),
   description text check (description is null or char_length(description) <= 300),
   photo_path text,
@@ -49,7 +49,7 @@ create table if not exists public.dishes (
   created_at timestamptz not null default now()
 );
 
--- Kategorie zgodne z tablicą w restauracji: zupy, drugie dania, pierogi, napoje, piwo.
+-- Kategorie zgodne z tablicą w restauracji: obiad dnia, zupy, drugie dania, pierogi, napoje, piwo.
 -- Starsze kategorie (dania główne/mięsne/bezmięsne, dodatki, sałatki, desery) trafiają do „drugich dań”,
 -- a ograniczenie jest zakładane od nowa. Bezpieczne przy ponownym uruchomieniu.
 alter table public.dishes drop constraint if exists dishes_category_check;
@@ -58,7 +58,7 @@ update public.dishes
  where category in ('dania-glowne', 'dania-miesne', 'dania-bezmiesne', 'dodatki', 'salatki', 'desery');
 alter table public.dishes
   add constraint dishes_category_check
-  check (category in ('zupy', 'drugie-dania', 'pierogi', 'napoje', 'piwo'));
+  check (category in ('obiad-dnia', 'zupy', 'drugie-dania', 'pierogi', 'napoje', 'piwo'));
 
 alter table public.dishes enable row level security;
 
