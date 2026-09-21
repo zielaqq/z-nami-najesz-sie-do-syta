@@ -16,6 +16,8 @@ interface PhotoProps {
   /** Zdjęcie widoczne od razu po wejściu na stronę (LCP) – ładuj z wysokim priorytetem */
   eager?: boolean;
   quality?: 75 | 90;
+  /** Którą część zdjęcia zachować przy przycinaniu (CSS `object-position`), np. "50% 60%"; domyślnie środek */
+  focus?: string;
   /** Zdjęcie z zewnętrznego adresu (np. baza menu) – bez optymalizatora Next.js */
   remote?: boolean;
 }
@@ -33,6 +35,7 @@ export function Photo({
   imageClassName,
   eager = false,
   quality = 75,
+  focus,
   remote = false,
 }: PhotoProps) {
   return (
@@ -46,6 +49,7 @@ export function Photo({
         unoptimized={remote}
         loading={eager ? "eager" : "lazy"}
         fetchPriority={eager ? "high" : "auto"}
+        style={focus ? { objectPosition: focus } : undefined}
         className={cx("object-cover", imageClassName)}
       />
     </div>

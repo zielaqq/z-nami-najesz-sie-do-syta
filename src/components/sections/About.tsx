@@ -5,7 +5,7 @@ import { Section, SectionHeading } from "@/components/ui/Section";
 import { aboutContent } from "@/data/about";
 
 export function About() {
-  const { eyebrow, title, lead, body, values, photoAlt, photoAlt2 } = aboutContent;
+  const { eyebrow, title, lead, body, values, photoAlt } = aboutContent;
 
   return (
     <Section id="o-nas" labelledBy="about-title" tone="paper">
@@ -17,26 +17,15 @@ export function About() {
           </p>
         </div>
 
-        <div className="relative pb-12 lg:col-span-6 xl:col-span-7" data-reveal>
-          <div className="ml-auto w-[80%] lg:w-[72%]">
-            <div className="zoom-on-hover">
-              <Photo
-                src="/images/about/about-1.jpg"
-                alt={photoAlt}
-                sizes="(min-width: 1280px) 40vw, (min-width: 1024px) 45vw, 80vw"
-                ratio="aspect-[4/5]"
-              />
-            </div>
-          </div>
-          <div className="absolute bottom-0 left-0 w-[52%] border-[6px] border-paper lg:w-[46%]">
-            <div className="zoom-on-hover">
-              <Photo
-                src="/images/about/about-2.jpg"
-                alt={photoAlt2}
-                sizes="(min-width: 1024px) 24vw, 50vw"
-                ratio="aspect-[4/3]"
-              />
-            </div>
+        <div className="lg:col-span-6 xl:col-span-7" data-reveal>
+          <div className="zoom-on-hover ml-auto w-full max-w-[34rem]">
+            <Photo
+              src="/images/gallery/ogrodek-taras-czysty.jpg"
+              alt={photoAlt}
+              sizes="(min-width: 1280px) 34rem, (min-width: 1024px) 45vw, 100vw"
+              ratio="aspect-[4/3] sm:aspect-[5/4] lg:aspect-[4/5]"
+              focus="50% 45%"
+            />
           </div>
         </div>
       </div>

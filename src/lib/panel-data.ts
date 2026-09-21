@@ -20,6 +20,12 @@ export function describeError(error: unknown): string {
   if (code === "42703" || /column .*sort_order/i.test(message)) {
     return "W bazie brakuje nowej kolumny. Administrator strony musi uruchomić aktualny plik supabase/schema.sql (SQL Editor w Supabase).";
   }
+  if (/bucket not found/i.test(message)) {
+    return "W bazie brakuje magazynu na zdjęcia. Administrator strony musi uruchomić aktualny plik supabase/schema.sql (SQL Editor w Supabase).";
+  }
+  if (/exceeds the maximum allowed size|payload too large/i.test(message)) {
+    return "Zdjęcie jest za duże. Spróbuj innego albo zmniejsz je przed wysłaniem.";
+  }
   if (code === "23514" || /violates check constraint/i.test(message)) {
     return /category/i.test(message)
       ? "Baza jeszcze nie zna tej kategorii. Administrator strony musi uruchomić aktualny plik supabase/schema.sql."

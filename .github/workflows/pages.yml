@@ -86,3 +86,23 @@ jobs:
       - name: Publikacja na GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  # Po pushu na main GitHub potrafi równolegle uruchomić własną publikację „pages build and deployment” (Jekyll, surowe
+  # pliki repozytorium – bez index.html). Jeśli skończy się po naszej, strona daje 404. Druga, opóźniona publikacja tego
+  # samego pliku zawsze jest ostatnia, więc strona wraca. Przy poprawnym ustawieniu (Settings → Pages → Source: GitHub
+  # Actions) wbudowana publikacja się nie uruchamia i ten krok jest tylko dodatkowym, niegroźnym powtórzeniem.
+  # Nie uruchamia się przy ręcznym „Run workflow” ani przy codziennej przebudowie – tam nic nie ściga się z naszą publikacją.
+  redeploy:
+    needs: deploy
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Odczekanie na koniec wbudowanej publikacji GitHuba
+        run: sleep 150
+
+      - name: Ponowna publikacja na GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

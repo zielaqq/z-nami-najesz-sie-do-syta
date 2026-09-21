@@ -5,6 +5,7 @@ import { useEffect, useState, type ReactNode } from "react";
 
 import { DishLibrary } from "@/components/panel/DishLibrary";
 import { EventsManager } from "@/components/panel/EventsManager";
+import { GalleryManager } from "@/components/panel/GalleryManager";
 import { LoginForm } from "@/components/panel/LoginForm";
 import { TodayEditor } from "@/components/panel/TodayEditor";
 import { buttonClasses } from "@/components/ui/Button";
@@ -21,12 +22,13 @@ type Auth =
   | { status: "error" }
   | { status: "ready"; email: string };
 
-type Tab = "today" | "dishes" | "events";
+type Tab = "today" | "dishes" | "events" | "gallery";
 
 const tabs: Array<{ id: Tab; label: string }> = [
   { id: "today", label: "Menu na dziś" },
   { id: "dishes", label: "Baza dań" },
   { id: "events", label: "Wydarzenia" },
+  { id: "gallery", label: "Galeria" },
 ];
 
 /**
@@ -148,6 +150,7 @@ function ConfiguredPanel() {
             {tab === "today" ? <TodayEditor onOpenLibrary={() => setTab("dishes")} /> : null}
             {tab === "dishes" ? <DishLibrary /> : null}
             {tab === "events" ? <EventsManager /> : null}
+            {tab === "gallery" ? <GalleryManager /> : null}
           </div>
         </>
       ) : null}

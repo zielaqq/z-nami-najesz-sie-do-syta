@@ -13,8 +13,7 @@ export const heroContent = {
   titleLines: ["Z nami", "najesz się", "do syta"],
   lead: "Domowe smaki polskiej kuchni, porcje, po których nie wychodzi się głodnym, i miejsce, do którego chce się wracać.",
   services: ["Na miejscu", "Z dowozem", "Catering"],
-  photoAlt: "Zastawiony stół z zupą, kotletem schabowym i pierogami",
-  insetAlt: "Miska gorącej zupy z pietruszką",
+  photoAlt: "Sala restauracji z drewnianymi stołami, czarnymi krzesłami i wiszącymi żarówkami",
 } as const;
 
 export const aboutContent = {
@@ -22,8 +21,7 @@ export const aboutContent = {
   title: "Domowy smak, duże porcje, przyjazna atmosfera",
   lead: "„Z nami najesz się do syta” to restauracja z kuchnią polską w Lesznie. Gotujemy po domowemu – konkretnie, ze smakiem i tak, żeby talerz był pełny.",
   body: "U nas obiad ma być taki, jaki lubisz: znane, polskie smaki, świeże dania i porcje, po których nikt nie wychodzi głodny. Wpadnij na obiad do Leszna, zamów jedzenie z dowozem albo zapytaj o catering na swoje spotkanie.",
-  photoAlt: "Nakryty stół w restauracji z domowymi daniami",
-  photoAlt2: "Talerz z domowym obiadem",
+  photoAlt: "Ogródek restauracji pod zadaszeniem z drewnianym tarasem i szklanymi stolikami",
   values: [
     {
       title: "Polska kuchnia",

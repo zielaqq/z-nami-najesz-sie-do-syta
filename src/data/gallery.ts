@@ -46,6 +46,15 @@ export interface GalleryImage {
   category: GalleryCategory;
   /** Którą część zdjęcia zachować w kafelku (CSS `object-position`), domyślnie środek. */
   focus?: string;
+  /** true = zdjęcie z zewnętrznego adresu (magazyn zdjęć w bazie), a nie z folderu `public` */
+  remote?: boolean;
+}
+
+/** Opis alternatywny zdjęcia bez własnego opisu i podpisu (zdjęcia dodane w panelu). */
+export function defaultGalleryAlt(category: GalleryCategory): string {
+  if (category === "wnetrze") return "Wnętrze restauracji";
+  if (category === "ogrodek") return "Ogródek restauracji";
+  return "Danie z naszej restauracji";
 }
 
 export const galleryImages: GalleryImage[] = [
@@ -101,7 +110,7 @@ export const galleryImages: GalleryImage[] = [
     category: "dania",
   },
   {
-    src: "/images/gallery/ogrodek-taras.jpg",
+    src: "/images/gallery/ogrodek-taras-czysty.jpg",
     alt: "Ogródek pod zadaszeniem z drewnianym tarasem, szklanymi stolikami i barkiem",
     caption: "Ogródek pod altaną",
     width: 1125,

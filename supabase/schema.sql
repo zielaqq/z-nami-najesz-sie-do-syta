@@ -1,5 +1,5 @@
 -- =============================================================================
---  Z nami najesz się do syta – baza menu i wydarzeń (Supabase / PostgreSQL)
+--  Z nami najesz się do syta – baza menu, wydarzeń i galerii (Supabase / PostgreSQL)
 --
 --  Uruchom: Supabase → SQL Editor → New query → wklej cały plik → Run.
 --  Skrypt można bezpiecznie uruchamiać wielokrotnie (nic nie kasuje) – także po jego aktualizacji:
@@ -208,3 +208,74 @@ drop policy if exists "dish_photos_admin_delete" on storage.objects;
 create policy "dish_photos_admin_delete" on storage.objects
   for delete to authenticated
   using (bucket_id = 'dish-photos' and public.is_admin());
+
+-- 6) Galeria zdjęć (dodawana, kasowana i układana w panelu) --------------------------------
+--    `photo_path` to nazwa pliku w magazynie `gallery-photos` albo (gdy zaczyna się od „/”) zdjęcie dołączone do strony
+--    (dotychczasowa galeria z kodu – można ją przenieść do panelu przyciskiem w zakładce „Galeria”).
+create table if not exists public.gallery_photos (
+  id uuid primary key default gen_random_uuid(),
+  photo_path text not null check (char_length(photo_path) between 1 and 300),
+  caption text check (caption is null or char_length(caption) <= 80),
+  alt text check (alt is null or char_length(alt) <= 200),
+  category text not null check (category in ('wnetrze', 'ogrodek', 'dania')),
+  width integer check (width is null or width > 0),
+  height integer check (height is null or height > 0),
+  focus text check (focus is null or char_length(focus) <= 20),
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now()
+);
+create index if not exists gallery_photos_sort_idx on public.gallery_photos (sort_order);
+alter table public.gallery_photos enable row level security;
+
+drop policy if exists "gallery_public_read" on public.gallery_photos;
+create policy "gallery_public_read" on public.gallery_photos
+  for select to anon, authenticated
+  using (true);
+
+drop policy if exists "gallery_admin_insert" on public.gallery_photos;
+create policy "gallery_admin_insert" on public.gallery_photos
+  for insert to authenticated
+  with check (public.is_admin());
+
+drop policy if exists "gallery_admin_update" on public.gallery_photos;
+create policy "gallery_admin_update" on public.gallery_photos
+  for update to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop policy if exists "gallery_admin_delete" on public.gallery_photos;
+create policy "gallery_admin_delete" on public.gallery_photos
+  for delete to authenticated
+  using (public.is_admin());
+
+grant select on public.gallery_photos to anon;
+grant select, insert, update, delete on public.gallery_photos to authenticated;
+
+-- Magazyn zdjęć galerii (publiczny odczyt, zapis tylko dla administratora, do 5 MB)
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('gallery-photos', 'gallery-photos', true, 5242880, array['image/jpeg', 'image/png', 'image/webp'])
+on conflict (id) do update
+  set public = excluded.public,
+      file_size_limit = excluded.file_size_limit,
+      allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "gallery_photos_public_read" on storage.objects;
+create policy "gallery_photos_public_read" on storage.objects
+  for select to anon, authenticated
+  using (bucket_id = 'gallery-photos');
+
+drop policy if exists "gallery_photos_admin_insert" on storage.objects;
+create policy "gallery_photos_admin_insert" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'gallery-photos' and public.is_admin());
+
+drop policy if exists "gallery_photos_admin_update" on storage.objects;
+create policy "gallery_photos_admin_update" on storage.objects
+  for update to authenticated
+  using (bucket_id = 'gallery-photos' and public.is_admin())
+  with check (bucket_id = 'gallery-photos' and public.is_admin());
+
+drop policy if exists "gallery_photos_admin_delete" on storage.objects;
+create policy "gallery_photos_admin_delete" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'gallery-photos' and public.is_admin());

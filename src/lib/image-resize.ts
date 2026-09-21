@@ -3,7 +3,18 @@
  * Lekkie pliki = szybka strona i mały transfer (darmowy plan bazy ma limit pobrań).
  * `imageOrientation: "from-image"` uwzględnia obrót zapisany przez aparat, więc zdjęcia nie są „na boku”.
  */
+export interface ResizedImage {
+  blob: Blob;
+  width: number;
+  height: number;
+}
+
 export async function resizeImage(file: File, maxSide = 900, quality = 0.82): Promise<Blob> {
+  return (await resizeImageDetailed(file, maxSide, quality)).blob;
+}
+
+/** Jak `resizeImage`, ale zwraca też wymiary zdjęcia po zmniejszeniu (np. do galerii). */
+export async function resizeImageDetailed(file: File, maxSide = 900, quality = 0.82): Promise<ResizedImage> {
   const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
   const width = Math.max(1, Math.round(bitmap.width * scale));
@@ -22,5 +33,5 @@ export async function resizeImage(file: File, maxSide = 900, quality = 0.82): Pr
 
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
   if (!blob) throw new Error("Nie udało się przetworzyć zdjęcia");
-  return blob;
+  return { blob, width, height };
 }

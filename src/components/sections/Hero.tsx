@@ -12,12 +12,12 @@ import { withBase } from "@/lib/base-path";
 const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
 export function Hero() {
-  const { eyebrow, titleLines, lead, services, photoAlt, insetAlt } = heroContent;
+  const { eyebrow, titleLines, lead, services, photoAlt } = heroContent;
   const lastLine = titleLines.length - 1;
 
   return (
     <section aria-labelledby="hero-title" className="relative bg-cream">
-      <div className="container-page grid items-center gap-14 pb-24 pt-10 sm:pt-14 lg:grid-cols-12 lg:gap-10 lg:pb-28 lg:pt-12 xl:gap-16">
+      <div className="container-page grid items-center gap-14 pb-16 pt-10 sm:pt-14 lg:grid-cols-12 lg:gap-10 lg:pb-20 lg:pt-12 xl:gap-16">
         <div className="lg:col-span-5">
           <p className="eyebrow hero-in flex items-center gap-3" style={delay(60)}>
             <span aria-hidden="true" className="h-px w-8 bg-current" />
@@ -72,26 +72,14 @@ export function Hero() {
         <div className="relative lg:col-span-7">
           <div className="hero-photo hero-in" style={delay(200)}>
             <Photo
-              src="/images/hero/hero-main.jpg"
+              src="/images/gallery/sala-1.jpg"
               alt={photoAlt}
               sizes="(min-width: 1024px) 58vw, 100vw"
               ratio="aspect-[5/4] sm:aspect-[16/11] lg:aspect-[6/7] lg:max-h-[calc(100svh-var(--header-h)-3rem)] lg:min-h-[28rem]"
               eager
               quality={90}
+              focus="50% 62%"
             />
-          </div>
-          <div
-            className="hero-in absolute -bottom-9 left-4 w-[38%] max-w-[15rem] border-[6px] border-cream sm:left-6 lg:-left-10 lg:-bottom-8 lg:w-[32%]"
-            style={delay(520)}
-          >
-            <div className="hero-photo zoom-on-hover">
-              <Photo
-                src="/images/hero/hero-inset.jpg"
-                alt={insetAlt}
-                sizes="(min-width: 1024px) 20vw, 40vw"
-                ratio="aspect-square"
-              />
-            </div>
           </div>
         </div>
       </div>

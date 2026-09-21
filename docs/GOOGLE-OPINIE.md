@@ -62,9 +62,11 @@ Przeglądarka ──(klik „Pokaż opinie z Google”)──▶ /api/google-rev
    * uruchom lokalnie: `npm run places:find` (potrzebny klucz w `.env.local`) – wypisze kandydatów z nazwą i adresem;
    * albo użyj [Place ID Finder](https://developers.google.com/maps/documentation/places/web-service/place-id).
 
-   > Z identyfikatora w Twoim linku (`0x47194dd1f26f0a19:0xc017f793101386a2`) wyliczyłem **kandydata**:
-   > `ChIJGQpv8tFNGUcRooYTEJP3F8A`. **Nie mogłem go zweryfikować bez klucza** – potwierdź go skryptem powyżej,
-   > zanim wpiszesz do konfiguracji. Jeśli jest błędny, API zwróci 404 i strona pokaże komunikat awaryjny.
+   > Z identyfikatora w linku do wizytówki (`0x47194dd1f26f0a19:0xc017f793101386a2`) wyliczono Place ID
+   > `ChIJGQpv8tFNGUcRooYTEJP3F8A`. **Zweryfikowany bez klucza i bez płatności**: adres
+   > `https://search.google.com/local/reviews?placeid=ChIJGQpv8tFNGUcRooYTEJP3F8A` otwiera wizytówkę
+   > „Z nami najesz się do syta, Partyzantów 2A, 05-084 Leszno”. Sam Place ID jest darmowy; płatne są dopiero
+   > zapytania do Places API o dane (opinie, ocena).
 5. Skopiuj `.env.example` → `.env.local` i uzupełnij:
 
    ```env

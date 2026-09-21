@@ -53,24 +53,23 @@ AVIF/WebP dla każdego urządzenia; **wgrywaj JPG/PNG/WebP, nie GIF**):
 | Folder / plik | Do czego | Proporcje i rozmiar |
 | --- | --- | --- |
 | `menu/*.jpg` | zdjęcia dań | **4:3**, min. 1200 × 900 px (na telefonie widać je jako kwadrat – danie na środku) |
-| `gallery/*.jpg` | galeria | dowolne proporcje, najlepiej min. 1200 px szerokości; realne wymiary wpisz w `gallery.ts` (`width`/`height`); kafelki w siatce mają proporcje 4:5, a w powiększeniu widać całe zdjęcie |
-| `hero/hero-main.jpg` | duże zdjęcie na górze strony | ok. **1800 × 1800 px**; najważniejsze rzeczy na środku (przycinane do 5:4 na telefonie i 6:7 na desktopie) |
-| `hero/hero-inset.jpg` | małe zdjęcie „wsunięte” | kwadrat, min. 900 × 900 px |
-| `about/about-1.jpg`, `about-2.jpg` | sekcja „O nas” | 4:5 (1000 × 1250) i 4:3 (1000 × 750) |
+| `gallery/*.jpg` | zdjęcia domyślne galerii (własne dodajesz w panelu) | dowolne proporcje, najlepiej min. 1200 px szerokości; realne wymiary wpisz w `gallery.ts` (`width`/`height`); kafelki w siatce mają proporcje 4:5, a w powiększeniu widać całe zdjęcie |
+| zdjęcia w „hero” i „O nas” | po jednym dużym zdjęciu: u góry strony (przycinane do 5:4 na telefonie i 6:7 na desktopie) i w „O nas” (4:5 na desktopie) | są to zdjęcia z `gallery/`; ścieżki wpisane są w `Hero.tsx` i `About.tsx` (pole `src`). Żeby użyć innego, wgraj plik do `gallery/` i zmień `src`. **Użyj nowej nazwy pliku** – przeglądarka i Next.js trzymają stare zdjęcia w cache |
 | `og-image.jpg` | podgląd przy udostępnianiu (Facebook, Google) | **1200 × 630 px** – powstaje z logo poleceniem `npm run icons` (adres i telefon są wpisane w `scripts/generate-icons.mjs`) |
 | `logo/logo.png` | logo (patrz niżej) | PNG z przezroczystym tłem, przycięty do zawartości, max 800 px szerokości (obecny: 800 × 685 px) |
 
 **Jak podmienić:** wrzuć nowy plik z **tą samą nazwą i rozszerzeniem** (np. `rosol-domowy.jpg`). Jeśli plik ma inne
 rozszerzenie, zmień ścieżkę w pliku danych.
 
-**Galeria:** ma już prawdziwe zdjęcia (wnętrze, ogródek, dania) i filtr „Wnętrze / Ogródek / Dania”. Nowe zdjęcie: wrzuć plik
+**Galeria:** dodawanie, usuwanie i kolejność zdjęć ustawia się w **panelu** (`/panel` → „Galeria”, patrz `docs/PANEL-MENU.md`). Poniżej opisano zdjęcia domyślne z kodu (pokazywane, gdy w bazie nie ma jeszcze żadnych). Galeria na stronie jest rozwijana: 12 zdjęć na start, „Pokaż więcej” dokłada kolejne (stała `PAGE_SIZE` w `GalleryGrid.tsx`). Ma już prawdziwe zdjęcia (wnętrze, ogródek, dania) i filtr „Wnętrze / Ogródek / Dania”. Nowe zdjęcie: wrzuć plik
 do `public/images/gallery/` i dopisz wpis w `gallery.ts`: nazwa pliku, `width`/`height`, `category` (`wnetrze`, `ogrodek` albo
 `dania`) oraz `alt` – krótki opis tego, co widać (ważne dla osób niewidomych i dla SEO). Opcjonalnie `focus` (np. `"50% 60%"`) –
 którą część zdjęcia zachować w kafelku 4:5. Na zdjęciach z gośćmi lub personelem zadbaj o ich zgodę albo zamaż twarze.
 
-> Obrazy dań w menu oraz w sekcjach „hero” i „O nas” to nadal **ilustracje poglądowe** wygenerowane skryptem
-> `npm run images:placeholders`. Nie uruchamiaj go po wgraniu własnych zdjęć – nadpisałby pliki o tych samych nazwach
-> (a w galerii odtworzyłby nieużywane ilustracje).
+> Zdjęcia w galerii oraz w sekcjach „hero” i „O nas” są **prawdziwe** (z lokalu). Tylko obrazy dań w przykładowym menu
+> (`menu/`) to **ilustracje poglądowe** wygenerowane skryptem `npm run images:placeholders`.
+> ⚠ **Nie uruchamiaj go po wgraniu własnych zdjęć dań** – nadpisałby pliki o tych samych nazwach.
+> Kadr zdjęcia w „hero” i „O nas” ustawiasz parametrem `focus` (np. `"50% 60%"`) w `Hero.tsx` i `About.tsx`.
 
 ## Nagrania z Facebooka (`src/data/videos.ts`)
 

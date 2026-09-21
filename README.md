@@ -58,7 +58,7 @@ materialy/                surowe pliki (filmy, oryginały logo) – wyłączone 
 ```
 
 **Menu na dziś** pochodzi z bazy i jest edytowane w panelu `/panel` (gdy ustawione są zmienne Supabase) – patrz
-[docs/PANEL-MENU.md](docs/PANEL-MENU.md). **Pozostałe treści** (galeria, wydarzenia, nagrania, teksty) komponenty czytają
+[docs/PANEL-MENU.md](docs/PANEL-MENU.md). Galeria jest ustawiana w panelu (zakładka „Galeria”). **Pozostałe treści** (wydarzenia, nagrania, teksty) komponenty czytają
 przez asynchroniczne funkcje z `src/lib/content.ts` (`getGallery`, `getUpcomingEvents`, `getVideos`) – wystarczy zmienić
 ich wnętrze, żeby podłączyć CMS; kształt danych zostaje.
 
@@ -85,10 +85,10 @@ Klucz trafia do przeglądarki, więc ograniczenia są obowiązkowe.
 * **Dane demonstracyjne są oznaczone** i łatwo je wyłączyć: `menuMeta.isSample`, `galleryMeta.isPlaceholder`,
   `demo: true` w wydarzeniach, placeholdery opinii. Dane strukturalne (Schema.org) **nie zawierają** przykładowego menu,
   ocen ani przedziału cenowego.
-* **Galeria ma prawdziwe zdjęcia z lokalu.** Obrazy dań w menu oraz w sekcjach „hero” i „O nas” to nadal tymczasowe
-  ilustracje (skrypt `scripts/generate-placeholders.mjs`) – układ jest gotowy na prawdziwe fotografie.
+* **Zdjęcia z lokalu są prawdziwe:** galeria, „hero” (góra strony) i sekcja „O nas”. Tylko obrazy dań w przykładowym menu
+  (`src/data/menu.ts`, wersja zapasowa bez bazy) to tymczasowe ilustracje (skrypt `scripts/generate-placeholders.mjs`).
 * **Opinie Google bez cache’u** – regulamin Google zabrania cache’owania treści Places, więc są pobierane na żywo dopiero
-  po przewinięciu do sekcji (uzasadnienie i konfiguracja: [docs/GOOGLE-OPINIE.md](docs/GOOGLE-OPINIE.md)).
+  po kliknięciu „Pokaż opinie z Google” (uzasadnienie i konfiguracja: [docs/GOOGLE-OPINIE.md](docs/GOOGLE-OPINIE.md)).
 * **Facebook:** w sekcji „Obserwuj nas” są **same nagrania** (Reels) w oficjalnym odtwarzaczu Facebooka (bez tokenów), bez
   treści postów; lista w `src/data/videos.ts`. Wtyczka z osią czasu (posty) została usunięta. Integracja przez Graph API
   zwykle wymaga aplikacji Meta i tokenu strony, dlatego jej nie udaję.
@@ -108,7 +108,7 @@ Klucz trafia do przeglądarki, więc ograniczenia są obowiązkowe.
 
 1. Ustaw `NEXT_PUBLIC_SITE_URL` (domena produkcyjna).
 2. Wpisz prawdziwe menu i ceny; ustaw `menuMeta.isSample = false`.
-3. Podmień zdjęcia dań w menu oraz w sekcjach „hero” i „O nas” (galeria jest już prawdziwa); uruchom `npm run images:check`.
+3. Zdjęcia w galerii dodajesz i układasz w panelu; obrazy dań w przykładowym menu (`src/data/menu.ts`) podmień na własne; uruchom `npm run images:check`.
 4. Logo, favicon i `og-image.jpg` są już z logo restauracji; przy nowej wersji logo: `npm run logo` (patrz [docs/EDYCJA-TRESCI.md](docs/EDYCJA-TRESCI.md)).
 5. Usuń wydarzenia `demo` i dodaj prawdziwe (albo zostaw pustą listę – sekcja zniknie).
 6. Skonfiguruj opinie Google (opcjonalnie) i ustaw dzienny limit/alert budżetu w Google Cloud.

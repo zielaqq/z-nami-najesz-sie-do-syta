@@ -34,6 +34,21 @@ w chmurze GitHuba i nie jest zapisywana w repozytorium. Folder `/docs` służy d
 Od tej pory każda zmiana wysłana na `main` odświeża podgląd automatycznie. Workflow uruchamia się też **codziennie
 rano**, żeby minione wydarzenia znikały z listy (na Pages nie działa automatyczne odświeżanie strony).
 
+## Gdy strona daje 404 po wysłaniu zmian
+
+W zakładce **Actions** przy każdym pushu widać **dwa** przebiegi: „Podgląd na GitHub Pages” (nasz) i **„pages build and
+deployment”** (wbudowany w GitHuba: buduje Jekyllem surowe pliki repozytorium, w którym nie ma `index.html`). Ten drugi
+pojawia się, gdy w **Settings → Pages → Source** wybrane jest „Deploy from a branch” (albo ustawienie się „zawiesiło”).
+Kto skończy ostatni, ten wygrywa – gdy wygra wbudowany, strona daje **404**, dopóki nie uruchomisz ręcznie „Run workflow”.
+
+* **Trwała poprawka po stronie GitHuba:** Settings → Pages → Source → wybierz **„GitHub Actions”** (jeśli już jest,
+  przełącz na „Deploy from a branch”, zapisz, i z powrotem na „GitHub Actions”). Po tym „pages build and deployment”
+  przestaje się uruchamiać przy pushu.
+* **Zabezpieczenie w kodzie:** po każdym pushu workflow robi drugą, opóźnioną publikację (zadanie `redeploy` w
+  `.github/workflows/pages.yml`, ok. 2,5 minuty po pierwszej), która zawsze jest ostatnia, więc strona wraca sama
+  nawet przy błędnym ustawieniu. Cały cykl po pushu trwa więc ok. 5 minut.
+* Doraźnie: **Actions → Podgląd na GitHub Pages → Run workflow** (ręczne uruchomienie nie ma konkurencji).
+
 ## Czym różni się od pełnej strony
 
 | | Pełna strona (np. Vercel) | Podgląd na GitHub Pages |

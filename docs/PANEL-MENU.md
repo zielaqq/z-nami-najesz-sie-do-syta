@@ -42,6 +42,30 @@ Wydarzenie widać na stronie do jego dnia i **znika samo**, więc nie trzeba go 
 „Pokaż minione”). Gdy nie ma żadnego nadchodzącego, cała sekcja „Wydarzenia” na stronie jest ukryta.
 Ołówek zmienia wydarzenie, kosz je usuwa.
 
+### Galeria
+
+Zakładka **„Galeria”** – zdjęcia ze strony (wnętrze, ogródek, dania). Wszystko zapisuje się od razu.
+
+* **Dodaj zdjęcia** – wybierz jedno albo kilka zdjęć naraz (z aparatu lub galerii telefonu), ustaw **kategorię**
+  (Wnętrze / Ogródek / Dania) i, jeśli chcesz, **podpis** (widać go w powiększeniu). Zdjęcia zmniejszymy automatycznie
+  i dodamy na koniec galerii.
+* **Strzałki w lewo / w prawo** przy zdjęciu zmieniają kolejność – na stronie zdjęcia układają się od lewej do prawej,
+  rząd po rzędzie.
+* **Ołówek** zmienia podpis i kategorię, **kosz** usuwa zdjęcie z galerii (razem z plikiem).
+* Filtry „Wnętrze / Ogródek / Dania” nad galerią na stronie pojawiają się same, gdy są zdjęcia z co najmniej dwóch kategorii.
+* **Galeria na stronie jest rozwijana:** na początku widać 12 zdjęć (pierwsze w kolejności ustawionej w panelu),
+  a przycisk **„Pokaż więcej zdjęć”** dokłada kolejne 12. Dzięki temu strona nie robi się długa i wolna, nawet przy
+  dziesiątkach zdjęć. Powiększenie przechodzi też do zdjęć, które nie są jeszcze pokazane w siatce, a zmiana filtra
+  zwija galerię z powrotem do 12. **Najlepsze zdjęcia ustaw na początku**, bo to je zobaczy każdy odwiedzający.
+
+**Za pierwszym razem** galeria w bazie jest pusta, a strona pokazuje zdjęcia domyślne z kodu. Kliknij
+**„Przenieś obecne zdjęcia do panelu”**, żeby móc je układać, podpisywać i usuwać. Jeśli usuniesz wszystkie zdjęcia,
+strona wróci do zdjęć domyślnych.
+
+Dobre zdjęcie do galerii: w dobrym świetle, bez bałaganu w kadrze i ze stołami bez zbędnych przedmiotów. Na stronie
+kafelki mają proporcje 4:5 (pionowe), a w powiększeniu widać całe zdjęcie. Przy zdjęciach z gośćmi lub personelem zadbaj
+o ich zgodę.
+
 ### Nowe danie
 
 Zakładka **„Baza dań” → „Dodaj danie”**: nazwa, kategoria, cena (nieobowiązkowa), krótki opis (nieobowiązkowy) i zdjęcie
@@ -61,7 +85,7 @@ Baza działa w usłudze **Supabase** (darmowy plan wystarcza). Projekt jest już
 1. **Schemat bazy.** Supabase → **SQL Editor** → **New query** → wklej całą zawartość pliku
    [`supabase/schema.sql`](../supabase/schema.sql) → **Run**. Powinno pojawić się „Success”. Można uruchomić ponownie
    (niczego nie kasuje). **Uruchom go ponownie po każdej aktualizacji tego pliku** – tak dopisała się np. tabela wydarzeń
-   kolejność dań i nowe kategorie (dania ze starych kategorii są przy tym automatycznie przenoszone do „Drugich dań”).
+   kolejność dań, galeria i nowe kategorie (dania ze starych kategorii są przy tym automatycznie przenoszone do „Drugich dań”).
    Dopóki nie uruchomisz aktualnego pliku, strona nadal pokazuje menu (alfabetycznie), ale panel nie zapisze wyboru dań.
 2. **Konto klientki.** **Authentication → Users → Add user → Create new user**: adres e-mail klientki i mocne hasło,
    zaznacz **„Auto Confirm User”**. Hasło przekaż klientce osobiście.
@@ -100,7 +124,7 @@ krok 3.
   Sprawdza to baza (reguły Row Level Security), a nie sama strona – więc nie da się tego obejść z przeglądarki.
 * Zdjęcia dań leżą w publicznym magazynie `dish-photos`; wgrywać i usuwać może tylko administrator (limit 3 MB,
   tylko JPG/PNG/WebP).
-* Reguły zostały sprawdzone 34 testami na lokalnej kopii bazy: anonimowa osoba i zalogowana osoba **bez** uprawnień
+* Reguły zostały sprawdzone kilkudziesięcioma testami na lokalnej kopii bazy (także dla galerii i wydarzeń): anonimowa osoba i zalogowana osoba **bez** uprawnień
   nie mogą niczego dodać, zmienić ani usunąć; ukryte dania są niewidoczne publicznie.
 * Klucz w kodzie strony jest publiczny z założenia; klucza `service_role` w projekcie nie ma i nie może być.
 
@@ -125,4 +149,8 @@ krok 3.
 * Bez zmiennych środowiskowych strona pokazuje menu przykładowe z `src/data/menu.ts`, a `/panel` informuje
   o braku połączenia z bazą.
 * Panel działa w całości w przeglądarce, więc działa także na GitHub Pages (eksport statyczny).
+* Galeria: tabela `gallery_photos` i magazyn `gallery-photos` (limit 5 MB na plik, zdjęcia zmniejszane w przeglądarce do
+  1600 px). Publiczny odczyt: `src/lib/gallery-live.ts` + `LiveGallery` (do czasu wczytania i przy pustej tabeli strona
+  pokazuje zdjęcia domyślne z `src/data/gallery.ts`); panel: `GalleryManager`, `GalleryPhotoForm`, `src/lib/panel-gallery.ts`.
+  Zdjęcie z `photo_path` zaczynającym się od „/” to plik z folderu `public` (import zdjęć domyślnych).
 * Nagrania z Facebooka (sekcja „Obserwuj nas”) są na razie w pliku `src/data/videos.ts`.
