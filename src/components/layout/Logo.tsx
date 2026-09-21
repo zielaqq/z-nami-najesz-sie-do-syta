@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { siteConfig } from "@/data/site";
+import { withBase } from "@/lib/base-path";
 import { cx } from "@/lib/cx";
 
 interface LogoProps {
@@ -27,7 +28,7 @@ export function Logo({ size = "header", className }: LogoProps) {
   return (
     <Link href="/" aria-label={`${name} – strona główna`} className={cx("inline-flex rounded-[3px]", className)}>
       <Image
-        src={logo.src}
+        src={withBase(logo.src)}
         alt={logo.alt}
         width={logo.width}
         height={logo.height}

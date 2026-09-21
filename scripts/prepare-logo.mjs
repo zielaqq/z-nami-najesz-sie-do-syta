@@ -156,12 +156,19 @@ const top = Math.max(0, minY - PAD);
 const width = Math.min(W, maxX + PAD + 1) - left;
 const height = Math.min(H, maxY + PAD + 1) - top;
 
+/**
+ * Największa szerokość pliku logo (px) ≈ 4× największy rozmiar na stronie. Lżejszy plik = szybsza strona
+ * także tam, gdzie nie ma optymalizatora zdjęć (GitHub Pages). Pełny oryginał zostaje w materialy/.
+ */
+const MAX_WIDTH = 800;
+
 await mkdir(path.dirname(target), { recursive: true });
-await sharp(out, { raw: { width: W, height: H, channels: 4 } })
+const saved = await sharp(out, { raw: { width: W, height: H, channels: 4 } })
   .extract({ left, top, width, height })
+  .resize({ width: MAX_WIDTH, withoutEnlargement: true, kernel: "lanczos3" })
   .png({ compressionLevel: 9, effort: 10 })
   .toFile(target);
 
 console.log(`Źródło: ${path.relative(root, source)} (${W}×${H}px, tło: biel ${WHITE}, wygładzono ${softened} pikseli brzegu)`);
-console.log(`✓ ${path.relative(root, target)} – ${width}×${height}px`);
-console.log(`  W src/data/site.ts ustaw: logo.width = ${width}, logo.height = ${height}`);
+console.log(`✓ ${path.relative(root, target)} – ${saved.width}×${saved.height}px`);
+console.log(`  W src/data/site.ts ustaw: logo.width = ${saved.width}, logo.height = ${saved.height}`);

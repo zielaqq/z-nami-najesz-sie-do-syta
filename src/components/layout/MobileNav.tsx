@@ -6,6 +6,7 @@ import { Logo } from "@/components/layout/Logo";
 import { ButtonLink } from "@/components/ui/Button";
 import { CloseIcon, MapPin, MenuIcon, Phone } from "@/components/ui/icons";
 import { fullAddress, navItems, openingHours, siteConfig } from "@/data/site";
+import { withBase } from "@/lib/base-path";
 
 /**
  * Menu mobilne jako natywny <dialog> otwarty przez showModal():
@@ -69,7 +70,7 @@ export function MobileNav() {
               {navItems.map((item, index) => (
                 <li key={item.id}>
                   <a
-                    href={`/#${item.id}`}
+                    href={withBase(`/#${item.id}`)}
                     className="flex items-baseline gap-4 py-4 font-serif text-[2rem] leading-none tracking-tight text-ink"
                   >
                     <span aria-hidden="true" className="tabular w-7 font-sans text-xs font-semibold text-accent">

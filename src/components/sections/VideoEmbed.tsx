@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { FacebookIcon, Play } from "@/components/ui/icons";
 import type { VideoItem } from "@/data/videos";
+import { withBase } from "@/lib/base-path";
 import { cx } from "@/lib/cx";
 
 interface VideoEmbedProps {
@@ -86,7 +87,7 @@ export function VideoEmbed({ video, loadOnClick }: VideoEmbedProps) {
           >
             {video.poster ? (
               <Image
-                src={video.poster}
+                src={withBase(video.poster)}
                 alt=""
                 fill
                 sizes="(min-width: 640px) 300px, 76vw"

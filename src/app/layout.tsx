@@ -9,7 +9,7 @@ import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { siteConfig } from "@/data/site";
 import { getUpcomingEvents } from "@/lib/content";
 import { buildStructuredData } from "@/lib/schema";
-import { getSiteUrl } from "@/lib/site-url";
+import { getSiteUrl, isNoIndex } from "@/lib/site-url";
 
 import "./globals.css";
 
@@ -68,11 +68,13 @@ export const metadata: Metadata = {
     description: seo.description,
     images: [{ url: seo.ogImage, alt: seo.ogImageAlt }],
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
-  },
+  robots: isNoIndex
+    ? { index: false, follow: false }
+    : {
+        index: true,
+        follow: true,
+        googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+      },
   formatDetection: { telephone: false, address: false, email: false },
 };
 

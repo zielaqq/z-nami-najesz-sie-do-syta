@@ -6,6 +6,7 @@ import { OpenStatus } from "@/components/ui/OpenStatus";
 import { Photo } from "@/components/ui/Photo";
 import { heroContent } from "@/data/about";
 import { siteConfig } from "@/data/site";
+import { withBase } from "@/lib/base-path";
 
 /** Opóźnienie animacji wejścia (CSS zmienna --d, patrz globals.css → .hero-in) */
 const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
@@ -48,7 +49,7 @@ export function Hero() {
             >
               Zadzwoń i umów
             </ButtonLink>
-            <ButtonLink href="/#menu" variant="secondary" size="lg">
+            <ButtonLink href={withBase("/#menu")} variant="secondary" size="lg">
               Zobacz menu
             </ButtonLink>
           </div>

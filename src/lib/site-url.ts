@@ -2,6 +2,13 @@ const FALLBACK_URL = "http://localhost:3000";
 let warned = false;
 
 /**
+ * Tryb podglądu: strona prosi wyszukiwarki, by jej NIE indeksowały (meta robots + robots.txt + pusty sitemap).
+ * Włącza go workflow GitHub Pages (NEXT_PUBLIC_NOINDEX=true), bo podgląd zawiera przykładowe dane.
+ * Na docelowej stronie zmiennej nie ustawiaj.
+ */
+export const isNoIndex = process.env.NEXT_PUBLIC_NOINDEX === "true";
+
+/**
  * Publiczny adres strony bez końcowego ukośnika.
  * Ustaw NEXT_PUBLIC_SITE_URL w środowisku produkcyjnym (patrz .env.example).
  * Używane po stronie serwera: canonical, Open Graph, sitemap, robots, JSON-LD.

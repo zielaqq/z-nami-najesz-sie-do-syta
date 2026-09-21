@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+import { withBase } from "@/lib/base-path";
 import { cx } from "@/lib/cx";
 
 interface PhotoProps {
@@ -34,7 +35,7 @@ export function Photo({
   return (
     <div className={cx("relative overflow-hidden bg-sand", ratio, className)}>
       <Image
-        src={src}
+        src={withBase(src)}
         alt={alt}
         fill
         sizes={sizes}

@@ -5,6 +5,7 @@ import { useCallback, useRef, useState, type KeyboardEvent, type MouseEvent, typ
 
 import { ChevronLeft, ChevronRight, CloseIcon } from "@/components/ui/icons";
 import type { GalleryImage } from "@/data/gallery";
+import { withBase } from "@/lib/base-path";
 
 interface GalleryGridProps {
   images: GalleryImage[];
@@ -79,7 +80,7 @@ export function GalleryGrid({ images }: GalleryGridProps) {
               style={{ aspectRatio: `${image.width} / ${image.height}` }}
             >
               <Image
-                src={image.src}
+                src={withBase(image.src)}
                 alt=""
                 fill
                 sizes="(min-width: 1024px) 30vw, 50vw"
@@ -140,7 +141,7 @@ export function GalleryGrid({ images }: GalleryGridProps) {
               <div className="relative h-full w-full">
                 <Image
                   key={active.src}
-                  src={active.src}
+                  src={withBase(active.src)}
                   alt={active.alt}
                   fill
                   sizes="100vw"

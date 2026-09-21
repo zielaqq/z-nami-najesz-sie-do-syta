@@ -4,6 +4,7 @@ import { Logo } from "@/components/layout/Logo";
 import { ButtonLink } from "@/components/ui/Button";
 import { FacebookIcon, MapPin, Phone } from "@/components/ui/icons";
 import { navItems, openingHours, siteConfig } from "@/data/site";
+import { withBase } from "@/lib/base-path";
 
 interface FooterProps {
   /** Gdy są zaplanowane wydarzenia, w stopce pojawia się link do ich sekcji. */
@@ -40,7 +41,7 @@ export function Footer({ hasEvents }: FooterProps) {
             <ul className="mt-5 space-y-3">
               {footerLinks.map((item) => (
                 <li key={item.id}>
-                  <a href={`/#${item.id}`} className="link-underline text-cream/90 hover:text-cream">
+                  <a href={withBase(`/#${item.id}`)} className="link-underline text-cream/90 hover:text-cream">
                     {item.label}
                   </a>
                 </li>

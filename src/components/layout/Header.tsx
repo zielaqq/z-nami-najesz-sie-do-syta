@@ -3,6 +3,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import { ButtonLink } from "@/components/ui/Button";
 import { Phone } from "@/components/ui/icons";
 import { navItems, siteConfig } from "@/data/site";
+import { withBase } from "@/lib/base-path";
 
 /**
  * Nagłówek (sticky). Ma stałą, litą tło, a sekcje mają `scroll-padding-top`
@@ -26,7 +27,7 @@ export function Header() {
             {navItems.map((item) => (
               <li key={item.id}>
                 <a
-                  href={`/#${item.id}`}
+                  href={withBase(`/#${item.id}`)}
                   className="link-underline inline-block py-2 text-[0.9375rem] font-medium text-ink-soft transition-colors hover:text-ink"
                 >
                   {item.label}

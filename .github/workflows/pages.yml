@@ -1,0 +1,83 @@
+# Podgląd strony na GitHub Pages (statyczny eksport Next.js) – opis i ograniczenia: docs/GITHUB-PAGES.md
+#
+# Włączenie (jednorazowo): GitHub → Settings → Pages → Build and deployment → Source: „GitHub Actions”.
+# Potem każde wysłanie kodu na gałąź main buduje stronę i publikuje ją pod adresem
+# https://<konto>.github.io/<nazwa-repozytorium>/ (adres pokaże się w zakładce Actions i w ustawieniach Pages).
+
+name: Podgląd na GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # ręczne uruchomienie z zakładki Actions
+  schedule:
+    # Codzienna przebudowa (ok. 5:20 czasu polskiego): na Pages nie działa automatyczne odświeżanie,
+    # a dzięki temu minione wydarzenia znikają z listy.
+    - cron: "20 3 * * *"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Tylko jedna publikacja naraz; trwającej nie przerywamy.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pobranie kodu
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Ustawienia GitHub Pages (adres i ścieżka bazowa)
+        id: setup_pages
+        uses: actions/configure-pages@v5
+
+      - name: Instalacja zależności
+        run: npm ci
+
+      # GitHub Pages hostuje tylko pliki statyczne. Endpoint opinii Google działa na serwerze,
+      # więc w tej wersji go nie ma (sekcja „Opinie” pokazuje oznaczone placeholdery).
+      - name: Usunięcie endpointów wymagających serwera
+        run: rm -rf src/app/api
+
+      - name: Budowa strony (eksport statyczny → folder out/)
+        run: npm run build
+        env:
+          STATIC_EXPORT: "true"
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.setup_pages.outputs.base_path }}
+          NEXT_PUBLIC_SITE_URL: ${{ steps.setup_pages.outputs.base_url }}
+          # Podgląd zawiera przykładowe dane – prosimy wyszukiwarki, by go nie indeksowały.
+          # Gdy strona będzie docelowa (prawdziwe menu, własna domena), usuń tę linię.
+          NEXT_PUBLIC_NOINDEX: "true"
+
+      - name: Plik .nojekyll (GitHub nie przetwarza folderu _next przez Jekylla)
+        run: touch out/.nojekyll
+
+      - name: Wgranie plików strony
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publikacja na GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

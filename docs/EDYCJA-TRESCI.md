@@ -46,21 +46,22 @@ AVIF/WebP dla każdego urządzenia; **wgrywaj JPG/PNG/WebP, nie GIF**):
 | Folder / plik | Do czego | Proporcje i rozmiar |
 | --- | --- | --- |
 | `menu/*.jpg` | zdjęcia dań | **4:3**, min. 1200 × 900 px (na telefonie widać je jako kwadrat – danie na środku) |
-| `gallery/gallery-01.jpg …` | galeria | dowolne, min. 1600 px szerokości; proporcje wpisz w `gallery.ts` (`width`/`height`, `shape`) |
+| `gallery/*.jpg` | galeria | dowolne proporcje, najlepiej min. 1200 px szerokości; realne wymiary wpisz w `gallery.ts` (`width`/`height` – kafelek ma proporcje zdjęcia) |
 | `hero/hero-main.jpg` | duże zdjęcie na górze strony | ok. **1800 × 1800 px**; najważniejsze rzeczy na środku (przycinane do 5:4 na telefonie i 6:7 na desktopie) |
 | `hero/hero-inset.jpg` | małe zdjęcie „wsunięte” | kwadrat, min. 900 × 900 px |
 | `about/about-1.jpg`, `about-2.jpg` | sekcja „O nas” | 4:5 (1000 × 1250) i 4:3 (1000 × 750) |
 | `og-image.jpg` | podgląd przy udostępnianiu (Facebook, Google) | **1200 × 630 px** – powstaje z logo poleceniem `npm run icons` (adres i telefon są wpisane w `scripts/generate-icons.mjs`) |
-| `logo/logo.png` | logo (patrz niżej) | PNG z przezroczystym tłem, przycięty do zawartości (obecny: 1223 × 1047 px) |
+| `logo/logo.png` | logo (patrz niżej) | PNG z przezroczystym tłem, przycięty do zawartości, max 800 px szerokości (obecny: 800 × 685 px) |
 
 **Jak podmienić:** wrzuć nowy plik z **tą samą nazwą i rozszerzeniem** (np. `rosol-domowy.jpg`). Jeśli plik ma inne
 rozszerzenie, zmień ścieżkę w pliku danych.
 
-**Galeria:** po wgraniu prawdziwych zdjęć zaktualizuj w `gallery.ts` pole `alt` (krótki opis tego, co widać –
-ważne dla osób niewidomych i dla SEO) i ustaw `galleryMeta.isPlaceholder = false`.
+**Galeria:** ma już prawdziwe zdjęcia. Nowe zdjęcie: wrzuć plik do `public/images/gallery/` i dopisz wpis w `gallery.ts`
+(nazwa pliku, `width`/`height`, oraz `alt` – krótki opis tego, co widać; ważne dla osób niewidomych i dla SEO).
 
-> Obecne obrazy to **ilustracje poglądowe** wygenerowane skryptem `npm run images:placeholders`.
-> Nie uruchamiaj tego skryptu po wgraniu własnych zdjęć – nadpisałby je.
+> Obrazy dań w menu oraz w sekcjach „hero” i „O nas” to nadal **ilustracje poglądowe** wygenerowane skryptem
+> `npm run images:placeholders`. Nie uruchamiaj go po wgraniu własnych zdjęć – nadpisałby pliki o tych samych nazwach
+> (a w galerii odtworzyłby nieużywane ilustracje).
 
 ## Nagrania z Facebooka (`src/data/videos.ts`)
 

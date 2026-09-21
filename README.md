@@ -79,7 +79,8 @@ Klucz trafia do przeglądarki, więc ograniczenia są obowiązkowe.
 * **Dane demonstracyjne są oznaczone** i łatwo je wyłączyć: `menuMeta.isSample`, `galleryMeta.isPlaceholder`,
   `demo: true` w wydarzeniach, placeholdery opinii. Dane strukturalne (Schema.org) **nie zawierają** przykładowego menu,
   ocen ani przedziału cenowego.
-* **Zdjęcia są tymczasowymi ilustracjami** (skrypt `scripts/generate-placeholders.mjs`) – układ jest gotowy na prawdziwe fotografie.
+* **Galeria ma prawdziwe zdjęcia z lokalu.** Obrazy dań w menu oraz w sekcjach „hero” i „O nas” to nadal tymczasowe
+  ilustracje (skrypt `scripts/generate-placeholders.mjs`) – układ jest gotowy na prawdziwe fotografie.
 * **Opinie Google bez cache’u** – regulamin Google zabrania cache’owania treści Places, więc są pobierane na żywo dopiero
   po przewinięciu do sekcji (uzasadnienie i konfiguracja: [docs/GOOGLE-OPINIE.md](docs/GOOGLE-OPINIE.md)).
 * **Facebook:** oficjalna wtyczka *Page Plugin* (bez tokenów) pokazuje aktualne posty. Integracja przez Graph API zwykle wymaga
@@ -96,7 +97,7 @@ Klucz trafia do przeglądarki, więc ograniczenia są obowiązkowe.
 
 1. Ustaw `NEXT_PUBLIC_SITE_URL` (domena produkcyjna).
 2. Wpisz prawdziwe menu i ceny; ustaw `menuMeta.isSample = false`.
-3. Podmień zdjęcia (menu, galeria, hero, o nas) i zaktualizuj teksty `alt` w `gallery.ts`; uruchom `npm run images:check`.
+3. Podmień zdjęcia dań w menu oraz w sekcjach „hero” i „O nas” (galeria jest już prawdziwa); uruchom `npm run images:check`.
 4. Logo, favicon i `og-image.jpg` są już z logo restauracji; przy nowej wersji logo: `npm run logo` (patrz [docs/EDYCJA-TRESCI.md](docs/EDYCJA-TRESCI.md)).
 5. Usuń wydarzenia `demo` i dodaj prawdziwe (albo zostaw pustą listę – sekcja zniknie).
 6. Skonfiguruj opinie Google (opcjonalnie) i ustaw dzienny limit/alert budżetu w Google Cloud.

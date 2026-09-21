@@ -61,8 +61,8 @@ export const siteConfig = {
    */
   logo: {
     src: "/images/logo/logo.png",
-    width: 1223,
-    height: 1047,
+    width: 800,
+    height: 685,
     alt: "Z nami najesz się do syta – logo restauracji",
   },
 
