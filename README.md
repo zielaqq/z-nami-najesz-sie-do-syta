@@ -23,7 +23,7 @@ npm run dev        # http://localhost:3000
 | `npm run images:placeholders` | (re)generuje ilustracje poglądowe ⚠ nadpisuje pliki o tych nazwach |
 | `npm run logo` | z `materialy/logo-oryginal.jpg` robi przezroczyste `logo.png` (usuwa białe tło, przycina) i generuje ikony |
 | `npm run icons` | (re)generuje z logo favicon, ikony PWA i `og-image.jpg` |
-| `npm run places:find` | wyszukuje Place ID wizytówki (wymaga klucza Google) |
+| `npm run build:hosting -- https://domena.pl` | buduje folder `out/` do wgrania przez FTP (FileZilla) na zwykły hosting – patrz [docs/HOSTING-FTP.md](docs/HOSTING-FTP.md) |
 
 Node.js ≥ 20.9. Skopiuj `.env.example` → `.env.local` i uzupełnij zmienne (patrz niżej).
 
@@ -39,15 +39,14 @@ src/
 │  ├─ gallery.ts · videos.ts (nagrania z Facebooka) · events.ts · about.ts
 ├─ lib/
 │  ├─ content.ts          warstwa dostępu do treści – „szew” pod przyszły CMS
-│  ├─ google-places.ts    pobieranie opinii z Google (serwer, bez cache'u)
-│  ├─ hours.ts · format.ts · maps.ts · schema.ts (JSON-LD) · rate-limit.ts · site-url.ts
+│  ├─ hours.ts · format.ts · maps.ts · schema.ts (JSON-LD) · site-url.ts
 ├─ components/
 │  ├─ layout/             Header, MobileNav (dialog), Logo, Footer, SiteChrome
 │  ├─ sections/           Hero, About, Menu(+MenuBrowser, LiveMenu), CateringDelivery, Gallery(+GalleryGrid),
 │  │                      Reviews(+ReviewsLive), Events, Social(+VideoEmbed), Contact(+MapEmbed)
 │  ├─ panel/              panel klientki: PanelApp, LoginForm, TodayEditor, DishLibrary, DishForm
 │  └─ ui/                 Button, Section, Photo, Stars, OpenStatus, ScrollReveal, icons
-└─ app/                   layout.tsx (SEO, fonty), sitemap/robots/manifest, /api/google-reviews, not-found,
+└─ app/                   layout.tsx (SEO, fonty), sitemap/robots/manifest, not-found,
                           (site)/ – strona główna i /polityka-prywatnosci, (panel)/panel – panel klientki
 supabase/schema.sql       schemat bazy menu (tabele, reguły dostępu, zdjęcia) – uruchamiany raz w Supabase
 public/images/            zdjęcia (menu/, gallery/, hero/, about/, og-image.jpg)
@@ -67,7 +66,6 @@ ich wnętrze, żeby podłączyć CMS; kształt danych zostaje.
 | Zmienna | Wymagana? | Po co |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | **tak (produkcja)** | canonical, Open Graph, sitemap, robots, JSON-LD |
-| `GOOGLE_PLACES_API_KEY`, `GOOGLE_PLACE_ID` | nie | opinie z Google na żywo – [docs/GOOGLE-OPINIE.md](docs/GOOGLE-OPINIE.md) |
 | `NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY` | nie | oficjalne Maps Embed API (klucz publiczny – ogranicz go do swojej domeny) |
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | nie | „Menu na dziś” i panel klientki `/panel` – [docs/PANEL-MENU.md](docs/PANEL-MENU.md) (klucz publishable/anon; **nigdy** `service_role`) |
 
@@ -87,8 +85,9 @@ Klucz trafia do przeglądarki, więc ograniczenia są obowiązkowe.
   ocen ani przedziału cenowego.
 * **Zdjęcia z lokalu są prawdziwe:** galeria, „hero” (góra strony) i sekcja „O nas”. Tylko obrazy dań w przykładowym menu
   (`src/data/menu.ts`, wersja zapasowa bez bazy) to tymczasowe ilustracje (skrypt `scripts/generate-placeholders.mjs`).
-* **Opinie Google bez cache’u** – regulamin Google zabrania cache’owania treści Places, więc są pobierane na żywo dopiero
-  po kliknięciu „Pokaż opinie z Google” (uzasadnienie i konfiguracja: [docs/GOOGLE-OPINIE.md](docs/GOOGLE-OPINIE.md)).
+* **Opinie:** na razie sekcja pokazuje wyraźnie oznaczone placeholdery i przycisk do wizytówki Google (integracja z
+  Places API została usunięta – wymaga płatnych rozliczeń, a regulamin Google zabrania zapisywania opinii). Plan i
+  uzasadnienie: [docs/GOOGLE-OPINIE.md](docs/GOOGLE-OPINIE.md).
 * **Facebook:** w sekcji „Obserwuj nas” są **same nagrania** (Reels) w oficjalnym odtwarzaczu Facebooka (bez tokenów), bez
   treści postów; lista w `src/data/videos.ts`. Wtyczka z osią czasu (posty) została usunięta. Integracja przez Graph API
   zwykle wymaga aplikacji Meta i tokenu strony, dlatego jej nie udaję.
@@ -120,7 +119,11 @@ Klucz trafia do przeglądarki, więc ograniczenia są obowiązkowe.
 
 1. Zaimportuj repozytorium, ustaw zmienne środowiskowe z tabeli wyżej (co najmniej `NEXT_PUBLIC_SITE_URL`).
 2. Deploy. Strona `/` odświeża się co 24 h (`export const revalidate = 86400`), dzięki czemu miniona data wydarzenia znika sama.
-3. Endpoint `/api/google-reviews` działa jako funkcja serwerowa (dynamiczna, `no-store`).
+
+### Zwykły hosting z FTP (FileZilla)
+
+Bez Node.js: `npm run build:hosting -- https://twoja-domena.pl`, potem zawartość folderu `out/` wgrywasz przez FTP do
+`public_html`. Cała instrukcja: [docs/HOSTING-FTP.md](docs/HOSTING-FTP.md).
 
 ### Podgląd na GitHub Pages
 

@@ -12,7 +12,7 @@
     "images:check": "node scripts/check-images.mjs",
     "logo": "node scripts/prepare-logo.mjs && node scripts/generate-icons.mjs",
     "icons": "node scripts/generate-icons.mjs",
-    "places:find": "node scripts/find-place-id.mjs"
+    "build:hosting": "node scripts/build-static.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

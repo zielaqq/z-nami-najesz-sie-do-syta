@@ -9,8 +9,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
  * cookies i analityki; mapa Google i nagrania Facebooka – zgodnie z ustawieniem
  * `embeds` w src/data/site.ts), ale nie jest poradą
  * prawną. Przed publikacją uzupełnij dane podmiotu prowadzącego działalność (pełna nazwa, NIP)
- * i – jeśli to możliwe – poproś o weryfikację prawnika. Google wymaga też publicznej polityki
- * prywatności i warunków korzystania przy używaniu Places API (opinie).
+ * i – jeśli to możliwe – poproś o weryfikację prawnika.
  */
 const UPDATED_AT = "20 września 2026";
 
