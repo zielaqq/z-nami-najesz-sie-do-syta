@@ -29,7 +29,7 @@ export function buildStructuredData() {
     description: siteConfig.seo.description,
     url,
     image: [`${url}${siteConfig.seo.ogImage}`],
-    ...(siteConfig.logo.src ? { logo: `${url}${siteConfig.logo.src}` } : {}),
+    logo: `${url}${siteConfig.logo.src}`,
     telephone: contact.phoneE164,
     ...(contact.email ? { email: contact.email } : {}),
     servesCuisine: "Polska",

@@ -20,7 +20,7 @@ export function Footer({ hasEvents }: FooterProps) {
       <div className="container-page py-16 lg:py-20">
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-5">
-            <Logo tone="dark" />
+            <Logo size="footer" />
             <p className="mt-6 max-w-[34ch] text-on-dark-mute">
               Restauracja z kuchnią polską w Lesznie. Obiady na miejscu, catering i jedzenie z dowozem.
             </p>

@@ -1,6 +1,7 @@
 import { events, type RestaurantEvent } from "@/data/events";
 import { galleryImages, galleryMeta } from "@/data/gallery";
 import { menuCategories, menuItems, menuMeta, type MenuCategoryId, type MenuItem } from "@/data/menu";
+import { videos, type VideoItem } from "@/data/videos";
 import { todayInWarsaw } from "@/lib/format";
 
 /**
@@ -36,6 +37,11 @@ export async function getMenu(): Promise<{ isSample: boolean; groups: MenuGroup[
 
 export async function getGallery() {
   return { isPlaceholder: galleryMeta.isPlaceholder, images: galleryImages };
+}
+
+/** Nagrania z Facebooka wyświetlane w galerii (pusta lista = brak bloku „Nagrania”). */
+export async function getVideos(): Promise<VideoItem[]> {
+  return videos;
 }
 
 /** Tylko przyszłe (lub trwające) wydarzenia, od najbliższego. */

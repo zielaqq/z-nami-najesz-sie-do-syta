@@ -55,15 +55,14 @@ export const siteConfig = {
   },
 
   /**
-   * LOGO – gdy dostaniesz plik, wrzuć go do `public/images/logo/` i ustaw `src`,
-   * np. src: "/images/logo/logo.svg" (najlepiej SVG lub PNG z przezroczystością,
-   * ciemne logo na jasnym tle). Podaj realne wymiary pliku (width/height).
-   * Dopóki `src` jest null, wyświetlany jest tymczasowy logotyp tekstowy.
+   * LOGO – plik `public/images/logo/logo.png` (przezroczyste tło, przycięte do zawartości).
+   * `width`/`height` muszą odpowiadać wymiarom pliku (wypisuje je `npm run logo`).
+   * Jak podmienić logo: docs/EDYCJA-TRESCI.md → „Logo”.
    */
   logo: {
-    src: null as string | null,
-    width: 240,
-    height: 72,
+    src: "/images/logo/logo.png",
+    width: 1223,
+    height: 1047,
     alt: "Z nami najesz się do syta – logo restauracji",
   },
 

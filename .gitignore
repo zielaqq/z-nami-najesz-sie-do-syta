@@ -42,3 +42,11 @@ next-env.d.ts
 
 # env files (szablon .env.example jest w repozytorium)
 !.env.example
+
+# surowe materiały (filmy, zdjęcia, oryginały logo) – za ciężkie na GitHub (limit 100 MB na plik);
+# na stronę trafiają tylko przetworzone pliki z public/
+/materialy/
+
+# konfiguracja narzędzi i edytora (podgląd w aplikacji Claude, JetBrains) – tylko lokalnie
+/.claude/
+/.idea/

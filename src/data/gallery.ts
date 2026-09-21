@@ -2,7 +2,9 @@
  * ============================================================================
  *  GALERIA – JEDNO MIEJSCE DO EDYCJI
  *
- *  ⚠ Obecne obrazy to ZDJĘCIA POGLĄDOWE (ilustracje). Podmień je własnymi.
+ *  ⚠ Większość obrazów to nadal ZDJĘCIA POGLĄDOWE (ilustracje) – podmieniamy je na prawdziwe.
+ *     Prawdziwe zdjęcia mają w `src` opisową nazwę pliku (np. placki-z-lososiem.jpg),
+ *     ilustracje – nazwy gallery-01.jpg … gallery-09.jpg.
  *
  *  JAK PODMIENIĆ ZDJĘCIE?  Wrzuć plik do `public/images/gallery/` (JPG/PNG/WebP,
  *                          min. 1600 px szerokości) i wpisz jego nazwę w `src`.
@@ -16,7 +18,7 @@
  */
 
 export const galleryMeta = {
-  /** true = pod galerią pojawia się informacja, że zdjęcia są poglądowe. */
+  /** true = pod galerią pojawia się informacja, że część zdjęć jest poglądowa. Ustaw false, gdy WSZYSTKIE będą prawdziwe. */
   isPlaceholder: true,
 } as const;
 
@@ -73,11 +75,12 @@ export const galleryImages: GalleryImage[] = [
     shape: "wide",
   },
   {
-    src: "/images/gallery/gallery-06.jpg",
-    alt: "Placki ziemniaczane ze śmietaną i koperkiem",
-    caption: "Placki ziemniaczane",
-    width: 1200,
-    height: 1500,
+    // PRAWDZIWE zdjęcie z lokalu (kadr ze story restauracji)
+    src: "/images/gallery/placki-z-lososiem.jpg",
+    alt: "Talerz placków ziemniaczanych z serkiem chrzanowym i łososiem",
+    caption: "Placki ziemniaczane z serkiem chrzanowym i łososiem",
+    width: 518,
+    height: 648,
     shape: "tall",
   },
   {

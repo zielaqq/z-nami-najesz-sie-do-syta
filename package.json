@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "images:placeholders": "node scripts/generate-placeholders.mjs",
     "images:check": "node scripts/check-images.mjs",
+    "logo": "node scripts/prepare-logo.mjs && node scripts/generate-icons.mjs",
     "icons": "node scripts/generate-icons.mjs",
     "places:find": "node scripts/find-place-id.mjs"
   },

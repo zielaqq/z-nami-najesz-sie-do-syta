@@ -30,7 +30,7 @@ const fraunces = Fraunces({
   axes: ["opsz"],
 });
 
-// Kursywa jest używana tylko w akcencie „do syta” (hero i logo) – wystarczy statyczny wariant 400
+// Kursywa jest używana tylko w akcencie „do syta” (hero) – wystarczy statyczny wariant 400
 // w podzbiorze łacińskim (≈ 22 KB zamiast ≈ 150 KB). ⚠ Jeśli dodasz kursywą polskie znaki
 // (ą ę ł ń ś ź ż ć), dopisz "latin-ext" do subsets – inaczej wyświetlą się czcionką zastępczą.
 const frauncesItalic = Fraunces({

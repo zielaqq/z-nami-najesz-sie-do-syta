@@ -8,6 +8,7 @@ jest w kilku plikach w folderze `src/data/`. Po zmianie zapisz plik – strona (
 | telefon, adres, godziny otwarcia, linki (Facebook, Google), logo, tytuł i opis SEO | `src/data/site.ts` |
 | **menu**: nazwa, cena, kategoria, zdjęcie dania | `src/data/menu.ts` |
 | galerię zdjęć | `src/data/gallery.ts` |
+| nagrania z Facebooka (Reels) pod galerią | `src/data/videos.ts` |
 | wydarzenia | `src/data/events.ts` |
 | teksty „O nas”, „Catering i dowóz” i hasło w hero | `src/data/about.ts` |
 | kolory i czcionki | `src/app/globals.css` (kolory) i `src/app/layout.tsx` (czcionki) |
@@ -49,8 +50,8 @@ AVIF/WebP dla każdego urządzenia; **wgrywaj JPG/PNG/WebP, nie GIF**):
 | `hero/hero-main.jpg` | duże zdjęcie na górze strony | ok. **1800 × 1800 px**; najważniejsze rzeczy na środku (przycinane do 5:4 na telefonie i 6:7 na desktopie) |
 | `hero/hero-inset.jpg` | małe zdjęcie „wsunięte” | kwadrat, min. 900 × 900 px |
 | `about/about-1.jpg`, `about-2.jpg` | sekcja „O nas” | 4:5 (1000 × 1250) i 4:3 (1000 × 750) |
-| `og-image.jpg` | podgląd przy udostępnianiu (Facebook, Google) | **1200 × 630 px** |
-| `logo/` | logo (patrz niżej) | SVG lub PNG z przezroczystością |
+| `og-image.jpg` | podgląd przy udostępnianiu (Facebook, Google) | **1200 × 630 px** – powstaje z logo poleceniem `npm run icons` (adres i telefon są wpisane w `scripts/generate-icons.mjs`) |
+| `logo/logo.png` | logo (patrz niżej) | PNG z przezroczystym tłem, przycięty do zawartości (obecny: 1223 × 1047 px) |
 
 **Jak podmienić:** wrzuć nowy plik z **tą samą nazwą i rozszerzeniem** (np. `rosol-domowy.jpg`). Jeśli plik ma inne
 rozszerzenie, zmień ścieżkę w pliku danych.
@@ -61,18 +62,41 @@ ważne dla osób niewidomych i dla SEO) i ustaw `galleryMeta.isPlaceholder = fal
 > Obecne obrazy to **ilustracje poglądowe** wygenerowane skryptem `npm run images:placeholders`.
 > Nie uruchamiaj tego skryptu po wgraniu własnych zdjęć – nadpisałby je.
 
+## Nagrania z Facebooka (`src/data/videos.ts`)
+
+Pod galerią jest blok „Nagrania z lokalu” z pionowymi filmami (Reels) z Facebooka. Każde nagranie to jeden wpis:
+
+```ts
+{
+  id: "impreza-w-lokalu",
+  title: "Impreza w lokalu",
+  caption: "Jedna z imprez w naszym lokalu – nagranie z przygotowanym stołem.",
+  facebookUrl: "https://www.facebook.com/reel/1850938466265497/",
+},
+```
+
+* **Adres:** na Facebooku kliknij „⋯” przy filmie → „Kopiuj link”. Nagranie musi być **publiczne**, inaczej odtwarzacz się nie wyświetli.
+* **Dodać / usunąć:** dopisz albo skasuj wpis. Gdy lista jest pusta, cały blok znika.
+* **Miniatura (opcjonalnie):** kadr z filmu (pion 9:16) wgraj do `public/images/video/` i dopisz `poster: "/images/video/nazwa.jpg"` –
+  pojawi się na kafelku zamiast jednolitego tła.
+* Odtwarzacz Facebooka ładuje się dopiero po kliknięciu kafelka (ochrona prywatności). Pod każdym nagraniem jest też zwykły
+  link „Zobacz na Facebooku” – działa nawet wtedy, gdy osadzenie nie zadziała.
+
 ## Logo
 
-1. Wrzuć plik do `public/images/logo/` (np. `logo.svg`) – ciemne logo, które dobrze wygląda na jasnym tle.
-2. W `src/data/site.ts` ustaw:
+Logo to plik `public/images/logo/logo.png` (przezroczyste tło, przycięte do zawartości). Widać je w nagłówku, w menu
+na telefonie i – większe – w stopce. Z tego samego pliku powstają favicon, ikony aplikacji i obraz podglądu przy
+udostępnianiu (`og-image.jpg`).
 
-   ```ts
-   logo: { src: "/images/logo/logo.svg", width: 240, height: 72, alt: "…" },
-   ```
+**Nowa wersja logo:**
 
-   (`width`/`height` – realne proporcje pliku.) Logo pojawi się w nagłówku i w stopce. Do tego czasu działa logotyp tekstowy.
-3. Favicon: podmień `src/app/icon.svg`, `src/app/favicon.ico`, `src/app/apple-icon.png` i `public/icons/*.png`
-   (albo dostosuj i uruchom `npm run icons`).
+* **Plik z białym tłem (JPG/PNG):** zapisz go jako `materialy/logo-oryginal.jpg` i uruchom `npm run logo`. Skrypt usunie
+  białe tło, przytnie marginesy, zapisze `logo.png` i wygeneruje ikony. Na końcu wypisze wymiary pliku – wpisz je
+  w `src/data/site.ts` (`logo.width` i `logo.height`).
+* **Plik z przezroczystym tłem (PNG):** zapisz go jako `public/images/logo/logo.png`, wpisz jego wymiary w `siteConfig.logo`
+  i uruchom `npm run icons`.
+
+> Folder `materialy/` jest wyłączony z Gita (surowe pliki bywają bardzo ciężkie), więc oryginał logo leży tylko na tym komputerze.
 
 ## Godziny otwarcia i telefon
 

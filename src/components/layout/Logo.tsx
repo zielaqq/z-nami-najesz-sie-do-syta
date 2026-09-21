@@ -1,61 +1,40 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { PlateMark } from "@/components/ui/icons";
 import { siteConfig } from "@/data/site";
 import { cx } from "@/lib/cx";
 
 interface LogoProps {
+  /** `header` – nagłówek i menu mobilne (mały znak); `footer` – stopka (duży, czytelny napis w znaku). */
+  size?: "header" | "footer";
   className?: string;
-  /** `dark` = logo na ciemnym tle (stopka) */
-  tone?: "light" | "dark";
 }
 
 /**
- * Logo restauracji.
- * Docelowy plik podpinasz w `src/data/site.ts` → `siteConfig.logo.src`.
- * Do tego czasu wyświetlany jest tymczasowy logotyp tekstowy.
+ * Wysokości znaku i atrybut `sizes` (szerokość = wysokość × proporcje pliku ≈ 1,17).
+ * `sizes` sprawia, że przeglądarka pobiera mały wariant obrazu, a nie cały plik źródłowy.
  */
-export function Logo({ className, tone = "light" }: LogoProps) {
+const presets = {
+  header: { className: "h-12 lg:h-14", sizes: "(min-width: 1024px) 66px, 56px" },
+  footer: { className: "h-36 sm:h-44", sizes: "(min-width: 640px) 206px, 169px" },
+} as const;
+
+/** Logo restauracji – plik i wymiary ustawiasz w `siteConfig.logo` (src/data/site.ts). */
+export function Logo({ size = "header", className }: LogoProps) {
   const { logo, name } = siteConfig;
-  const onDark = tone === "dark";
+  const preset = presets[size];
 
   return (
-    <Link
-      href="/"
-      aria-label={`${name} – strona główna`}
-      className={cx("inline-flex items-center gap-2.5 rounded-[3px]", className)}
-    >
-      {logo.src ? (
-        <Image
-          src={logo.src}
-          alt={logo.alt}
-          width={logo.width}
-          height={logo.height}
-          className="h-9 w-auto lg:h-11"
-        />
-      ) : (
-        <>
-          <PlateMark
-            className={cx("hidden size-8 shrink-0 min-[400px]:block lg:size-9", onDark ? "text-cream" : "text-ink")}
-          />
-          <span className="flex flex-col font-serif leading-[1.03] tracking-[-0.01em]">
-            <span className={cx("text-[1.0625rem] lg:text-[1.25rem]", onDark ? "text-cream" : "text-ink")}>
-              Z nami najesz się
-            </span>
-            {/* spacja: tekst widoczny („Z nami najesz się do syta”) musi pasować do nazwy dostępnej (WCAG 2.5.3) */}
-            {" "}
-            <span
-              className={cx(
-                "font-serif-italic text-[1.0625rem] italic lg:text-[1.25rem]",
-                onDark ? "text-accent-on-dark" : "text-accent",
-              )}
-            >
-              do syta
-            </span>
-          </span>
-        </>
-      )}
+    <Link href="/" aria-label={`${name} – strona główna`} className={cx("inline-flex rounded-[3px]", className)}>
+      <Image
+        src={logo.src}
+        alt={logo.alt}
+        width={logo.width}
+        height={logo.height}
+        sizes={preset.sizes}
+        loading={size === "header" ? "eager" : "lazy"}
+        className={cx("w-auto", preset.className)}
+      />
     </Link>
   );
 }

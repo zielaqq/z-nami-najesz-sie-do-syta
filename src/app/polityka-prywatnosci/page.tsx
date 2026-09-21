@@ -92,7 +92,8 @@ export default function PrivacyPage() {
               </li>
               <li>
                 <strong className="text-ink">Facebook.</strong> Wtyczka z postami ładuje się dopiero po kliknięciu
-                „Załaduj posty z Facebooka”. Dostawcą jest Meta Platforms, która może zapisywać pliki cookies. Więcej:{" "}
+                „Załaduj posty z Facebooka”, a odtwarzacz nagrań w galerii – dopiero po kliknięciu nagrania. Dostawcą
+                jest Meta Platforms, która może zapisywać pliki cookies. Więcej:{" "}
                 <a href="https://www.facebook.com/privacy/policy/" target="_blank" rel="noopener noreferrer" className={linkClass}>
                   Polityka prywatności Meta
                 </a>
