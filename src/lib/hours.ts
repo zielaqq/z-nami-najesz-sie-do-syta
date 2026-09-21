@@ -50,7 +50,7 @@ function warsawNow(now: Date): { day: Weekday; minutes: number } {
 
 export interface OpenStatus {
   isOpen: boolean;
-  /** Krótki tekst do wyświetlenia, np. „Otwarte teraz · do 20:00” */
+  /** Krótki tekst do wyświetlenia, np. „Otwarte teraz · do 18:00” */
   label: string;
 }
 
@@ -86,7 +86,7 @@ export function getOpenStatus(now: Date = new Date()): OpenStatus {
   return { isOpen: false, label: "Zamknięte" };
 }
 
-/** Godziny na dziś, np. „12:00–20:00” (do krótkich podsumowań). */
+/** Godziny na dziś, np. „12:00–18:00” (do krótkich podsumowań). */
 export function getTodayHours(now: Date = new Date()): string | null {
   const rule = ruleForDay(warsawNow(now).day);
   return rule ? `${rule.opens}–${rule.closes}` : null;

@@ -17,7 +17,7 @@ import { deleteEvent, listEvents, type EventRecord } from "@/lib/panel-events";
  */
 export function EventsManager() {
   const [events, setEvents] = useState<EventRecord[] | null>(null);
-  const [loadError, setLoadError] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [showPast, setShowPast] = useState(false);
   const [editing, setEditing] = useState<EventRecord | "new" | null>(null);
   const [notice, setNotice] = useState<PanelNotice | null>(null);
@@ -28,8 +28,8 @@ export function EventsManager() {
       .then((list) => {
         if (active) setEvents(list);
       })
-      .catch(() => {
-        if (active) setLoadError(true);
+      .catch((error) => {
+        if (active) setLoadError(describeError(error));
       });
     return () => {
       active = false;
@@ -85,7 +85,7 @@ export function EventsManager() {
 
       {loadError ? (
         <p role="alert" className="mt-8 text-accent-deep">
-          Nie udało się wczytać wydarzeń. Odśwież stronę.
+          Nie udało się wczytać wydarzeń. {loadError}
         </p>
       ) : !events ? (
         <p role="status" className="mt-8 text-mute">

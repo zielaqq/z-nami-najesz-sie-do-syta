@@ -14,6 +14,14 @@ const BUCKET = "dish-photos";
 export function describeError(error: unknown): string {
   console.error("[panel]", error);
   const { message = "", code = "" } = (error ?? {}) as { message?: string; code?: string };
+  if (code === "PGRST205" || /could not find the table|schema cache/i.test(message)) {
+    return "W bazie brakuje tabeli. Administrator strony musi uruchomić aktualny plik supabase/schema.sql (SQL Editor w Supabase).";
+  }
+  if (code === "23514" || /violates check constraint/i.test(message)) {
+    return /category/i.test(message)
+      ? "Baza jeszcze nie zna tej kategorii. Administrator strony musi uruchomić aktualny plik supabase/schema.sql."
+      : "Wpisane dane są niepoprawne (sprawdź daty i długość tekstów).";
+  }
   if (code === "42501" || /row-level security|permission denied/i.test(message)) {
     return "Brak uprawnień do zapisu. Wyloguj się i zaloguj ponownie.";
   }

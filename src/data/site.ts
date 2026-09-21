@@ -23,16 +23,9 @@ export interface OpeningHoursRule {
 /** Godziny otwarcia. Zmiana tutaj aktualizuje też status „otwarte teraz” i SEO. */
 export const openingHours: OpeningHoursRule[] = [
   {
-    id: "weekdays",
-    label: "Poniedziałek–Piątek",
-    days: [1, 2, 3, 4, 5],
-    opens: "12:00",
-    closes: "20:00",
-  },
-  {
-    id: "weekend",
-    label: "Sobota–Niedziela",
-    days: [6, 0],
+    id: "daily",
+    label: "Codziennie",
+    days: [1, 2, 3, 4, 5, 6, 0],
     opens: "12:00",
     closes: "18:00",
   },

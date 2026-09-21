@@ -19,7 +19,7 @@ function getSnapshot(): string {
 const getServerSnapshot = (): string | null => null;
 
 /**
- * „Otwarte teraz · do 20:00” – liczone w przeglądarce, wg czasu w Polsce.
+ * „Otwarte teraz · do 18:00” – liczone w przeglądarce, wg czasu w Polsce.
  * Na serwerze i przy pierwszym renderze zajmuje tylko miejsce (bez skoków układu).
  * Bazuje na regularnych godzinach – nie zna świąt (stąd wskazówka o telefonie w sekcji kontakt).
  */
