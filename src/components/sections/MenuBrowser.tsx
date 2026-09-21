@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react";
 
 import { Photo } from "@/components/ui/Photo";
 import { Utensils } from "@/components/ui/icons";
-import type { MenuCategoryId } from "@/data/menu";
+import { isTextOnlyCategory, type MenuCategoryId } from "@/data/menu";
 import { cx } from "@/lib/cx";
 import { formatPrice } from "@/lib/format";
 
@@ -96,11 +96,19 @@ export function MenuBrowser({ groups, isSample }: MenuBrowserProps) {
               <h3 className="text-h3">{group.label}</h3>
               <span className="tabular text-sm text-mute">{pluralizeItems(group.items.length)}</span>
             </div>
+            {isTextOnlyCategory(group.id) ? (
+              <ul className="mt-2 grid sm:mt-6 sm:grid-cols-2 sm:gap-x-12 lg:gap-x-16">
+                {group.items.map((item) => (
+                  <TextRow key={item.key} item={item} />
+                ))}
+              </ul>
+            ) : (
             <ul className="mt-2 grid sm:mt-8 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-10 lg:grid-cols-3 lg:gap-x-10 lg:gap-y-12">
               {group.items.map((item) => (
                 <MenuRow key={item.key} item={item} />
               ))}
             </ul>
+            )}
           </div>
         ))}
       </div>
@@ -131,6 +139,22 @@ function FilterChip({
     >
       {children}
     </button>
+  );
+}
+
+/** Pozycja bez zdjęcia: nazwa, kropkowana linia i cena (napoje, piwo). */
+function TextRow({ item }: { item: MenuBrowserItem }) {
+  return (
+    <li className="border-b border-ink/10 py-3.5">
+      <div className="flex items-baseline gap-3">
+        <p className="font-serif text-[1.125rem] leading-snug text-ink sm:text-[1.1875rem]">{item.name}</p>
+        <span aria-hidden="true" className="min-w-4 flex-1 translate-y-[-0.2em] border-b border-dotted border-ink/30" />
+        {item.price != null ? (
+          <p className="tabular shrink-0 text-[1rem] font-semibold text-accent">{formatPrice(item.price)}</p>
+        ) : null}
+      </div>
+      {item.description ? <p className="mt-1 text-sm text-mute">{item.description}</p> : null}
+    </li>
   );
 }
 

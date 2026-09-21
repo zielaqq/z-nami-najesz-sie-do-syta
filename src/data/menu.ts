@@ -35,6 +35,13 @@ export const menuCategories = [
 
 export type MenuCategoryId = (typeof menuCategories)[number]["id"];
 
+/** Kategorie pokazywane jako zwykła lista „nazwa … cena”, bez zdjęć (zdjęcia napojów i piwa wyglądają sztucznie). */
+export const textOnlyCategories: readonly MenuCategoryId[] = ["napoje", "piwo"];
+
+export function isTextOnlyCategory(id: MenuCategoryId): boolean {
+  return textOnlyCategories.includes(id);
+}
+
 export interface MenuItem {
   /** Nazwa dania */
   name: string;

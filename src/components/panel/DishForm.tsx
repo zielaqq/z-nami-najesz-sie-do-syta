@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "r
 import { NoticeBanner, fieldClass, type PanelNotice } from "@/components/panel/NoticeBanner";
 import { buttonClasses } from "@/components/ui/Button";
 import { CloseIcon, ImagePlus, Utensils } from "@/components/ui/icons";
-import { menuCategories, type MenuCategoryId } from "@/data/menu";
+import { isTextOnlyCategory, menuCategories, type MenuCategoryId } from "@/data/menu";
 import { dishPhotoUrl, type Dish } from "@/lib/daily-menu";
 import { describeError, saveDish } from "@/lib/panel-data";
 
@@ -162,34 +162,40 @@ export function DishForm({ dish, onClose, onSaved }: DishFormProps) {
             />
           </label>
 
-          <div>
-            <span className="text-sm font-semibold">Zdjęcie</span>
-            <div className="mt-1.5 flex items-center gap-4">
-              <div className="relative size-24 shrink-0 overflow-hidden bg-sand">
-                {shownPhoto ? (
-                  <Image src={shownPhoto} alt="Podgląd zdjęcia dania" fill unoptimized sizes="96px" className="object-cover" />
-                ) : (
-                  <span className="absolute inset-0 grid place-items-center text-mute" aria-hidden="true">
-                    <Utensils className="size-8 opacity-50" />
-                  </span>
-                )}
-              </div>
-              <label
-                className={buttonClasses(
-                  "secondary",
-                  "md",
-                  "cursor-pointer has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent",
-                )}
-              >
-                <ImagePlus className="size-4" aria-hidden="true" />
-                {shownPhoto ? "Zmień zdjęcie" : "Dodaj zdjęcie"}
-                <input type="file" accept="image/*" onChange={onPick} className="sr-only" />
-              </label>
-            </div>
-            <p className="mt-2 text-xs text-mute">
-              Zdjęcie z telefonu zmniejszymy automatycznie. Najlepiej danie z góry, przy dobrym świetle.
+          {isTextOnlyCategory(category) ? (
+            <p className="text-xs text-mute">
+              Napoje i piwo są na stronie zwykłą listą z cenami – zdjęcie nie jest potrzebne.
             </p>
-          </div>
+          ) : (
+            <div>
+              <span className="text-sm font-semibold">Zdjęcie</span>
+              <div className="mt-1.5 flex items-center gap-4">
+                <div className="relative size-24 shrink-0 overflow-hidden bg-sand">
+                  {shownPhoto ? (
+                    <Image src={shownPhoto} alt="Podgląd zdjęcia dania" fill unoptimized sizes="96px" className="object-cover" />
+                  ) : (
+                    <span className="absolute inset-0 grid place-items-center text-mute" aria-hidden="true">
+                      <Utensils className="size-8 opacity-50" />
+                    </span>
+                  )}
+                </div>
+                <label
+                  className={buttonClasses(
+                    "secondary",
+                    "md",
+                    "cursor-pointer has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent",
+                  )}
+                >
+                  <ImagePlus className="size-4" aria-hidden="true" />
+                  {shownPhoto ? "Zmień zdjęcie" : "Dodaj zdjęcie"}
+                  <input type="file" accept="image/*" onChange={onPick} className="sr-only" />
+                </label>
+              </div>
+              <p className="mt-2 text-xs text-mute">
+                Zdjęcie z telefonu zmniejszymy automatycznie. Najlepiej danie z góry, przy dobrym świetle.
+              </p>
+            </div>
+          )}
 
           <NoticeBanner notice={notice} />
         </div>
