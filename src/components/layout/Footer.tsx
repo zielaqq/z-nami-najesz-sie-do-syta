@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { CookieSettingsLink } from "@/components/layout/CookieSettingsLink";
 import { EventsNavItem } from "@/components/layout/EventsNavItem";
 import { Logo } from "@/components/layout/Logo";
 import { ButtonLink } from "@/components/ui/Button";
@@ -119,6 +120,7 @@ export function Footer({ hasEvents }: FooterProps) {
             <Link href="/polityka-prywatnosci" className="link-underline hover:text-cream">
               Polityka prywatności
             </Link>
+            <CookieSettingsLink />
             {/* Logowanie właścicielki do panelu menu – dyskretnie, w stopce (strona /panel jest ukryta przed wyszukiwarkami). */}
             <Link href="/panel" rel="nofollow" className="link-underline hover:text-cream">
               Panel menu (logowanie)

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { CookieConsent } from "@/components/layout/CookieConsent";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -28,6 +29,7 @@ export async function SiteChrome({ children }: { children: ReactNode }) {
         {children}
       </main>
       <Footer hasEvents={upcomingEvents.length > 0} />
+      <CookieConsent />
       <ScrollReveal />
       <JsonLd data={buildStructuredData()} />
     </>

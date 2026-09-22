@@ -5,13 +5,12 @@ import { fullAddress, siteConfig } from "@/data/site";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 /**
- * ⚠ SZABLON DO WERYFIKACJI. Tekst opisuje faktyczne działanie tej strony (brak formularzy,
- * cookies i analityki; mapa Google i nagrania Facebooka – zgodnie z ustawieniem
- * `embeds` w src/data/site.ts), ale nie jest poradą
- * prawną. Przed publikacją uzupełnij dane podmiotu prowadzącego działalność (pełna nazwa, NIP)
- * i – jeśli to możliwe – poproś o weryfikację prawnika.
+ * ⚠ SZABLON DO WERYFIKACJI. Tekst opisuje faktyczne działanie tej strony (brak formularzy i analityki;
+ * baner zgody na cookies – `CookieConsent`; mapa Google i nagrania Facebooka – zgodnie z ustawieniem
+ * `embeds` w src/data/site.ts), ale nie jest poradą prawną. Przed publikacją uzupełnij dane podmiotu
+ * prowadzącego działalność (pełna nazwa, NIP) i – jeśli to możliwe – poproś o weryfikację prawnika.
  */
-const UPDATED_AT = "20 września 2026";
+const UPDATED_AT = "22 września 2026";
 
 const TITLE = "Polityka prywatności";
 const DESCRIPTION =
@@ -64,12 +63,37 @@ export default function PrivacyPage() {
                 Strona nie zawiera formularzy, nie wymaga rejestracji i nie korzysta z narzędzi analitycznych ani
                 reklamowych.
               </li>
-              <li>Strona sama nie zapisuje plików cookies w Twojej przeglądarce.</li>
+              <li>Strona sama nie zapisuje plików cookies w Twojej przeglądarce (patrz niżej: „Pliki cookies”).</li>
               <li>
                 Serwer, na którym działa strona, może zapisywać standardowe logi techniczne (m.in. adres IP, datę i
                 adres żądania) w celu zapewnienia bezpieczeństwa i prawidłowego działania.
               </li>
             </ul>
+          </section>
+
+          <section aria-labelledby="p-cookies">
+            <h2 id="p-cookies">Pliki cookies</h2>
+            <p>
+              Przy pierwszym wejściu na stronę pokazujemy baner z dwoma równorzędnymi opcjami: <strong className="text-ink">„Zgadzam
+              się”</strong> i <strong className="text-ink">„Tylko niezbędne”</strong>. Twój wybór dotyczy wyłącznie
+              automatycznego ładowania mapy Google i nagrań z Facebooka opisanych niżej – to jedyne treści na tej
+              stronie, które mogą zapisać pliki cookies.
+            </p>
+            <ul>
+              <li>
+                <strong className="text-ink">„Zgadzam się”</strong> – mapa i nagrania ładują się same, gdy przewiniesz
+                do ich sekcji.
+              </li>
+              <li>
+                <strong className="text-ink">„Tylko niezbędne”</strong> (albo brak decyzji) – mapę i nagrania nadal
+                obejrzysz, wystarczy je kliknąć; same z siebie się nie wczytują.
+              </li>
+            </ul>
+            <p>
+              Decyzję zapamiętujemy wyłącznie w Twojej przeglądarce (nie wysyłamy jej nigdzie i nie łączymy z żadnym
+              kontem) i możesz ją w każdej chwili zmienić linkiem <strong className="text-ink">„Ustawienia cookies”</strong> w
+              stopce strony.
+            </p>
           </section>
 
           <section aria-labelledby="p-telefon">
@@ -87,7 +111,7 @@ export default function PrivacyPage() {
                 <strong className="text-ink">Mapa Google.</strong>{" "}
                 {siteConfig.embeds.mapLoadOnClick
                   ? "Ładuje się dopiero po kliknięciu „Załaduj mapę Google”."
-                  : "Ładuje się automatycznie, gdy przewiniesz do sekcji „Kontakt” – Twoja przeglądarka łączy się wtedy z serwerami Google."}{" "}
+                  : "Domyślnie ładuje się dopiero po kliknięciu „Załaduj mapę Google”. Jeśli zgodzisz się w banerze cookies, będzie się ładować sama, gdy przewiniesz do sekcji „Kontakt”."}{" "}
                 Dostawcą jest Google LLC, który może zapisywać pliki cookies i przetwarzać dane o Twoich odwiedzinach.
                 Więcej:{" "}
                 <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className={linkClass}>
@@ -100,7 +124,7 @@ export default function PrivacyPage() {
                 odtwarzacza Facebooka.{" "}
                 {siteConfig.embeds.facebookLoadOnClick
                   ? "Odtwarzacz ładuje się dopiero po kliknięciu nagrania."
-                  : "Odtwarzacz ładuje się automatycznie, gdy przewiniesz do tej sekcji – Twoja przeglądarka łączy się wtedy z serwerami Facebooka."}{" "}
+                  : "Domyślnie ładuje się dopiero po kliknięciu nagrania. Jeśli zgodzisz się w banerze cookies, będzie się ładować sam, gdy przewiniesz do tej sekcji."}{" "}
                 Dostawcą jest Meta Platforms, która może zapisywać pliki cookies i przetwarzać dane o Twoich
                 odwiedzinach. Więcej:{" "}
                 <a href="https://www.facebook.com/privacy/policy/" target="_blank" rel="noopener noreferrer" className={linkClass}>

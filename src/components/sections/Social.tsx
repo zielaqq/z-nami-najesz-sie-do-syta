@@ -48,7 +48,9 @@ export async function Social({ tone = "paper" }: { tone?: SectionTone }) {
             <p className="mt-8 max-w-[46ch] text-xs leading-relaxed text-mute" data-reveal>
               Nagrania wyświetla odtwarzacz Facebooka (Meta Platforms), który może zapisywać na Twoim urządzeniu pliki
               cookies.
-              {facebookLoadOnClick ? " Nagranie wczytamy dopiero po Twoim kliknięciu." : ""}{" "}
+              {facebookLoadOnClick
+                ? " Nagranie wczytamy dopiero po Twoim kliknięciu."
+                : " Bez Twojej zgody w banerze na dole strony wczytamy je dopiero po kliknięciu."}{" "}
               <Link href="/polityka-prywatnosci" className="link-underline text-ink">
                 Polityka prywatności
               </Link>

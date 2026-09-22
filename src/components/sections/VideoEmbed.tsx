@@ -6,13 +6,16 @@ import { useEffect, useRef, useState } from "react";
 import { FacebookIcon, Play } from "@/components/ui/icons";
 import type { VideoItem } from "@/data/videos";
 import { withBase } from "@/lib/base-path";
+import { useCookieConsent } from "@/lib/cookie-consent";
 import { cx } from "@/lib/cx";
 
 interface VideoEmbedProps {
   video: VideoItem;
   /**
-   * false = odtwarzacz Facebooka ładuje się sam, gdy kafelek zbliża się do ekranu (od razu widoczny);
-   * true = najpierw kafelek „Odtwórz”, połączenie z Facebookiem dopiero po kliknięciu.
+   * true = zawsze najpierw kafelek „Odtwórz”, połączenie z Facebookiem dopiero po kliknięciu (ustawienie
+   * właściciela, patrz `siteConfig.embeds`). false = odtwarzacz ładuje się sam, gdy kafelek zbliża się do
+   * ekranu – ALE dopiero po zgodzie odwiedzającego w banerze cookies (patrz `CookieConsent`); bez zgody
+   * (albo przed decyzją) i tak jest najpierw ten kafelek.
    */
   loadOnClick: boolean;
 }
@@ -38,30 +41,40 @@ function playerUrl(facebookUrl: string, width: number, autoplay: boolean) {
  * gdy kafelek jest blisko ekranu, więc nie spowalnia pierwszego wejścia na stronę.
  * Tryb `loadOnClick` (dwuklik) chroni prywatność – połączenie z Facebookiem dopiero po kliknięciu.
  */
-export function VideoEmbed({ video, loadOnClick }: VideoEmbedProps) {
+export function VideoEmbed({ video, loadOnClick: ownerLoadOnClick }: VideoEmbedProps) {
+  const consent = useCookieConsent();
+  // Bez zgody odwiedzającego w banerze cookies (albo przed jego decyzją) odtwarzacz nie ładuje się sam,
+  // nawet gdy właściciel ustawił automatyczne ładowanie. Ręczne kliknięcie „Odtwórz” jest samo w sobie
+  // świadomą zgodą, więc działa zawsze, niezależnie od banera.
+  const loadOnClick = ownerLoadOnClick || consent !== "accepted";
+
   const boxRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLIFrameElement>(null);
-  const [src, setSrc] = useState<string | null>(null);
+  const [autoSrc, setAutoSrc] = useState<string | null>(null);
+  // Ręczne kliknięcie zawsze zostaje wczytane – nawet gdyby zgoda później się cofnęła (np. w „Ustawieniach cookies”).
+  const [manualSrc, setManualSrc] = useState<string | null>(null);
   const [clicked, setClicked] = useState(false);
   const dark = Boolean(video.poster);
+  // Cofnięcie zgody po automatycznym wczytaniu chowa odtwarzacz z powrotem za kafelek „Odtwórz”.
+  const src = manualSrc ?? (loadOnClick ? null : autoSrc);
 
   // Tryb automatyczny: wczytaj odtwarzacz, gdy kafelek zbliża się do ekranu (z zapasem 500 px).
   useEffect(() => {
-    if (loadOnClick) return;
+    if (loadOnClick || manualSrc) return;
     const box = boxRef.current;
     if (!box) return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
         // Odtwarzacz dostaje dokładną szerokość kafelka, dzięki czemu nic się nie ucina.
-        setSrc(playerUrl(video.facebookUrl, box.clientWidth || 300, false));
+        setAutoSrc(playerUrl(video.facebookUrl, box.clientWidth || 300, false));
         observer.disconnect();
       },
       { rootMargin: "500px 0px" },
     );
     observer.observe(box);
     return () => observer.disconnect();
-  }, [loadOnClick, video.facebookUrl]);
+  }, [loadOnClick, manualSrc, video.facebookUrl]);
 
   // Tryb „dwuklik”: po kliknięciu przycisk znika – przenosimy fokus na odtwarzacz.
   useEffect(() => {
@@ -69,7 +82,7 @@ export function VideoEmbed({ video, loadOnClick }: VideoEmbedProps) {
   }, [clicked]);
 
   const play = () => {
-    setSrc(playerUrl(video.facebookUrl, boxRef.current?.clientWidth ?? 300, true));
+    setManualSrc(playerUrl(video.facebookUrl, boxRef.current?.clientWidth ?? 300, true));
     setClicked(true);
   };
 

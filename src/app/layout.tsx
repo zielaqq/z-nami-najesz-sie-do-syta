@@ -95,7 +95,9 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       <head>
         <script dangerouslySetInnerHTML={{ __html: revealGate }} />
       </head>
-      <body>{children}</body>
+      {/* suppressHydrationWarning: niektóre rozszerzenia przeglądarki (menedżery haseł, blokady reklam) dopisują
+          do <body> własny atrybut, zanim React zdąży „uruchomić” stronę – to nieszkodliwe ostrzeżenie, nie błąd. */}
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { buttonClasses } from "@/components/ui/Button";
 import { MapPin } from "@/components/ui/icons";
+import { useCookieConsent } from "@/lib/cookie-consent";
 
 interface MapEmbedProps {
   /** Adres iframe (Maps Embed API z kluczem ze zmiennej środowiskowej albo osadzenie bez klucza) */
@@ -14,7 +15,7 @@ interface MapEmbedProps {
   /** Kod pocztowy i miejscowość */
   locality: string;
   title: string;
-  /** true = mapa ładuje się po kliknięciu (RODO, szybsza strona) */
+  /** true = mapa ładuje się zawsze dopiero po kliknięciu (ustawienie właściciela, patrz `siteConfig.embeds`) */
   loadOnClick: boolean;
 }
 
@@ -23,8 +24,15 @@ interface MapEmbedProps {
  * całego ekranu), na desktopie wypełnia wysokość kolumny. Przycisk „Wyznacz trasę”
  * jest osobno w sekcji kontaktowej i działa bez ładowania mapy.
  */
-export function MapEmbed({ src, street, locality, title, loadOnClick }: MapEmbedProps) {
-  const [loaded, setLoaded] = useState(!loadOnClick);
+export function MapEmbed({ src, street, locality, title, loadOnClick: ownerLoadOnClick }: MapEmbedProps) {
+  const consent = useCookieConsent();
+  // Bez zgody odwiedzającego w banerze cookies (albo przed jego decyzją) mapa nie ładuje się sama, nawet
+  // gdy właściciel ustawił automatyczne ładowanie – patrz `CookieConsent`. Ręczne kliknięcie „Załaduj mapę”
+  // jest samo w sobie świadomą zgodą, więc działa zawsze, niezależnie od banera.
+  const loadOnClick = ownerLoadOnClick || consent !== "accepted";
+  // Ręczne kliknięcie zawsze zostaje wczytane – nawet gdyby zgoda później się cofnęła (np. w „Ustawieniach cookies”).
+  const [manuallyLoaded, setManuallyLoaded] = useState(false);
+  const loaded = manuallyLoaded || !loadOnClick;
 
   return (
     <div className="relative h-80 overflow-hidden bg-sand sm:h-[26rem] lg:h-full lg:min-h-[34rem]" data-reveal>
@@ -51,7 +59,7 @@ export function MapEmbed({ src, street, locality, title, loadOnClick }: MapEmbed
               </p>
               <button
                 type="button"
-                onClick={() => setLoaded(true)}
+                onClick={() => setManuallyLoaded(true)}
                 className={buttonClasses("primary", "md", "mt-5 w-full")}
               >
                 Załaduj mapę Google
