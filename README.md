@@ -117,7 +117,8 @@ Klucz trafia do przeglądarki, więc ograniczenia są obowiązkowe.
 4. Logo, favicon i `og-image.jpg` są już z logo restauracji; przy nowej wersji logo: `npm run logo` (patrz [docs/EDYCJA-TRESCI.md](docs/EDYCJA-TRESCI.md)).
 5. Usuń wydarzenia `demo` i dodaj prawdziwe (albo zostaw pustą listę – sekcja zniknie).
 6. Skonfiguruj opinie Google (opcjonalnie) i ustaw dzienny limit/alert budżetu w Google Cloud.
-7. Uzupełnij `/polityka-prywatnosci` (pełna nazwa i NIP podmiotu) – najlepiej po konsultacji prawnej.
+7. Dane podmiotu w `/polityka-prywatnosci` (pełna nazwa, NIP) są wpisane w `siteConfig.legal` – zaktualizuj je tam,
+   gdyby się zmieniły, i najlepiej skonsultuj cały tekst z prawnikiem.
 8. Sprawdź dane kontaktowe i godziny w `src/data/site.ts` (wpływają też na wyniki Google).
 9. Po wdrożeniu: dodaj stronę w Google Search Console i wyślij `sitemap.xml`; wpisz adres strony w Profilu Firmy Google.
 

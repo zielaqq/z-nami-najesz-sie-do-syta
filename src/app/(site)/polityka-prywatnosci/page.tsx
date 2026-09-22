@@ -8,9 +8,9 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
  * ⚠ SZABLON DO WERYFIKACJI. Tekst opisuje faktyczne działanie tej strony (brak formularzy i analityki;
  * baner zgody na cookies – `CookieConsent`; mapa Google i nagrania Facebooka – zgodnie z ustawieniem
  * `embeds` w src/data/site.ts; opinie z Google – patrz docs/GOOGLE-OPINIE.md), ale nie jest poradą
- * prawną. Przed publikacją uzupełnij dane podmiotu prowadzącego działalność (pełna nazwa, NIP)
- * i – jeśli to możliwe – poproś o weryfikację prawnika. Google wymaga też publicznej polityki
- * prywatności i warunków korzystania przy używaniu Places API (opinie).
+ * prawną – jeśli to możliwe, poproś o jej weryfikację prawnika. Dane podmiotu (nazwa, NIP) są wpisane
+ * w `siteConfig.legal` w src/data/site.ts – zmień je tam, gdyby się zmieniły. Google wymaga też
+ * publicznej polityki prywatności i warunków korzystania przy używaniu Places API (opinie).
  */
 const UPDATED_AT = "22 września 2026";
 
@@ -55,7 +55,10 @@ export default function PrivacyPage() {
               </a>
               .
             </p>
-            {/* UZUPEŁNIJ: pełna nazwa podmiotu prowadzącego działalność oraz NIP */}
+            <p>
+              Podmiot prowadzący działalność: <strong className="text-ink">{siteConfig.legal.entityName}</strong>,
+              NIP: <span className="tabular">{siteConfig.legal.nip}</span>.
+            </p>
           </section>
 
           <section aria-labelledby="p-dane">

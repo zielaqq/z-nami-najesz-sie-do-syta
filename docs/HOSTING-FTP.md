@@ -60,8 +60,9 @@ Jeśli coś się nie uda, skrypt napisze co i **nie wgrywaj wtedy folderu `out/`
   **URL Configuration** → *Site URL* na `https://twoja-domena.pl`.
 * **Wyszukiwarki:** dodaj stronę w Google Search Console i wyślij `https://twoja-domena.pl/sitemap.xml`. Wpisz adres
   strony w Profilu Firmy Google.
-* **Polityka prywatności:** uzupełnij pełną nazwę i NIP podmiotu (`/polityka-prywatnosci`) i najlepiej poproś prawnika o
-  weryfikację. Baner zgody na cookies (mapa Google, nagrania z Facebooka) jest już wbudowany – patrz `CookieConsent`.
+* **Polityka prywatności:** dane podmiotu (pełna nazwa, NIP) są już wpisane w `siteConfig.legal`; najlepiej poproś
+  prawnika o weryfikację całego tekstu. Baner zgody na cookies (mapa Google, nagrania z Facebooka) jest już
+  wbudowany – patrz `CookieConsent`.
 * Podgląd na GitHub Pages może zostać (jest ukryty przed Google) albo możesz go wyłączyć w Settings → Pages.
 
 ## Czego ta wersja nie ma (i czemu to nie problem)

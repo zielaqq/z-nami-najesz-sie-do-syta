@@ -51,6 +51,10 @@ Zakładka **„Galeria”** – zdjęcia ze strony (wnętrze, ogródek, dania). 
 * **Dodaj zdjęcia** – wybierz jedno albo kilka zdjęć naraz (z aparatu lub galerii telefonu), ustaw **kategorię**
   (Wnętrze / Ogródek / Dania) i, jeśli chcesz, **podpis** (widać go w powiększeniu). Zdjęcia zmniejszymy automatycznie
   i dodamy na koniec galerii.
+* **Skopiuj zdjęcia dań** – jednym kliknięciem kopiuje do galerii (kategoria „Dania”, podpis = nazwa dania) zdjęcia,
+  które masz wgrane przy daniach w „Bazie dań”. Danie bez zdjęcia jest pomijane; danie już raz skopiowane (po nazwie)
+  też, więc można klikać ten przycisk wielokrotnie, np. po dodaniu nowego dania ze zdjęciem – doda tylko nowe.
+  Oryginał w „Bazie dań” zostaje bez zmian, w galerii powstaje osobna kopia zdjęcia.
 * **Strzałki w lewo / w prawo** przy zdjęciu zmieniają kolejność – na stronie zdjęcia układają się od lewej do prawej,
   rząd po rzędzie.
 * **Ołówek** zmienia podpis i kategorię, **kosz** usuwa zdjęcie z galerii (razem z plikiem).

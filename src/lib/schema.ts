@@ -32,6 +32,7 @@ export function buildStructuredData() {
     logo: `${url}${siteConfig.logo.src}`,
     telephone: contact.phoneE164,
     ...(contact.email ? { email: contact.email } : {}),
+    taxID: siteConfig.legal.nip,
     servesCuisine: "Polska",
     address: {
       "@type": "PostalAddress",

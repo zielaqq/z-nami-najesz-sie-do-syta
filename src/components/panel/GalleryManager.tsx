@@ -6,11 +6,12 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "re
 import { GalleryPhotoForm } from "@/components/panel/GalleryPhotoForm";
 import { NoticeBanner, type PanelNotice } from "@/components/panel/NoticeBanner";
 import { buttonClasses } from "@/components/ui/Button";
-import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from "@/components/ui/icons";
+import { ChevronLeft, ChevronRight, Copy, Pencil, Plus, Trash2 } from "@/components/ui/icons";
 import { defaultGalleryAlt, galleryCategories } from "@/data/gallery";
 import { galleryPhotoUrl } from "@/lib/gallery-live";
 import { describeError } from "@/lib/panel-data";
 import {
+  copyDishPhotosToGallery,
   deletePhoto,
   importDefaultPhotos,
   listGallery,
@@ -28,6 +29,7 @@ export function GalleryManager() {
   const [editing, setEditing] = useState<GalleryRecord | "new" | null>(null);
   const [notice, setNotice] = useState<PanelNotice | null>(null);
   const [busy, setBusy] = useState(false);
+  const [copyProgress, setCopyProgress] = useState<{ done: number; total: number } | null>(null);
   const [announcement, setAnnouncement] = useState("");
   // Zapisy kolejności idą jeden po drugim, żeby wolniejsza odpowiedź nie nadpisała nowszej zmiany.
   const writeQueue = useRef<Promise<unknown>>(Promise.resolve());
@@ -109,6 +111,43 @@ export function GalleryManager() {
     }
   };
 
+  const copyDishPhotos = async () => {
+    setBusy(true);
+    setNotice(null);
+    setCopyProgress(null);
+    try {
+      const startOrder = photos ? photos.reduce((max, item) => Math.max(max, item.sort_order + 1), 0) : 0;
+      const { added, skipped, error } = await copyDishPhotosToGallery(startOrder, (done, total) =>
+        setCopyProgress({ done, total }),
+      );
+      if (added.length > 0) setPhotos((current) => [...(current ?? []), ...added]);
+      if (error) {
+        setNotice({
+          tone: "error",
+          text: `${added.length > 0 ? `Skopiowano ${added.length} zdjęć. ` : ""}${describeError(error)}`,
+        });
+      } else if (added.length === 0) {
+        setNotice({
+          tone: "ok",
+          text:
+            skipped > 0
+              ? "Wszystkie dania ze zdjęciem są już skopiowane do galerii."
+              : "Żadne danie w bazie nie ma jeszcze zdjęcia – nie ma czego kopiować.",
+        });
+      } else {
+        setNotice({
+          tone: "ok",
+          text: `Skopiowano ${added.length} ${added.length === 1 ? "zdjęcie" : "zdjęć"} z bazy dań do galerii, kategoria „Dania”.`,
+        });
+      }
+    } catch (error) {
+      setNotice({ tone: "error", text: describeError(error) });
+    } finally {
+      setBusy(false);
+      setCopyProgress(null);
+    }
+  };
+
   return (
     <section aria-labelledby="gallery-manager-title">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -118,13 +157,25 @@ export function GalleryManager() {
           </h2>
           <p className="max-w-[52ch] text-sm text-mute">
             Zdjęcia układają się na stronie od lewej do prawej, rząd po rzędzie. Strzałkami zmieniasz kolejność, a filtry
-            „Wnętrze / Ogródek / Dania” nad galerią pojawiają się same.
+            „Wnętrze / Ogródek / Dania” nad galerią pojawiają się same. Masz już zdjęcia dań w „Bazie dań”? Przycisk
+            „Skopiuj zdjęcia dań” doda je tutaj (z nazwą dania jako podpisem), oryginały zostają bez zmian.
           </p>
         </div>
-        <button type="button" onClick={() => setEditing("new")} className={buttonClasses("primary", "md")}>
-          <Plus className="size-4" aria-hidden="true" />
-          Dodaj zdjęcia
-        </button>
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => void copyDishPhotos()}
+            disabled={busy}
+            className={buttonClasses("secondary", "md", "disabled:opacity-60")}
+          >
+            <Copy className="size-4" aria-hidden="true" />
+            {copyProgress ? `Kopiuję… ${Math.min(copyProgress.done + 1, copyProgress.total)}/${copyProgress.total}` : "Skopiuj zdjęcia dań"}
+          </button>
+          <button type="button" onClick={() => setEditing("new")} className={buttonClasses("primary", "md")}>
+            <Plus className="size-4" aria-hidden="true" />
+            Dodaj zdjęcia
+          </button>
+        </div>
       </div>
 
       <NoticeBanner notice={notice} className="mt-4" />

@@ -1,6 +1,8 @@
 import { galleryImages, type GalleryCategory } from "@/data/gallery";
+import { dishPhotoUrl } from "@/lib/daily-menu";
 import { GALLERY_COLUMNS, type GalleryRow } from "@/lib/gallery-live";
 import { resizeImageDetailed } from "@/lib/image-resize";
+import { listDishes } from "@/lib/panel-data";
 import { getSupabase } from "@/lib/supabase/client";
 
 /** Zdjęcie galerii w panelu (wiersz tabeli `gallery_photos`). */
@@ -103,6 +105,71 @@ export async function saveGalleryOrder(ordered: GalleryRecord[]): Promise<Galler
   const { error } = await supabase.from("gallery_photos").upsert(renumbered, { onConflict: "id" });
   if (error) throw error;
   return renumbered;
+}
+
+/**
+ * Kopiuje do galerii (kategoria „Dania”, podpis = nazwa dania) zdjęcia z bazy dań, które mają jeszcze wgrane
+ * zdjęcie (dania bez zdjęcia – bo menu jest teraz listą bez zdjęć – są pomijane). Oryginał w bazie dań zostaje
+ * bez zmian; w galerii powstaje osobna kopia pliku. Można uruchamiać wielokrotnie – danie, którego nazwa już jest
+ * podpisem zdjęcia w kategorii „Dania”, jest pomijane, żeby nie powielać tego samego zdjęcia.
+ */
+export async function copyDishPhotosToGallery(
+  startOrder: number,
+  onProgress?: (done: number, total: number) => void,
+): Promise<{ added: GalleryRecord[]; skipped: number; error: unknown | null }> {
+  const supabase = await getSupabase();
+  const [dishes, existing] = await Promise.all([listDishes(false), listGallery()]);
+  const alreadyCopied = new Set(
+    existing
+      .filter((photo) => photo.category === "dania")
+      .map((photo) => (photo.caption ?? "").trim().toLocaleLowerCase("pl")),
+  );
+  const candidates = dishes.filter(
+    (dish) => dish.photo_path && !alreadyCopied.has(dish.name.trim().toLocaleLowerCase("pl")),
+  );
+  const skipped = dishes.length - candidates.length;
+
+  const added: GalleryRecord[] = [];
+  for (const [index, dish] of candidates.entries()) {
+    onProgress?.(index, candidates.length);
+    let uploaded: string | null = null;
+    try {
+      const sourceUrl = dishPhotoUrl(dish.photo_path);
+      if (!sourceUrl) continue; // nie powinno się zdarzyć (już odfiltrowane wyżej) – dla bezpieczeństwa typów
+      const response = await fetch(sourceUrl);
+      if (!response.ok) throw new Error(`Nie udało się pobrać zdjęcia dania (HTTP ${response.status})`);
+      const sourceBlob = await response.blob();
+      const sourceFile = new File([sourceBlob], `${dish.id}.jpg`, { type: sourceBlob.type || "image/jpeg" });
+
+      const { blob, width, height } = await resizeImageDetailed(sourceFile, MAX_SIDE, 0.85);
+      const path = `${crypto.randomUUID()}.jpg`;
+      const { error: uploadError } = await supabase.storage
+        .from(BUCKET)
+        .upload(path, blob, { contentType: "image/jpeg", cacheControl: "31536000" });
+      if (uploadError) throw uploadError;
+      uploaded = path;
+
+      const { data, error } = await supabase
+        .from("gallery_photos")
+        .insert({
+          photo_path: path,
+          caption: dish.name,
+          category: "dania" satisfies GalleryCategory,
+          width,
+          height,
+          sort_order: startOrder + added.length,
+        })
+        .select(GALLERY_COLUMNS);
+      const saved = data?.[0] as GalleryRecord | undefined;
+      if (error || !saved) throw error ?? new Error("Brak odpowiedzi z bazy");
+      added.push(saved);
+    } catch (error) {
+      if (uploaded) await supabase.storage.from(BUCKET).remove([uploaded]);
+      return { added, skipped, error };
+    }
+  }
+  onProgress?.(candidates.length, candidates.length);
+  return { added, skipped, error: null };
 }
 
 /** Przenosi do bazy zdjęcia domyślne z kodu (`src/data/gallery.ts`), żeby można je było układać i kasować w panelu. */

@@ -76,6 +76,12 @@ export const siteConfig = {
     country: "PL",
   },
 
+  /** Dane podmiotu prowadzącego działalność – używane w polityce prywatności i danych strukturalnych (SEO). */
+  legal: {
+    entityName: "Z nami najesz się do syta Katarzyna Budnik",
+    nip: "1181672211",
+  },
+
   /** Współrzędne odczytane z linku do wizytówki Google Maps. */
   geo: { lat: 52.2590698, lng: 20.5932767 },
 
