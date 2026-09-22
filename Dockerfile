@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1
 # Obraz do wdrożenia na Coolify (albo dowolnym hoście z Dockerem). Zwykły serwer Next.js
 # (nie eksport statyczny) – działają na nim panel /panel, opinie z Google (/api/google-reviews)
 # i optymalizacja zdjęć. Zmienne środowiskowe: patrz .env.example.
