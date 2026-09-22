@@ -52,7 +52,7 @@ AVIF/WebP dla każdego urządzenia; **wgrywaj JPG/PNG/WebP, nie GIF**):
 
 | Folder / plik | Do czego | Proporcje i rozmiar |
 | --- | --- | --- |
-| `menu/*.jpg` | zdjęcia dań | **4:3**, min. 1200 × 900 px (na telefonie widać je jako kwadrat – danie na środku) |
+| `menu/*.jpg` | ilustracje przykładowego menu (`src/data/menu.ts`, zapasowe bez bazy) – nigdzie się nie wyświetlają, menu jest listą bez zdjęć | – |
 | `gallery/*.jpg` | zdjęcia domyślne galerii (własne dodajesz w panelu) | dowolne proporcje, najlepiej min. 1200 px szerokości; realne wymiary wpisz w `gallery.ts` (`width`/`height`); kafelki w siatce mają proporcje 4:5, a w powiększeniu widać całe zdjęcie |
 | zdjęcia w „hero” i „O nas” | po jednym dużym zdjęciu: u góry strony (przycinane do 5:4 na telefonie i 6:7 na desktopie) i w „O nas” (4:5 na desktopie) | są to zdjęcia z `gallery/`; ścieżki wpisane są w `Hero.tsx` i `About.tsx` (pole `src`). Żeby użyć innego, wgraj plik do `gallery/` i zmień `src`. **Użyj nowej nazwy pliku** – przeglądarka i Next.js trzymają stare zdjęcia w cache |
 | `og-image.jpg` | podgląd przy udostępnianiu (Facebook, Google) | **1200 × 630 px** – powstaje z logo poleceniem `npm run icons` (adres i telefon są wpisane w `scripts/generate-icons.mjs`) |

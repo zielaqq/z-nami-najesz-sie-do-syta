@@ -8,9 +8,9 @@
  *  ⚠ PRZYKŁADOWE DANE. Dania i ceny poniżej są tylko demonstracją układu strony.
  *
  *  KATEGORIE: Obiad dnia, Danie specjalne (to, co nie pasuje do innych), Zupy, Drugie dania, Ryby, Pierogi, Napoje, Piwo.
+ *  Menu na stronie jest listą „nazwa … cena”, bez zdjęć (patrz `textOnlyCategories` niżej) – pole `image` jest więc
+ *  tylko wymagane przez typ (`MenuItem`) i się nie wyświetla; zostaw dowolną istniejącą ścieżkę.
  *  JAK ZMIENIĆ CENĘ?      Zmień liczbę w polu `price` (w zł, np. 18 albo 18.5).
- *  JAK ZMIENIĆ ZDJĘCIE?   Wrzuć plik do `public/images/menu/` (najlepiej JPG,
- *                         min. 1200 × 900 px, format 4:3) i wpisz jego nazwę w polu `image`.
  *  JAK DODAĆ DANIE?       Skopiuj dowolny wiersz i zmień wartości.
  *  JAK USUNĄĆ DANIE?      Usuń cały wiersz. Puste kategorie znikają same.
  *  KOLEJNOŚĆ?             Dania wyświetlają się w takiej kolejności, w jakiej są tutaj.
@@ -37,8 +37,13 @@ export const menuCategories = [
 
 export type MenuCategoryId = (typeof menuCategories)[number]["id"];
 
-/** Kategorie pokazywane jako zwykła lista „nazwa … cena”, bez zdjęć (zdjęcia napojów i piwa wyglądają sztucznie). */
-export const textOnlyCategories: readonly MenuCategoryId[] = ["napoje", "piwo"];
+/**
+ * Kategorie pokazywane jako zwykła lista „nazwa … cena”, bez zdjęć – tak wygląda teraz całe menu (zdjęcie dania
+ * nie jest nigdzie wymagane, w panelu pole „Zdjęcie” w ogóle się nie pokazuje). Żeby wrócić do kafelków ze
+ * zdjęciami dla jakiejś kategorii (np. tylko „Obiad dnia”), usuń jej `id` z tej listy – zdjęcia dodane wcześniej
+ * zostają w bazie i wracają automatycznie.
+ */
+export const textOnlyCategories: readonly MenuCategoryId[] = menuCategories.map((category) => category.id);
 
 export function isTextOnlyCategory(id: MenuCategoryId): boolean {
   return textOnlyCategories.includes(id);

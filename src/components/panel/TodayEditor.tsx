@@ -399,7 +399,40 @@ function ModeButton({ pressed, onClick, children }: { pressed: boolean; onClick:
 }
 
 function DishTile({ dish, on, onToggle }: { dish: Dish; on: boolean; onToggle: () => void }) {
-  const photo = dishPhotoUrl(dish.photo_path);
+  const showsPhoto = !isTextOnlyCategory(dish.category);
+  const photo = showsPhoto ? dishPhotoUrl(dish.photo_path) : null;
+
+  // Kategorie bez zdjęć (patrz `textOnlyCategories` w src/data/menu.ts): zwarty wiersz z „ptaszkiem” zamiast
+  // dużego pustego kafelka – tak samo jak w widoku „Kolejność na stronie” (`OrderTile`).
+  if (!showsPhoto) {
+    return (
+      <button
+        type="button"
+        aria-pressed={on}
+        onClick={onToggle}
+        className={cx(
+          "flex w-full items-start gap-3 rounded-[3px] border-2 bg-white p-3.5 text-left transition-colors",
+          on ? "border-accent" : "border-ink/15 hover:border-ink/40",
+        )}
+      >
+        <span
+          aria-hidden="true"
+          className={cx(
+            "mt-0.5 grid size-7 shrink-0 place-items-center rounded-full border-2 transition-colors",
+            on ? "border-accent bg-accent text-white" : "border-ink/30 text-transparent",
+          )}
+        >
+          <Check className="size-4" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-serif text-[1.0625rem] leading-snug">{dish.name}</span>
+          {dish.price != null ? <span className="tabular mt-0.5 block text-sm font-semibold text-accent">{formatPrice(dish.price)}</span> : null}
+          <span className="sr-only">{on ? " – jest w menu na ten dzień" : " – nie ma w menu na ten dzień"}</span>
+        </span>
+      </button>
+    );
+  }
+
   return (
     <button
       type="button"

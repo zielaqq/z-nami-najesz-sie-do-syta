@@ -45,9 +45,10 @@ function pluralizeItems(count: number): string {
 }
 
 /**
- * Menu z filtrowaniem kategorii.
- * Mobile: lista z miniaturą 96 px (szybkie skanowanie), pasek kategorii przewijany palcem.
- * Desktop: siatka „zdjęcie na pierwszym planie”. Bez JS wyświetla się całe menu.
+ * Menu z filtrowaniem kategorii, pasek kategorii przewijany palcem na telefonie. Bez JS wyświetla się całe menu.
+ * Kategorie z `textOnlyCategories` (patrz src/data/menu.ts – obecnie wszystkie) to zwykła lista „nazwa … cena”
+ * (`TextRow`); pozostałe (gdyby jakąś wyłączyć z listy) to kafelki ze zdjęciem – miniatura 96 px na telefonie,
+ * „zdjęcie na pierwszym planie” na desktopie (`MenuRow`).
  */
 export function MenuBrowser({ groups, isSample }: MenuBrowserProps) {
   const [filter, setFilter] = useState<Filter>("all");

@@ -26,7 +26,9 @@ i jest ukryty przed wyszukiwarkami.
 **Kategorie dań:** **Obiad dnia, Danie specjalne, Zupy, Drugie dania, Ryby, Pierogi, Napoje, Piwo.**
 W „Obiedzie dnia” wpisz zestaw jako jedno danie (np. „Pomidorowa + schabowy”, cena zestawu, ewentualnie opis).
 „Danie specjalne” jest na to, co nie pasuje do żadnej innej kategorii (np. propozycja szefa kuchni na dziś).
-**Napoje i piwo** pokazują się na stronie jako zwykła lista „nazwa … cena” – bez zdjęć, więc nie trzeba ich fotografować.
+**Menu na stronie jest listą** „nazwa … cena”, bez zdjęć dań – nie trzeba ich fotografować. Formularz dania w ogóle
+nie pyta o zdjęcie. (Da się to zmienić dla wybranej kategorii – patrz komentarz `textOnlyCategories` w
+`src/data/menu.ts` – wtedy ta kategoria wraca do kafelków ze zdjęciem, jak dawniej.)
 
 ### Kolejność dań na stronie
 
@@ -68,12 +70,9 @@ o ich zgodę.
 
 ### Nowe danie
 
-Zakładka **„Baza dań” → „Dodaj danie”**: nazwa, kategoria, cena (nieobowiązkowa), krótki opis (nieobowiązkowy) i zdjęcie
-(zrób aparatem albo wybierz z galerii – zmniejszymy je automatycznie). Ołówek przy daniu zmienia nazwę, cenę i zdjęcie.
-Oko **ukrywa** danie zamiast je usuwać: znika ze strony i z wyboru, ale można je przywrócić („Pokaż ukryte”).
-
-**Dobre zdjęcie dania:** z góry albo lekko z boku, przy świetle dziennym, jedno danie w kadrze, bez bałaganu wokół.
-Poziome czy pionowe – bez znaczenia, na stronie kafelki mają proporcje 4:3.
+Zakładka **„Baza dań” → „Dodaj danie”**: nazwa, kategoria, cena (nieobowiązkowa) i krótki opis (nieobowiązkowy) –
+zdjęcia nie trzeba dodawać, formularz o nie nie pyta. Ołówek przy daniu zmienia nazwę, cenę i opis. Oko **ukrywa**
+danie zamiast je usuwać: znika ze strony i z wyboru, ale można je przywrócić („Pokaż ukryte”).
 
 ---
 

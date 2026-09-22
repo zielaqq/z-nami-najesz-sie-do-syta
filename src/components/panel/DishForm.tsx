@@ -25,7 +25,10 @@ interface DishFormProps {
   onSaved: (dish: Dish) => void;
 }
 
-/** Formularz dania w oknie dialogowym: nazwa, kategoria, cena, opis i zdjęcie (z aparatu lub galerii). */
+/**
+ * Formularz dania w oknie dialogowym: nazwa, kategoria, cena i opis; pole zdjęcia (z aparatu lub galerii) pokazuje
+ * się tylko dla kategorii spoza `textOnlyCategories` (obecnie żadnej – patrz src/data/menu.ts).
+ */
 export function DishForm({ dish, onClose, onSaved }: DishFormProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [name, setName] = useState(dish?.name ?? "");
@@ -164,7 +167,7 @@ export function DishForm({ dish, onClose, onSaved }: DishFormProps) {
 
           {isTextOnlyCategory(category) ? (
             <p className="text-xs text-mute">
-              Napoje i piwo są na stronie zwykłą listą z cenami – zdjęcie nie jest potrzebne.
+              Ta kategoria pokazuje się na stronie jako zwykła lista z cenami – zdjęcie nie jest potrzebne.
             </p>
           ) : (
             <div>
