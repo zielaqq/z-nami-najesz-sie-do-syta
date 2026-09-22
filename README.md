@@ -122,11 +122,19 @@ Klucz trafia do przeglądarki, więc ograniczenia są obowiązkowe.
 8. Sprawdź dane kontaktowe i godziny w `src/data/site.ts` (wpływają też na wyniki Google).
 9. Po wdrożeniu: dodaj stronę w Google Search Console i wyślij `sitemap.xml`; wpisz adres strony w Profilu Firmy Google.
 
-## Wdrożenie (np. Vercel)
+## Wdrożenie na Coolify
 
-1. Zaimportuj repozytorium, ustaw zmienne środowiskowe z tabeli wyżej (co najmniej `NEXT_PUBLIC_SITE_URL`).
-2. Deploy. Strona `/` odświeża się co 24 h (`export const revalidate = 86400`), dzięki czemu miniona data wydarzenia znika sama.
-3. Endpoint `/api/google-reviews` działa jako funkcja serwerowa (dynamiczna, `no-store`).
+Po jednorazowej konfiguracji poniżej wystarczy **commit i push na `main`**. Coolify sam buduje obraz z `Dockerfile` i podmienia działającą wersję (w aplikacji musi być włączone Auto Deploy).
+
+Jednorazowo w Coolify:
+
+1. Źródło: repozytorium GitHub, gałąź `main`, build pack **Dockerfile**, port **3000**.
+2. Zmienne z tabeli wyżej. Te z prefiksem `NEXT_PUBLIC_` zaznacz jako dostępne **w czasie builda** (Build Variable) — inaczej adres strony i Supabase nie wejdą do kodu przeglądarki. `GOOGLE_PLACES_API_KEY` i `GOOGLE_PLACE_ID` zostaw jako zwykłe zmienne kontenera (czyta je serwer w trakcie działania).
+3. Włącz **Auto Deploy**.
+
+Strona `/` odświeża się co 24 h (`export const revalidate = 86400`), dzięki czemu miniona data wydarzenia znika sama. Endpoint `/api/google-reviews` działa w tym samym kontenerze (dynamiczny, `no-store`).
+
+Obraz bazowy to `public.ecr.aws/docker/library/node:22-alpine` (lustro oficjalnego `node:22-alpine`). Build na serwerze nie pobiera nic z Docker Hub.
 
 ### Zwykły hosting z FTP (FileZilla)
 
