@@ -196,3 +196,17 @@ export async function setArchived(id: string, archived: boolean): Promise<Dish> 
   if (error || !saved) throw error ?? new Error("Brak odpowiedzi z bazy");
   return saved;
 }
+
+/**
+ * Usuwa danie na stałe (razem ze zdjęciem w magazynie) – w przeciwieństwie do ukrycia, tego nie da się cofnąć.
+ * Baza sama usuwa wpisy tego dania z menu na poszczególne dni (klucz obcy `on delete cascade`).
+ */
+export async function deleteDish(dish: Dish): Promise<void> {
+  const supabase = await getSupabase();
+  const { error } = await supabase.from("dishes").delete().eq("id", dish.id);
+  if (error) throw error;
+  if (dish.photo_path) {
+    // Błąd usuwania pliku nie jest krytyczny – danie i tak zniknęło z bazy.
+    await supabase.storage.from(BUCKET).remove([dish.photo_path]);
+  }
+}

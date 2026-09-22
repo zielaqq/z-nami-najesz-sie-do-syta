@@ -5,13 +5,15 @@ import { useEffect, useState } from "react";
 
 import { DishForm } from "@/components/panel/DishForm";
 import { NoticeBanner, fieldClass, type PanelNotice } from "@/components/panel/NoticeBanner";
+import { PhotoDownloadPicker } from "@/components/panel/PhotoDownloadPicker";
 import { PhotoLightbox } from "@/components/panel/PhotoLightbox";
 import { buttonClasses } from "@/components/ui/Button";
-import { Eye, EyeOff, Pencil, Plus, Search, Utensils } from "@/components/ui/icons";
+import { Download, Eye, EyeOff, Pencil, Plus, Search, Trash2, Utensils } from "@/components/ui/icons";
 import { cx } from "@/lib/cx";
 import { dishCountLabel, dishPhotoUrl, groupDishes, type Dish } from "@/lib/daily-menu";
+import { safeFileName } from "@/lib/download-file";
 import { formatPrice } from "@/lib/format";
-import { describeError, listDishes, setArchived } from "@/lib/panel-data";
+import { deleteDish, describeError, listDishes, setArchived } from "@/lib/panel-data";
 
 /**
  * Baza dań: dodawanie (ze zdjęciem z telefonu), zmiana, ukrywanie i przywracanie dań.
@@ -24,6 +26,7 @@ export function DishLibrary() {
   const [query, setQuery] = useState("");
   const [editing, setEditing] = useState<Dish | "new" | null>(null);
   const [lightbox, setLightbox] = useState<{ src: string; title: string } | null>(null);
+  const [downloadPickerOpen, setDownloadPickerOpen] = useState(false);
   const [notice, setNotice] = useState<PanelNotice | null>(null);
 
   useEffect(() => {
@@ -68,6 +71,23 @@ export function DishLibrary() {
     }
   };
 
+  const remove = async (dish: Dish) => {
+    if (
+      !window.confirm(
+        `Na pewno usunąć „${dish.name}” na stałe z bazy dań? Zniknie też z menu na dni, w których było wybrane. Tej operacji nie da się cofnąć.`,
+      )
+    )
+      return;
+    setNotice(null);
+    try {
+      await deleteDish(dish);
+      setDishes((current) => (current ?? []).filter((item) => item.id !== dish.id));
+      setNotice({ tone: "ok", text: `Usunięto na stałe: ${dish.name}.` });
+    } catch (error) {
+      setNotice({ tone: "error", text: describeError(error) });
+    }
+  };
+
   const needle = query.trim().toLocaleLowerCase("pl");
   const visible = (dishes ?? []).filter(
     (dish) => (showArchived || !dish.archived) && (!needle || dish.name.toLocaleLowerCase("pl").includes(needle)),
@@ -85,10 +105,21 @@ export function DishLibrary() {
           </h2>
           <p className="text-sm text-mute">{dishes ? `W bazie: ${dishCountLabel(activeCount)}` : " "}</p>
         </div>
-        <button type="button" onClick={() => setEditing("new")} className={buttonClasses("primary", "md")}>
-          <Plus className="size-4" aria-hidden="true" />
-          Dodaj danie
-        </button>
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => setDownloadPickerOpen(true)}
+            disabled={!dishes || dishes.every((dish) => !dish.photo_path)}
+            className={buttonClasses("secondary", "md", "disabled:opacity-60")}
+          >
+            <Download className="size-4" aria-hidden="true" />
+            Pobierz zdjęcia
+          </button>
+          <button type="button" onClick={() => setEditing("new")} className={buttonClasses("primary", "md")}>
+            <Plus className="size-4" aria-hidden="true" />
+            Dodaj danie
+          </button>
+        </div>
       </div>
 
       <NoticeBanner notice={notice} className="mt-4" />
@@ -147,6 +178,7 @@ export function DishLibrary() {
                   dish={dish}
                   onEdit={() => setEditing(dish)}
                   onToggleArchived={() => void toggleArchived(dish)}
+                  onDelete={() => void remove(dish)}
                   onPreview={(photo) => setLightbox({ src: photo, title: dish.name })}
                 />
               ))}
@@ -163,6 +195,20 @@ export function DishLibrary() {
           onSaved={onSaved}
         />
       ) : null}
+      {downloadPickerOpen ? (
+        <PhotoDownloadPicker
+          title="Pobierz zdjęcia dań"
+          items={(dishes ?? [])
+            .filter((dish) => dish.photo_path)
+            .map((dish) => ({
+              id: dish.id,
+              src: dishPhotoUrl(dish.photo_path)!,
+              title: dish.name,
+              filename: safeFileName(dish.name),
+            }))}
+          onClose={() => setDownloadPickerOpen(false)}
+        />
+      ) : null}
       <PhotoLightbox photo={lightbox} onClose={() => setLightbox(null)} />
     </section>
   );
@@ -172,11 +218,13 @@ function DishRow({
   dish,
   onEdit,
   onToggleArchived,
+  onDelete,
   onPreview,
 }: {
   dish: Dish;
   onEdit: () => void;
   onToggleArchived: () => void;
+  onDelete: () => void;
   onPreview: (photoUrl: string) => void;
 }) {
   const photo = dishPhotoUrl(dish.photo_path);
@@ -224,6 +272,15 @@ function DishRow({
           className="inline-flex size-11 items-center justify-center rounded-[3px] border border-ink/25 hover:border-ink hover:bg-ink/5"
         >
           {dish.archived ? <Eye className="size-5" aria-hidden="true" /> : <EyeOff className="size-5" aria-hidden="true" />}
+        </button>
+        <button
+          type="button"
+          onClick={onDelete}
+          aria-label={`Usuń na stałe: ${dish.name}`}
+          title="Usuń na stałe"
+          className="inline-flex size-11 items-center justify-center rounded-[3px] border border-ink/25 hover:border-accent hover:bg-accent/5 hover:text-accent-deep"
+        >
+          <Trash2 className="size-5" aria-hidden="true" />
         </button>
       </div>
     </li>

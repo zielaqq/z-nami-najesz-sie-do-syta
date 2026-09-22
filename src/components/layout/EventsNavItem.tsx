@@ -1,8 +1,8 @@
 "use client";
 
 import { withBase } from "@/lib/base-path";
-import { useUpcomingEvents } from "@/lib/events-live";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { useUpcomingEvents } from "@/lib/use-upcoming-events";
 
 /**
  * Link „Wydarzenia” w stopce – tylko gdy są nadchodzące wydarzenia (z bazy albo z pliku, zależnie od trybu).

@@ -60,3 +60,12 @@ export function shiftDay(isoDate: string, days: number): string {
   date.setUTCDate(date.getUTCDate() + days);
   return date.toISOString().slice(0, 10);
 }
+
+const DAYS_SINCE_MONDAY: Record<string, number> = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 };
+
+/** Poniedziałek tygodnia zawierającego podaną datę (RRRR-MM-DD), liczony wg dnia tygodnia w Polsce. */
+export function mondayOfWeek(isoDate: string): string {
+  const date = new Date(`${isoDate}T12:00:00Z`);
+  const short = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone: "Europe/Warsaw" }).format(date);
+  return shiftDay(isoDate, -(DAYS_SINCE_MONDAY[short] ?? 0));
+}

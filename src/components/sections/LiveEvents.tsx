@@ -3,14 +3,22 @@
 import { useEffect } from "react";
 
 import { EventsView } from "@/components/sections/Events";
-import { useUpcomingEvents } from "@/lib/events-live";
+import type { RestaurantEvent } from "@/data/events";
+import { useUpcomingEvents } from "@/lib/use-upcoming-events";
+
+interface LiveEventsProps {
+  /** Wydarzenia pobrane już na serwerze (patrz `page.tsx`) – widoczne w HTML od razu (m.in. dla Google), zanim
+   * przeglądarka doładuje najświeższą wersję poniżej. */
+  initialEvents?: RestaurantEvent[];
+}
 
 /**
  * „Wydarzenia” z bazy – dodaje je klientka w panelu (/panel), więc zmiana jest widoczna od razu po odświeżeniu strony.
  * Bez wydarzeń (albo przy błędzie sieci) sekcja się nie pokazuje – strona nie wygląda na pustą ani niedokończoną.
  */
-export function LiveEvents() {
-  const events = useUpcomingEvents();
+export function LiveEvents({ initialEvents }: LiveEventsProps) {
+  const live = useUpcomingEvents();
+  const events = live ?? initialEvents ?? null;
   const visible = Boolean(events && events.length > 0);
 
   // Sekcja pojawia się dopiero po wczytaniu danych, więc przeglądarka nie zdąży przewinąć do adresu „/#wydarzenia”

@@ -3,23 +3,16 @@
 import Image from "next/image";
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
-import { DishPhotoPicker } from "@/components/panel/DishPhotoPicker";
 import { GalleryPhotoForm } from "@/components/panel/GalleryPhotoForm";
 import { NoticeBanner, type PanelNotice } from "@/components/panel/NoticeBanner";
+import { PhotoDownloadPicker } from "@/components/panel/PhotoDownloadPicker";
 import { buttonClasses } from "@/components/ui/Button";
-import { ChevronLeft, ChevronRight, Copy, Pencil, Plus, Trash2 } from "@/components/ui/icons";
+import { ChevronLeft, ChevronRight, Download, Pencil, Plus, Trash2 } from "@/components/ui/icons";
 import { defaultGalleryAlt, galleryCategories } from "@/data/gallery";
-import type { Dish } from "@/lib/daily-menu";
+import { safeFileName } from "@/lib/download-file";
 import { galleryPhotoUrl } from "@/lib/gallery-live";
 import { describeError } from "@/lib/panel-data";
-import {
-  copyDishPhotosToGallery,
-  deletePhoto,
-  importDefaultPhotos,
-  listGallery,
-  saveGalleryOrder,
-  type GalleryRecord,
-} from "@/lib/panel-gallery";
+import { deletePhoto, listGallery, saveGalleryOrder, type GalleryRecord } from "@/lib/panel-gallery";
 
 /**
  * Galeria widoczna na stronie: dodawanie zdjęć, usuwanie, zmiana podpisu i kategorii oraz kolejność (strzałki w lewo
@@ -30,9 +23,7 @@ export function GalleryManager() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [editing, setEditing] = useState<GalleryRecord | "new" | null>(null);
   const [notice, setNotice] = useState<PanelNotice | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const [copyProgress, setCopyProgress] = useState<{ done: number; total: number } | null>(null);
+  const [downloadPickerOpen, setDownloadPickerOpen] = useState(false);
   const [announcement, setAnnouncement] = useState("");
   // Zapisy kolejności idą jeden po drugim, żeby wolniejsza odpowiedź nie nadpisała nowszej zmiany.
   const writeQueue = useRef<Promise<unknown>>(Promise.resolve());
@@ -100,50 +91,6 @@ export function GalleryManager() {
     }
   };
 
-  const importDefaults = async () => {
-    setBusy(true);
-    setNotice(null);
-    try {
-      const list = await importDefaultPhotos();
-      setPhotos(list);
-      setNotice({ tone: "ok", text: `Przeniesiono ${list.length} zdjęć. Możesz je teraz układać, podpisywać i usuwać.` });
-    } catch (error) {
-      setNotice({ tone: "error", text: describeError(error) });
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const copyDishPhotos = async (dishes: Dish[]) => {
-    setPickerOpen(false);
-    setBusy(true);
-    setNotice(null);
-    setCopyProgress(null);
-    try {
-      const startOrder = photos ? photos.reduce((max, item) => Math.max(max, item.sort_order + 1), 0) : 0;
-      const { added, error } = await copyDishPhotosToGallery(dishes, startOrder, (done, total) =>
-        setCopyProgress({ done, total }),
-      );
-      if (added.length > 0) setPhotos((current) => [...(current ?? []), ...added]);
-      if (error) {
-        setNotice({
-          tone: "error",
-          text: `${added.length > 0 ? `Skopiowano ${added.length} zdjęć. ` : ""}${describeError(error)}`,
-        });
-      } else {
-        setNotice({
-          tone: "ok",
-          text: `Skopiowano ${added.length} ${added.length === 1 ? "zdjęcie" : "zdjęć"} z bazy dań do galerii, kategoria „Dania”.`,
-        });
-      }
-    } catch (error) {
-      setNotice({ tone: "error", text: describeError(error) });
-    } finally {
-      setBusy(false);
-      setCopyProgress(null);
-    }
-  };
-
   return (
     <section aria-labelledby="gallery-manager-title">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -153,19 +100,18 @@ export function GalleryManager() {
           </h2>
           <p className="max-w-[52ch] text-sm text-mute">
             Zdjęcia układają się na stronie od lewej do prawej, rząd po rzędzie. Strzałkami zmieniasz kolejność, a filtry
-            „Wnętrze / Ogródek / Dania” nad galerią pojawiają się same. Masz już zdjęcia dań w „Bazie dań”? Przycisk
-            „Skopiuj zdjęcia dań” doda je tutaj (z nazwą dania jako podpisem), oryginały zostają bez zmian.
+            „Wnętrze / Ogródek / Dania” nad galerią pojawiają się same.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
           <button
             type="button"
-            onClick={() => setPickerOpen(true)}
-            disabled={busy}
+            onClick={() => setDownloadPickerOpen(true)}
+            disabled={!photos || photos.length === 0}
             className={buttonClasses("secondary", "md", "disabled:opacity-60")}
           >
-            <Copy className="size-4" aria-hidden="true" />
-            {copyProgress ? `Kopiuję… ${Math.min(copyProgress.done + 1, copyProgress.total)}/${copyProgress.total}` : "Skopiuj zdjęcia dań"}
+            <Download className="size-4" aria-hidden="true" />
+            Pobierz zdjęcia
           </button>
           <button type="button" onClick={() => setEditing("new")} className={buttonClasses("primary", "md")}>
             <Plus className="size-4" aria-hidden="true" />
@@ -190,23 +136,10 @@ export function GalleryManager() {
       ) : photos.length === 0 ? (
         <div className="mt-8 border border-ink/15 bg-white p-6">
           <p className="font-serif text-xl">Galeria w bazie jest jeszcze pusta</p>
-          <p className="mt-2 max-w-[56ch] text-ink-soft">
-            Do czasu dodania zdjęć strona pokazuje zdjęcia domyślne. Możesz przenieść je tutaj (i wtedy układać, podpisywać
-            albo usuwać) albo od razu dodać własne.
-          </p>
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-            <button
-              type="button"
-              onClick={() => void importDefaults()}
-              disabled={busy}
-              className={buttonClasses("primary", "md", "disabled:opacity-60")}
-            >
-              {busy ? "Przenoszę…" : "Przenieś obecne zdjęcia do panelu"}
-            </button>
-            <button type="button" onClick={() => setEditing("new")} className={buttonClasses("secondary", "md")}>
-              Dodaj własne zdjęcia
-            </button>
-          </div>
+          <p className="mt-2 max-w-[56ch] text-ink-soft">Do czasu dodania zdjęć strona pokazuje zdjęcia domyślne.</p>
+          <button type="button" onClick={() => setEditing("new")} className={buttonClasses("primary", "md", "mt-5")}>
+            Dodaj zdjęcia
+          </button>
         </div>
       ) : (
         <>
@@ -250,7 +183,18 @@ export function GalleryManager() {
           }}
         />
       ) : null}
-      {pickerOpen ? <DishPhotoPicker onClose={() => setPickerOpen(false)} onConfirm={(dishes) => void copyDishPhotos(dishes)} /> : null}
+      {downloadPickerOpen ? (
+        <PhotoDownloadPicker
+          title="Pobierz zdjęcia z galerii"
+          items={(photos ?? []).map((photo) => ({
+            id: photo.id,
+            src: galleryPhotoUrl(photo.photo_path),
+            title: photo.caption ?? defaultGalleryAlt(photo.category),
+            filename: safeFileName(photo.caption ?? defaultGalleryAlt(photo.category)),
+          }))}
+          onClose={() => setDownloadPickerOpen(false)}
+        />
+      ) : null}
     </section>
   );
 }

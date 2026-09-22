@@ -316,3 +316,30 @@ create policy "opening_hours_admin_update" on public.opening_hours
 
 grant select on public.opening_hours to anon;
 grant select, update on public.opening_hours to authenticated;
+
+-- 8) Ustawienia strony (jeden wiersz, edytowane w panelu) ----------------------------------
+create table if not exists public.site_settings (
+  id smallint primary key default 1 check (id = 1),
+  -- Przycisk „Cały tydzień” przy menu na stronie (podgląd pon.–niedz., z jutrem włącznie).
+  weekly_menu_visible boolean not null default false
+);
+
+insert into public.site_settings (id, weekly_menu_visible)
+values (1, false)
+on conflict (id) do nothing;
+
+alter table public.site_settings enable row level security;
+
+drop policy if exists "site_settings_public_read" on public.site_settings;
+create policy "site_settings_public_read" on public.site_settings
+  for select to anon, authenticated
+  using (true);
+
+drop policy if exists "site_settings_admin_update" on public.site_settings;
+create policy "site_settings_admin_update" on public.site_settings
+  for update to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+grant select on public.site_settings to anon;
+grant select, update on public.site_settings to authenticated;

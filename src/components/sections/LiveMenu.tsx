@@ -14,13 +14,24 @@ type State =
   | { status: "ready"; day: string; dishes: Dish[] }
   | { status: "error" };
 
+interface LiveMenuProps {
+  /** Dzień i dania pobrane już na serwerze (patrz `Menu`) – widoczne w HTML od razu (m.in. dla Google), zanim
+   * przeglądarka doładuje najświeższą wersję poniżej. */
+  initialDay?: string;
+  initialDishes?: Dish[];
+}
+
 /**
  * „Menu na dziś” – dania wybrane przez klientkę w panelu (/panel), pobierane z bazy przy każdym wejściu
  * na stronę, więc zmiana jest widoczna od razu (bez ponownego budowania strony). Gdy menu na dziś nie jest
  * ustawione albo baza nie odpowiada, nie pokazujemy nieaktualnych dań – tylko uczciwy komunikat i telefon.
  */
-export function LiveMenu() {
-  const [state, setState] = useState<State>({ status: "loading" });
+export function LiveMenu({ initialDay, initialDishes }: LiveMenuProps) {
+  const [state, setState] = useState<State>(
+    initialDay !== undefined && initialDishes !== undefined
+      ? { status: "ready", day: initialDay, dishes: initialDishes }
+      : { status: "loading" },
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -28,7 +39,9 @@ export function LiveMenu() {
     fetchDailyMenu(day, controller.signal)
       .then((dishes) => setState({ status: "ready", day, dishes }))
       .catch(() => {
-        if (!controller.signal.aborted) setState({ status: "error" });
+        if (controller.signal.aborted) return;
+        // Błąd doładowania nie chowa menu, które już mamy (z serwera albo z poprzedniego udanego pobrania).
+        setState((current) => (current.status === "ready" ? current : { status: "error" }));
       });
     return () => controller.abort();
   }, []);

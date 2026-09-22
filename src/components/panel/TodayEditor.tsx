@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { NoticeBanner, fieldClass, type PanelNotice } from "@/components/panel/NoticeBanner";
+import { WeeklyMenuToggle } from "@/components/panel/WeeklyMenuToggle";
 import { buttonClasses } from "@/components/ui/Button";
 import { Check, ChevronLeft, ChevronRight, Copy, Search, Utensils } from "@/components/ui/icons";
 import { isTextOnlyCategory } from "@/data/menu";
@@ -243,6 +244,8 @@ export function TodayEditor({ onOpenLibrary }: TodayEditorProps) {
           Kolejność na stronie
         </ModeButton>
       </div>
+
+      <WeeklyMenuToggle />
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <button

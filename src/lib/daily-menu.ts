@@ -89,3 +89,49 @@ export async function fetchDailyMenu(day: string, signal?: AbortSignal): Promise
     .sort(compareByOrder)
     .map((entry) => entry.dish);
 }
+
+/** Dania jednego dnia w menu tygodnia. */
+export interface DayMenu {
+  /** RRRR-MM-DD */
+  day: string;
+  dishes: Dish[];
+}
+
+/**
+ * Menu całego tygodnia (dowolny zakres dni, RRRR-MM-DD, oba końce włącznie) – jedno zapytanie do bazy,
+ * pogrupowane po dniu. Dzień bez żadnego ustawionego dania po prostu nie pojawia się w wyniku.
+ */
+export async function fetchWeekMenu(fromDay: string, toDay: string, signal?: AbortSignal): Promise<DayMenu[]> {
+  if (!supabaseConfig) throw new Error("Supabase nie jest skonfigurowany");
+  const { url, key } = supabaseConfig;
+  const request = (select: string) => {
+    const params = new URLSearchParams();
+    params.append("select", select);
+    params.append("day", `gte.${fromDay}`);
+    params.append("day", `lte.${toDay}`);
+    params.append("order", "day.asc");
+    return fetch(`${url}/rest/v1/daily_menu?${params}`, {
+      headers: { apikey: key, Accept: "application/json" },
+      cache: "no-store",
+      signal,
+    });
+  };
+
+  let response = await request(`day,sort_order,dishes(${DISH_COLUMNS})`);
+  // Baza sprzed dodania kolejności (schema.sql jeszcze nie uruchomiony ponownie): menu działa, tylko alfabetycznie.
+  if (response.status === 400) response = await request(`day,dishes(${DISH_COLUMNS})`);
+  if (!response.ok) throw new Error(`Menu tygodnia: HTTP ${response.status}`);
+
+  const rows = (await response.json()) as Array<{ day: string; sort_order?: number; dishes: Dish | null }>;
+  const byDay = new Map<string, Array<{ dish: Dish; sortOrder: number; name: string }>>();
+  for (const row of rows) {
+    if (!row.dishes) continue;
+    const entries = byDay.get(row.day) ?? [];
+    entries.push({ dish: row.dishes, sortOrder: row.sort_order ?? 0, name: row.dishes.name });
+    byDay.set(row.day, entries);
+  }
+  return [...byDay.entries()].map(([day, entries]) => ({
+    day,
+    dishes: entries.sort(compareByOrder).map((entry) => entry.dish),
+  }));
+}

@@ -12,6 +12,7 @@ export {
   ChevronRight,
   Clock,
   Copy,
+  Download,
   Eye,
   EyeOff,
   ImagePlus,

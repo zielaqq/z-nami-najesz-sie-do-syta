@@ -8,7 +8,10 @@ import { LiveEvents } from "@/components/sections/LiveEvents";
 import { Menu } from "@/components/sections/Menu";
 import { Reviews } from "@/components/sections/Reviews";
 import { Social } from "@/components/sections/Social";
+import type { RestaurantEvent } from "@/data/events";
 import { getUpcomingEvents } from "@/lib/content";
+import { fetchUpcomingEvents } from "@/lib/events-live";
+import { todayInWarsaw } from "@/lib/format";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 // Strona jest statyczna i odświeża się raz na dobę (tryb bez bazy: miniona data wydarzenia z pliku znika sama).
@@ -16,8 +19,22 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 export const revalidate = 86400;
 
 export default async function HomePage() {
-  // Z bazą (panel klientki): wydarzenia wczytuje przeglądarka na żywo. Bez bazy: z pliku src/data/events.ts.
-  const upcomingEvents = isSupabaseConfigured ? [] : await getUpcomingEvents();
+  let upcomingEvents: RestaurantEvent[] = [];
+  let initialLiveEvents: RestaurantEvent[] | undefined;
+
+  if (isSupabaseConfigured) {
+    // Wstępne pobranie na serwerze – żeby wydarzenia były widoczne w wygenerowanym HTML od razu (m.in. dla
+    // Google), zanim `LiveEvents` doładuje najświeższą wersję w przeglądarce. Błąd tutaj nie psuje strony –
+    // bez tego `LiveEvents` i tak pobiera dane sam, tak jak dotychczas.
+    try {
+      initialLiveEvents = await fetchUpcomingEvents(todayInWarsaw());
+    } catch {
+      initialLiveEvents = undefined;
+    }
+  } else {
+    // Bez bazy: wydarzenia z pliku src/data/events.ts.
+    upcomingEvents = await getUpcomingEvents();
+  }
 
   // Tła sekcji naprzemiennie: opinie (paper) → wydarzenia (sand, opcjonalne) → social (cream) → kontakt (paper).
   // „Sand” odcina się od sąsiadów, więc kolory pozostałych sekcji nie zależą od tego, czy wydarzenia są.
@@ -29,7 +46,11 @@ export default async function HomePage() {
       <CateringDelivery />
       <Gallery />
       <Reviews />
-      {isSupabaseConfigured ? <LiveEvents /> : <Events events={upcomingEvents} />}
+      {isSupabaseConfigured ? (
+        <LiveEvents initialEvents={initialLiveEvents} />
+      ) : (
+        <Events events={upcomingEvents} />
+      )}
       <Social tone="cream" />
       <Contact tone="paper" />
     </>

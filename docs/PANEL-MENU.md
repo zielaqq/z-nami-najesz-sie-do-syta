@@ -18,10 +18,16 @@ i jest ukryty przed wyszukiwarkami.
 3. W zakładce **„Menu na dziś”** dotknij zdjęć dań, które są dziś. Zaznaczone mają ramkę i „ptaszek”.
    **Zapisuje się samo** – nie ma przycisku „Zapisz”.
    * **Skopiuj z poprzedniego dnia** – dania często się powtarzają, skopiuj i tylko popraw różnice.
-   * **Strzałki przy dacie** – możesz ustawić menu na jutro (np. wieczorem) albo poprawić wczorajsze.
+   * **Strzałki przy dacie** – możesz ustawić menu na jutro (np. wieczorem) albo poprawić wczorajsze. Możesz też
+     iść strzałką dalej w przyszłość i ustawić menu na kolejne dni tego tygodnia z wyprzedzeniem.
    * **Zobacz na stronie** – sprawdź, jak menu widzą klienci.
 4. Jeśli nic nie zaznaczysz, na stronie pojawi się „Dzisiejsze menu pojawi się wkrótce” i telefon do restauracji.
    Strona **nigdy nie pokazuje wczorajszego menu** jako dzisiejszego.
+
+**Podgląd „Cały tydzień”:** obok „Dziś” w sekcji Menu na stronie jest drugi przycisk – „Cały tydzień”. Pokazuje
+poniedziałek–niedzielę z datami, ale **z jutrem włącznie** – kolejne dni tego tygodnia są celowo jeszcze zakryte
+(„Zobaczysz tutaj jutro”), nawet jeśli już ustawiłaś dla nich menu strzałką do przodu. To zamierzona „ciekawostka”:
+odwiedzający widzą, co było i co będzie jutro, a reszta tygodnia odsłania się dzień po dniu.
 
 **Kategorie dań:** **Obiad dnia, Danie specjalne, Zupy, Drugie dania, Ryby, Pierogi, Napoje, Piwo.**
 W „Obiedzie dnia” wpisz zestaw jako jedno danie (np. „Pomidorowa + schabowy”, cena zestawu, ewentualnie opis).
@@ -52,10 +58,9 @@ Zakładka **„Galeria”** – zdjęcia ze strony (wnętrze, ogródek, dania). 
 * **Dodaj zdjęcia** – wybierz jedno albo kilka zdjęć naraz (z aparatu lub galerii telefonu), ustaw **kategorię**
   (Wnętrze / Ogródek / Dania) i, jeśli chcesz, **podpis** (widać go w powiększeniu). Zdjęcia zmniejszymy automatycznie
   i dodamy na koniec galerii.
-* **Skopiuj zdjęcia dań** – otwiera okno z daniami z „Bazy dań”, które mają zdjęcie; zaznaczasz, które mają trafić do
-  galerii (kategoria „Dania”, podpis = nazwa dania), i klikasz „Skopiuj zaznaczone”. Danie, które już raz skopiowano
-  (po nazwie), jest domyślnie odznaczone – możesz je zaznaczyć ponownie, jeśli naprawdę chcesz dodać je drugi raz.
-  Oryginał w „Bazie dań” zostaje bez zmian, w galerii powstaje osobna kopia zdjęcia.
+* **Pobierz zdjęcia** – zapisuje wybrane zdjęcia z galerii na Twoim komputerze (wszystkie są domyślnie zaznaczone,
+  możesz odznaczyć niepotrzebne). Nic przy tym nie zmienia się w galerii ani w bazie – to tylko kopia dla Ciebie,
+  np. żeby użyć zdjęcia gdzieś indziej.
 * **Strzałki w lewo / w prawo** przy zdjęciu zmieniają kolejność – na stronie zdjęcia układają się od lewej do prawej,
   rząd po rzędzie.
 * **Ołówek** zmienia podpis i kategorię, **kosz** usuwa zdjęcie z galerii (razem z plikiem).
@@ -65,9 +70,8 @@ Zakładka **„Galeria”** – zdjęcia ze strony (wnętrze, ogródek, dania). 
   dziesiątkach zdjęć. Powiększenie przechodzi też do zdjęć, które nie są jeszcze pokazane w siatce, a zmiana filtra
   zwija galerię z powrotem do 12. **Najlepsze zdjęcia ustaw na początku**, bo to je zobaczy każdy odwiedzający.
 
-**Za pierwszym razem** galeria w bazie jest pusta, a strona pokazuje zdjęcia domyślne z kodu. Kliknij
-**„Przenieś obecne zdjęcia do panelu”**, żeby móc je układać, podpisywać i usuwać. Jeśli usuniesz wszystkie zdjęcia,
-strona wróci do zdjęć domyślnych.
+**Za pierwszym razem** galeria w bazie jest pusta, a strona pokazuje zdjęcia domyślne z kodu, dopóki nie dodasz
+własnych przyciskiem **„Dodaj zdjęcia”**. Jeśli usuniesz wszystkie zdjęcia, strona wróci do zdjęć domyślnych.
 
 Dobre zdjęcie do galerii: w dobrym świetle, bez bałaganu w kadrze i ze stołami bez zbędnych przedmiotów. Na stronie
 kafelki mają proporcje 4:5 (pionowe), a w powiększeniu widać całe zdjęcie. Przy zdjęciach z gośćmi lub personelem zadbaj
@@ -81,7 +85,12 @@ dodajesz na dwa sposoby: **„Dodaj zdjęcie”** (aparat albo galeria telefonu,
 **„Wybierz z galerii”** – gdy dobre zdjęcie tego dania jest już w galerii strony, użyjesz go bez robienia nowego.
 Kliknięcie miniatury zdjęcia (w formularzu i na liście dań) pokazuje je na większym ekranie. Ołówek przy daniu
 zmienia nazwę, cenę, opis i zdjęcie. Oko **ukrywa** danie zamiast je usuwać: znika ze strony i z wyboru, ale można
-je przywrócić („Pokaż ukryte”).
+je przywrócić („Pokaż ukryte”). Kosz **usuwa danie na stałe** z bazy (razem ze zdjęciem) – po potwierdzeniu tego
+nie da się cofnąć, więc w większości przypadków lepiej danie po prostu ukryć okiem. Danie znika też wtedy z menu
+na dni, w których było wcześniej wybrane.
+
+**Pobierz zdjęcia** (przycisk nad listą dań) – zapisuje zdjęcia wybranych dań na Twoim komputerze, tak samo jak w
+Galerii. Widoczne są tylko dania, które mają zdjęcie.
 
 Po co w takim razie zdjęcie dania, skoro menu jest listą? Głównie po to, żeby łatwo przenieść je do **galerii**
 (patrz niżej) – to najprostszy sposób na dorzucenie do galerii kolejnych zdjęć potraw.
@@ -164,12 +173,20 @@ krok 3.
 ## Dla programisty
 
 * Schemat i reguły: `supabase/schema.sql` (tabele `dishes`, `daily_menu`, `events`, `gallery_photos`, `opening_hours`,
-  `admins`; magazyny `dish-photos`, `gallery-photos`).
+  `site_settings`, `admins`; magazyny `dish-photos`, `gallery-photos`).
+* Ustawienia strony (na razie tylko widoczność przycisku „Cały tydzień”): tabela `site_settings` (jeden wiersz,
+  `id=1`), publiczny odczyt `src/lib/site-settings-live.ts`, panel: `WeeklyMenuToggle.tsx` + `src/lib/panel-settings.ts`.
 * Wydarzenia: publiczny odczyt `src/lib/events-live.ts` (jedno zapytanie na wejście na stronę), sekcja
   `src/components/sections/LiveEvents.tsx`; panel: `EventsManager` i `EventForm` (+ `src/lib/panel-events.ts`).
   Sekcja „Wydarzenia” ma tło „sand”, więc kolory sąsiednich sekcji nie zależą od tego, czy wydarzenia są.
 * Publiczne menu: `src/components/sections/LiveMenu.tsx` + `src/lib/daily-menu.ts` – zwykły `fetch` do PostgREST
-  (bez biblioteki Supabase). Data „dziś” liczona w strefie Europe/Warsaw.
+  (bez biblioteki Supabase). Data „dziś” liczona w strefie Europe/Warsaw. Przełącznik „Dziś”/„Cały tydzień”:
+  `LiveMenuTabs.tsx` + `LiveMenuWeek.tsx` (`fetchWeekMenu` w `daily-menu.ts`, jedno zapytanie o zakres dat).
+  Reguła odsłaniania dni (dziś + jutro widoczne, dalsze dni tego tygodnia zakryte) liczona po stronie klienta w
+  `LiveMenuWeek.tsx` – w bazie nic nie jest ukrywane, więc klientka może spokojnie ustawiać dania z wyprzedzeniem.
+  Sekcja „Menu na dziś” (i wydarzenia, patrz niżej) pobierają dane też na serwerze przy każdym wejściu na stronę
+  (żeby były widoczne w HTML od razu, m.in. dla Google) – dlatego strona główna jest renderowana dynamicznie,
+  gdy Supabase jest skonfigurowany.
 * Panel: `src/app/(panel)/panel/page.tsx` + `src/components/panel/*`, dane w `src/lib/panel-data.ts`. Biblioteka
   `@supabase/supabase-js` ładuje się dopiero w panelu (dynamiczny import).
 * Bez zmiennych środowiskowych strona pokazuje menu przykładowe z `src/data/menu.ts`, a `/panel` informuje

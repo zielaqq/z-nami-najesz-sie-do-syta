@@ -157,7 +157,7 @@ export function GalleryGrid({ images }: GalleryGridProps) {
               <Image
                 src={image.remote ? image.src : withBase(image.src)}
                 unoptimized={image.remote}
-                alt=""
+                alt={image.alt}
                 fill
                 sizes="(min-width: 1024px) 30vw, 50vw"
                 loading="lazy"

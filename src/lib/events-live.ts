@@ -1,7 +1,4 @@
-import { useEffect, useState } from "react";
-
 import type { RestaurantEvent } from "@/data/events";
-import { todayInWarsaw } from "@/lib/format";
 import { supabaseConfig } from "@/lib/supabase/config";
 
 interface EventRow {
@@ -14,7 +11,8 @@ interface EventRow {
 }
 
 /**
- * Nadchodzące (i trwające) wydarzenia z bazy – publiczny odczyt zwykłym `fetch`.
+ * Nadchodzące (i trwające) wydarzenia z bazy – publiczny odczyt zwykłym `fetch`. Bez React, więc działa zarówno
+ * po stronie serwera (patrz `page.tsx`), jak i w przeglądarce (patrz `src/lib/use-upcoming-events.ts`).
  * Wydarzenie znika następnego dnia po dacie (albo po dacie zakończenia, jeśli trwa kilka dni).
  */
 export async function fetchUpcomingEvents(today: string, signal?: AbortSignal): Promise<RestaurantEvent[]> {
@@ -39,35 +37,4 @@ export async function fetchUpcomingEvents(today: string, signal?: AbortSignal): 
     time: row.time_label ?? undefined,
     description: row.description ?? "",
   }));
-}
-
-// Jedno zapytanie na wejście na stronę – korzystają z niego zarówno sekcja „Wydarzenia”, jak i link w stopce.
-let cached: { day: string; promise: Promise<RestaurantEvent[]> } | null = null;
-
-function loadUpcomingEvents(): Promise<RestaurantEvent[]> {
-  const day = todayInWarsaw();
-  if (!cached || cached.day !== day) {
-    const promise: Promise<RestaurantEvent[]> = fetchUpcomingEvents(day).catch(() => {
-      // Błąd sieci: nie zapamiętujemy go, a sekcja po prostu się nie pokazuje (nie wymyślamy wydarzeń).
-      if (cached?.promise === promise) cached = null;
-      return [];
-    });
-    cached = { day, promise };
-  }
-  return cached.promise;
-}
-
-/** Wydarzenia z bazy dla komponentów klienckich. `null` = jeszcze się wczytują. */
-export function useUpcomingEvents(): RestaurantEvent[] | null {
-  const [events, setEvents] = useState<RestaurantEvent[] | null>(null);
-  useEffect(() => {
-    let active = true;
-    void loadUpcomingEvents().then((list) => {
-      if (active) setEvents(list);
-    });
-    return () => {
-      active = false;
-    };
-  }, []);
-  return events;
 }

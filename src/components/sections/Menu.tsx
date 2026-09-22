@@ -1,10 +1,12 @@
-import { LiveMenu } from "@/components/sections/LiveMenu";
+import { LiveMenuTabs } from "@/components/sections/LiveMenuTabs";
 import { MenuBrowser, type MenuBrowserGroup } from "@/components/sections/MenuBrowser";
 import { ButtonLink } from "@/components/ui/Button";
 import { Phone } from "@/components/ui/icons";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { siteConfig } from "@/data/site";
+import { fetchDailyMenu, type Dish } from "@/lib/daily-menu";
 import { getMenu } from "@/lib/content";
+import { todayInWarsaw } from "@/lib/format";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 /**
@@ -16,7 +18,20 @@ export async function Menu() {
 
   let groups: MenuBrowserGroup[] = [];
   let isSample = false;
-  if (!live) {
+  let initialDay: string | undefined;
+  let initialDishes: Dish[] | undefined;
+
+  if (live) {
+    // Wstępne pobranie na serwerze – żeby dzisiejsze menu było widoczne w wygenerowanym HTML od razu (m.in. dla
+    // Google), zanim `LiveMenu` doładuje najświeższą wersję w przeglądarce. Błąd tutaj nie psuje strony –
+    // bez tego `LiveMenu` i tak pobiera dane sam, tak jak dotychczas.
+    initialDay = todayInWarsaw();
+    try {
+      initialDishes = await fetchDailyMenu(initialDay);
+    } catch {
+      initialDishes = undefined;
+    }
+  } else {
     const menu = await getMenu();
     isSample = menu.isSample;
     groups = menu.groups.map((group) => ({
@@ -46,7 +61,11 @@ export async function Menu() {
         }
       />
 
-      {live ? <LiveMenu /> : <MenuBrowser groups={groups} isSample={isSample} />}
+      {live ? (
+        <LiveMenuTabs initialDay={initialDay} initialDishes={initialDishes} />
+      ) : (
+        <MenuBrowser groups={groups} isSample={isSample} />
+      )}
 
       <div className="mt-16 flex flex-col items-start gap-6 border-t border-ink/15 pt-8 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-lead max-w-[38ch] text-ink">
