@@ -53,7 +53,7 @@ Kto skończy ostatni, ten wygrywa – gdy wygra wbudowany, strona daje **404**, 
 
 | | Pełna strona (np. Vercel) | Podgląd na GitHub Pages |
 | --- | --- | --- |
-| Opinie z Google | wyłączone (placeholdery i przycisk do wizytówki) | wyłączone (placeholdery i przycisk do wizytówki) |
+| Opinie z Google | na żywo, po dodaniu kluczy | oznaczone placeholdery (endpoint wymaga serwera) |
 | Zdjęcia | AVIF/WebP, małe wersje dla telefonu | oryginalne pliki – na telefonie wolniej |
 | Nagłówki bezpieczeństwa | tak | nie (GitHub Pages nie pozwala ich ustawiać) |
 | Indeksowanie przez Google | tak | **wyłączone** (patrz niżej) |
@@ -72,7 +72,7 @@ pod nazwą restauracji. Dlatego workflow ustawia `NEXT_PUBLIC_NOINDEX=true`: str
   Workflow sam wykryje, że strona nie leży już w podkatalogu, i zbuduje ją pod nową domeną.
 * **Indeksowanie:** usuń z `pages.yml` linię `NEXT_PUBLIC_NOINDEX: "true"` dopiero wtedy, gdy strona ma prawdziwe menu
   i ceny (patrz README → „Lista kontrolna przed publikacją”).
-* **Szybkie zdjęcia (optymalizacja w locie)** wymagają hostingu z obsługą Next.js (Vercel, Netlify, Cloudflare…). Przy stronie firmowej
+* **Żywe opinie i szybkie zdjęcia** wymagają hostingu z obsługą Next.js (Vercel, Netlify, Cloudflare…). Przy stronie firmowej
   sprawdź warunki darmowego planu wybranego hostingu.
 
 ## Dla programisty
@@ -82,13 +82,15 @@ pod nazwą restauracji. Dlatego workflow ustawia `NEXT_PUBLIC_NOINDEX=true`: str
 * Adres w podkatalogu (`/z-nami-najesz-sie-do-syta`) wymaga ścieżki bazowej. Linki `next/link` dostają ją automatycznie,
   a **zwykłe `<a href="/…">` oraz ścieżki obrazów w `next/image` trzeba owinąć w `withBase()`** z `src/lib/base-path.ts`
   (bez ścieżki bazowej funkcja niczego nie zmienia).
-* W projekcie nie ma już endpointów serwerowych (integracja z Google Places została usunięta), więc eksport statyczny buduje się bez żadnych obejść. Sekcja „Opinie” pokazuje placeholdery.
+* Workflow usuwa `src/app/api` (endpoint opinii działa tylko na serwerze). Sekcja „Opinie” bez kluczy i tak pokazuje placeholdery.
 * `robots.ts`, `sitemap.ts`, `manifest.ts` mają `export const dynamic = "force-static"` – tego wymaga eksport statyczny.
 * Test lokalny (Git Bash na Windows: dodatkowo `MSYS_NO_PATHCONV=1`, inaczej powłoka zamieni `/nazwa-repo` na ścieżkę dysku):
 
   ```bash
+  mv src/app/api/google-reviews/route.ts src/app/api/google-reviews/route.ts.bak   # endpoint wymaga serwera
   STATIC_EXPORT=true NEXT_PUBLIC_BASE_PATH=/z-nami-najesz-sie-do-syta \
     NEXT_PUBLIC_SITE_URL=https://zielaqq.github.io/z-nami-najesz-sie-do-syta NEXT_PUBLIC_NOINDEX=true npm run build
+  mv src/app/api/google-reviews/route.ts.bak src/app/api/google-reviews/route.ts   # przywróć po buildzie
   ```
 
   Wynik jest w folderze `out/` (wyłączonym z Gita) – uruchom go dowolnym serwerem plików statycznych pod adresem `/z-nami-najesz-sie-do-syta/`.

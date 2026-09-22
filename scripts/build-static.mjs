@@ -7,6 +7,7 @@
  *  • eksport statyczny (`STATIC_EXPORT=true`) bez ścieżki bazowej i BEZ blokady indeksowania,
  *  • adres domeny trafia do canonical, sitemap.xml, robots.txt i danych strukturalnych,
  *  • klucze Supabase (publiczne) czyta z `.env.local`, więc „Menu na dziś”, galeria, wydarzenia i panel działają,
+ *  • na czas budowy wyłącza endpoint /api/google-reviews (wymaga serwera Node; opinie z Google są wyłączone),
  *  • dopisuje `out/.htaccess` (strona 404, nagłówki bezpieczeństwa, cache) dla hostingu z Apache/LiteSpeed.
  * Instrukcja: docs/HOSTING-FTP.md
  */
@@ -17,6 +18,8 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outDir = path.join(root, "out");
+const apiRoute = path.join(root, "src", "app", "api", "google-reviews", "route.ts");
+const apiRouteOff = `${apiRoute}.wylaczony`;
 
 const rawUrl = (process.argv[2] ?? "").trim().replace(/\/+$/, "");
 if (!/^https:\/\/[^/\s]+\.[^/\s]+$/i.test(rawUrl)) {
@@ -47,13 +50,27 @@ if (!localEnv.NEXT_PUBLIC_SUPABASE_URL || !localEnv.NEXT_PUBLIC_SUPABASE_ANON_KE
   );
 }
 
+let restored = false;
+function restoreApiRoute() {
+  if (restored) return;
+  restored = true;
+  if (fs.existsSync(apiRouteOff)) fs.renameSync(apiRouteOff, apiRoute);
+}
+process.on("exit", restoreApiRoute);
+for (const signal of ["SIGINT", "SIGTERM"]) process.on(signal, () => process.exit(130));
+
+// Endpoint wymagający serwera nie może trafić do eksportu statycznego – wyłączamy go tylko na czas budowy.
+if (fs.existsSync(apiRoute)) fs.renameSync(apiRoute, apiRouteOff);
+
 const env = { ...process.env, STATIC_EXPORT: "true", NEXT_PUBLIC_SITE_URL: siteUrl, NEXT_TELEMETRY_DISABLED: "1" };
 delete env.NEXT_PUBLIC_BASE_PATH;
 delete env.NEXT_PUBLIC_NOINDEX;
+delete env.GOOGLE_PLACES_API_KEY;
 
 console.log(`\nBudowanie strony dla ${siteUrl} …\n`);
 const nextBin = path.join(root, "node_modules", "next", "dist", "bin", "next");
 const result = spawnSync(process.execPath, [nextBin, "build"], { cwd: root, env, stdio: "inherit" });
+restoreApiRoute();
 if (result.status !== 0) {
   console.error("\n✗ Budowanie się nie udało (błędy powyżej). Folder out/ może być niekompletny – nie wgrywaj go.");
   process.exit(result.status ?? 1);

@@ -48,6 +48,11 @@ jobs:
       - name: Instalacja zależności
         run: npm ci
 
+      # GitHub Pages hostuje tylko pliki statyczne. Endpoint opinii Google działa na serwerze,
+      # więc w tej wersji go nie ma (sekcja „Opinie” pokazuje oznaczone placeholdery).
+      - name: Usunięcie endpointów wymagających serwera
+        run: rm -rf src/app/api
+
       - name: Budowa strony (eksport statyczny → folder out/)
         run: npm run build
         env:

@@ -61,16 +61,18 @@ Jeśli coś się nie uda, skrypt napisze co i **nie wgrywaj wtedy folderu `out/`
 * **Wyszukiwarki:** dodaj stronę w Google Search Console i wyślij `https://twoja-domena.pl/sitemap.xml`. Wpisz adres
   strony w Profilu Firmy Google.
 * **Polityka prywatności:** uzupełnij pełną nazwę i NIP podmiotu (`/polityka-prywatnosci`) i najlepiej poproś prawnika o
-  weryfikację. Przy automatycznym ładowaniu mapy Google i nagrań z Facebooka rozważ baner zgody na cookies.
+  weryfikację. Baner zgody na cookies (mapa Google, nagrania z Facebooka) jest już wbudowany – patrz `CookieConsent`.
 * Podgląd na GitHub Pages może zostać (jest ukryty przed Google) albo możesz go wyłączyć w Settings → Pages.
 
 ## Czego ta wersja nie ma (i czemu to nie problem)
-* **Opinii z Google na żywo** (integrację usunięto: wymaga płatnych rozliczeń w Google Cloud). W sekcji „Opinie” są
-  placeholdery i przycisk do wizytówki Google.
+* **Opinii z Google na żywo** – endpoint `/api/google-reviews` wymaga serwera Node, więc na zwykłym hostingu FTP
+  sekcja „Opinie” pokazuje placeholdery i przycisk do wizytówki Google, nawet gdy masz skonfigurowany klucz
+  (patrz [docs/GOOGLE-OPINIE.md](GOOGLE-OPINIE.md)). Żeby opinie działały na żywo, potrzebny jest hosting z Next.js
+  (Vercel, Netlify, Cloudflare…) – patrz „Pełna wersja” niżej.
 * **Optymalizacji zdjęć „w locie”** przez serwer: zdjęcia są wgrywane w ustalonym rozmiarze (galeria z panelu do
   1600 px). Strona jest przez to nieco cięższa niż na Vercelu, ale działa szybko.
 * **Automatycznego odświeżania co dobę:** niepotrzebne, bo menu, wydarzenia i galeria pobierają się z bazy na żywo.
 
 ## Pełna wersja (opcjonalnie)
 Hosting z Node.js (np. Vercel, VPS) uruchamia zwykły `npm run build` + `npm start` (patrz README) i daje m.in.
-optymalizację zdjęć. Do zwykłego hostingu przez FTP wystarcza powyższa wersja statyczna.
+optymalizację zdjęć oraz opinie z Google na żywo. Do zwykłego hostingu przez FTP wystarcza powyższa wersja statyczna.

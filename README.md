@@ -23,6 +23,7 @@ npm run dev        # http://localhost:3000
 | `npm run images:placeholders` | (re)generuje ilustracje poglądowe ⚠ nadpisuje pliki o tych nazwach |
 | `npm run logo` | z `materialy/logo-oryginal.jpg` robi przezroczyste `logo.png` (usuwa białe tło, przycina) i generuje ikony |
 | `npm run icons` | (re)generuje z logo favicon, ikony PWA i `og-image.jpg` |
+| `npm run places:find` | wyszukuje Place ID wizytówki (wymaga klucza Google) |
 | `npm run build:hosting -- https://domena.pl` | buduje folder `out/` do wgrania przez FTP (FileZilla) na zwykły hosting – patrz [docs/HOSTING-FTP.md](docs/HOSTING-FTP.md) |
 
 Node.js ≥ 20.9. Skopiuj `.env.example` → `.env.local` i uzupełnij zmienne (patrz niżej).
@@ -39,14 +40,15 @@ src/
 │  ├─ gallery.ts · videos.ts (nagrania z Facebooka) · events.ts · about.ts
 ├─ lib/
 │  ├─ content.ts          warstwa dostępu do treści – „szew” pod przyszły CMS
-│  ├─ hours.ts · format.ts · maps.ts · schema.ts (JSON-LD) · site-url.ts
+│  ├─ google-places.ts    pobieranie opinii z Google (serwer, bez cache'u)
+│  ├─ hours.ts · format.ts · maps.ts · schema.ts (JSON-LD) · rate-limit.ts · site-url.ts
 ├─ components/
 │  ├─ layout/             Header, MobileNav (dialog), Logo, Footer, SiteChrome
 │  ├─ sections/           Hero, About, Menu(+MenuBrowser, LiveMenu), CateringDelivery, Gallery(+GalleryGrid),
 │  │                      Reviews(+ReviewsLive), Events, Social(+VideoEmbed), Contact(+MapEmbed)
 │  ├─ panel/              panel klientki: PanelApp, LoginForm, TodayEditor, DishLibrary, DishForm
 │  └─ ui/                 Button, Section, Photo, Stars, OpenStatus, ScrollReveal, icons
-└─ app/                   layout.tsx (SEO, fonty), sitemap/robots/manifest, not-found,
+└─ app/                   layout.tsx (SEO, fonty), sitemap/robots/manifest, /api/google-reviews, not-found,
                           (site)/ – strona główna i /polityka-prywatnosci, (panel)/panel – panel klientki
 supabase/schema.sql       schemat bazy menu (tabele, reguły dostępu, zdjęcia) – uruchamiany raz w Supabase
 public/images/            zdjęcia (menu/, gallery/, hero/, about/, og-image.jpg)
@@ -66,6 +68,7 @@ ich wnętrze, żeby podłączyć CMS; kształt danych zostaje.
 | Zmienna | Wymagana? | Po co |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | **tak (produkcja)** | canonical, Open Graph, sitemap, robots, JSON-LD |
+| `GOOGLE_PLACES_API_KEY`, `GOOGLE_PLACE_ID` | nie | opinie z Google na żywo – [docs/GOOGLE-OPINIE.md](docs/GOOGLE-OPINIE.md) |
 | `NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY` | nie | oficjalne Maps Embed API (klucz publiczny – ogranicz go do swojej domeny) |
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | nie | „Menu na dziś” i panel klientki `/panel` – [docs/PANEL-MENU.md](docs/PANEL-MENU.md) (klucz publishable/anon; **nigdy** `service_role`) |
 
@@ -85,19 +88,22 @@ Klucz trafia do przeglądarki, więc ograniczenia są obowiązkowe.
   ocen ani przedziału cenowego.
 * **Zdjęcia z lokalu są prawdziwe:** galeria, „hero” (góra strony) i sekcja „O nas”. Tylko obrazy dań w przykładowym menu
   (`src/data/menu.ts`, wersja zapasowa bez bazy) to tymczasowe ilustracje (skrypt `scripts/generate-placeholders.mjs`).
-* **Opinie:** na razie sekcja pokazuje wyraźnie oznaczone placeholdery i przycisk do wizytówki Google (integracja z
-  Places API została usunięta – wymaga płatnych rozliczeń, a regulamin Google zabrania zapisywania opinii). Plan i
-  uzasadnienie: [docs/GOOGLE-OPINIE.md](docs/GOOGLE-OPINIE.md).
+* **Opinie Google bez cache’u** – regulamin Google zabrania cache’owania treści Places, więc są pobierane na żywo:
+  automatycznie po zgodzie w banerze cookies (przewinięcie do sekcji „Opinie”), a bez zgody dopiero po kliknięciu
+  „Pokaż opinie z Google” (uzasadnienie i konfiguracja: [docs/GOOGLE-OPINIE.md](docs/GOOGLE-OPINIE.md)).
 * **Facebook:** w sekcji „Obserwuj nas” są **same nagrania** (Reels) w oficjalnym odtwarzaczu Facebooka (bez tokenów), bez
   treści postów; lista w `src/data/videos.ts`. Wtyczka z osią czasu (posty) została usunięta. Integracja przez Graph API
   zwykle wymaga aplikacji Meta i tokenu strony, dlatego jej nie udaję.
 * **Menu na dziś i wydarzenia:** ustawia je klientka w panelu `/panel` (baza Supabase, zdjęcia dań, reguły dostępu w bazie) –
   patrz [docs/PANEL-MENU.md](docs/PANEL-MENU.md). Kategorie menu: obiad dnia, danie specjalne, zupy, drugie dania, ryby, pierogi,
   napoje, piwo. Strona nie pokazuje wczorajszego menu jako dzisiejszego, a minione wydarzenia znikają same.
-* **Prywatność:** mapa Google i nagrania z Facebooka ładują się **od razu** (gdy sekcja jest blisko ekranu) – na życzenie
-  właściciela; Google i Facebook (Meta) mogą wtedy zapisywać cookies bez zgody użytkownika, więc rozważ baner zgody
-  (albo tryb „po kliknięciu”: `siteConfig.embeds.mapLoadOnClick = true` i `facebookLoadOnClick = true`). Strona sama nie używa cookies ani analityki.
-  Jeśli dodasz analitykę, dodaj baner zgody.
+* **Prywatność:** baner zgody na cookies (`CookieConsent`) pokazuje się od razu przy wejściu, z dwoma równorzędnymi
+  przyciskami. Dopiero po „Zgadzam się” mapa Google, nagrania z Facebooka i opinie z Google ładują się same, gdy
+  ich sekcja jest blisko ekranu (ustawienie właściciela mapy/nagrań: `siteConfig.embeds.mapLoadOnClick` /
+  `facebookLoadOnClick` = `false`; opinie zawsze podlegają banerowi); bez zgody (albo przed decyzją) i tak można je
+  obejrzeć – wystarczy kliknąć. Decyzję pamięta tylko przeglądarka odwiedzającego (localStorage), a link „Ustawienia
+  cookies” w stopce otwiera baner ponownie. Strona sama nie używa analityki. Jeśli ją kiedyś dodasz, rozszerz baner
+  o zgodę na analitykę.
 * **Dostępność:** semantyczny HTML, skip-link, focus-visible, natywne `<dialog>` (menu mobilne, lightbox) z pułapką fokusu,
   `prefers-reduced-motion`, kontrasty WCAG AA (sprawdzone), audyt axe-core: 0 naruszeń.
 * **Wydajność:** strona statyczna (ISR co dobę), `next/image` (AVIF/WebP, lazy), czcionki hostowane lokalnie,
@@ -119,6 +125,7 @@ Klucz trafia do przeglądarki, więc ograniczenia są obowiązkowe.
 
 1. Zaimportuj repozytorium, ustaw zmienne środowiskowe z tabeli wyżej (co najmniej `NEXT_PUBLIC_SITE_URL`).
 2. Deploy. Strona `/` odświeża się co 24 h (`export const revalidate = 86400`), dzięki czemu miniona data wydarzenia znika sama.
+3. Endpoint `/api/google-reviews` działa jako funkcja serwerowa (dynamiczna, `no-store`).
 
 ### Zwykły hosting z FTP (FileZilla)
 

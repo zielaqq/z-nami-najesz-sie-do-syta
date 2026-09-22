@@ -7,8 +7,10 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 /**
  * ⚠ SZABLON DO WERYFIKACJI. Tekst opisuje faktyczne działanie tej strony (brak formularzy i analityki;
  * baner zgody na cookies – `CookieConsent`; mapa Google i nagrania Facebooka – zgodnie z ustawieniem
- * `embeds` w src/data/site.ts), ale nie jest poradą prawną. Przed publikacją uzupełnij dane podmiotu
- * prowadzącego działalność (pełna nazwa, NIP) i – jeśli to możliwe – poproś o weryfikację prawnika.
+ * `embeds` w src/data/site.ts; opinie z Google – patrz docs/GOOGLE-OPINIE.md), ale nie jest poradą
+ * prawną. Przed publikacją uzupełnij dane podmiotu prowadzącego działalność (pełna nazwa, NIP)
+ * i – jeśli to możliwe – poproś o weryfikację prawnika. Google wymaga też publicznej polityki
+ * prywatności i warunków korzystania przy używaniu Places API (opinie).
  */
 const UPDATED_AT = "22 września 2026";
 
@@ -76,17 +78,17 @@ export default function PrivacyPage() {
             <p>
               Przy pierwszym wejściu na stronę pokazujemy baner z dwoma równorzędnymi opcjami: <strong className="text-ink">„Zgadzam
               się”</strong> i <strong className="text-ink">„Tylko niezbędne”</strong>. Twój wybór dotyczy wyłącznie
-              automatycznego ładowania mapy Google i nagrań z Facebooka opisanych niżej – to jedyne treści na tej
-              stronie, które mogą zapisać pliki cookies.
+              automatycznego ładowania mapy Google, nagrań z Facebooka i opinii z Google opisanych niżej – to jedyne
+              treści na tej stronie, przy których może dojść do zapisania plików cookies.
             </p>
             <ul>
               <li>
-                <strong className="text-ink">„Zgadzam się”</strong> – mapa i nagrania ładują się same, gdy przewiniesz
-                do ich sekcji.
+                <strong className="text-ink">„Zgadzam się”</strong> – mapa, nagrania i opinie ładują się same, gdy
+                przewiniesz do ich sekcji.
               </li>
               <li>
-                <strong className="text-ink">„Tylko niezbędne”</strong> (albo brak decyzji) – mapę i nagrania nadal
-                obejrzysz, wystarczy je kliknąć; same z siebie się nie wczytują.
+                <strong className="text-ink">„Tylko niezbędne”</strong> (albo brak decyzji) – mapę, nagrania i opinie
+                nadal obejrzysz, wystarczy je kliknąć; same z siebie się nie wczytują.
               </li>
             </ul>
             <p>
@@ -132,6 +134,13 @@ export default function PrivacyPage() {
                 </a>
                 .
               </li>
+              <li>
+                <strong className="text-ink">Opinie z Google.</strong> Ocenę i opinie w sekcji „Opinie” pobieramy z
+                Google Maps dopiero po Twoim kliknięciu „Pokaż opinie z Google” – samo wejście na stronę nie wysyła
+                żadnego zapytania. Jeśli zgodzisz się w banerze cookies, pobierzemy je automatycznie, gdy przewiniesz
+                do tej sekcji. Nie zapisujemy opinii na naszym serwerze; zdjęcia profilowe autorów są ładowane
+                bezpośrednio z serwerów Google.
+              </li>
               {isSupabaseConfigured ? (
                 <li>
                   <strong className="text-ink">Menu na dziś i wydarzenia.</strong> Dzisiejsze menu, zdjęcia dań i
@@ -150,7 +159,7 @@ export default function PrivacyPage() {
               ) : null}
             </ul>
             <p>
-              Korzystanie z map Google podlega warunkom Google:{" "}
+              Korzystanie z map i opinii Google podlega warunkom Google:{" "}
               <a href="https://www.google.com/help/terms_maps/" target="_blank" rel="noopener noreferrer" className={linkClass}>
                 Dodatkowe Warunki Usługi Google Maps
               </a>{" "}
