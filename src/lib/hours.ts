@@ -1,6 +1,33 @@
-import { openingHours, type OpeningHoursRule, type Weekday } from "@/data/site";
+import { openingHours, type Weekday } from "@/data/site";
+import type { OpeningHoursRow } from "@/lib/opening-hours-live";
 
 const TZ = "Europe/Warsaw";
+
+interface DayHours {
+  is_open: boolean;
+  opens: string;
+  closes: string;
+}
+
+type HoursByDay = Record<Weekday, DayHours>;
+
+const CLOSED: DayHours = { is_open: false, opens: "", closes: "" };
+
+/** Godziny z kodu (`src/data/site.ts`) w postaci jednego wiersza na dzień – dopóki dane z bazy się nie wczytają. */
+function defaultHoursByDay(): HoursByDay {
+  const map: HoursByDay = { 0: CLOSED, 1: CLOSED, 2: CLOSED, 3: CLOSED, 4: CLOSED, 5: CLOSED, 6: CLOSED };
+  for (const rule of openingHours) {
+    for (const day of rule.days) map[day] = { is_open: true, opens: rule.opens, closes: rule.closes };
+  }
+  return map;
+}
+
+/** Zamienia wiersze z bazy (tabela `opening_hours`) na mapę dzień → godziny. */
+export function hoursByDayFromRows(rows: OpeningHoursRow[]): HoursByDay {
+  const map = defaultHoursByDay();
+  for (const row of rows) map[row.weekday] = { is_open: row.is_open, opens: row.opens, closes: row.closes };
+  return map;
+}
 
 const WEEKDAY_FROM_SHORT: Record<string, Weekday> = {
   Sun: 0,
@@ -28,8 +55,9 @@ function toMinutes(hhmm: string): number {
   return h * 60 + m;
 }
 
-function ruleForDay(day: Weekday): OpeningHoursRule | undefined {
-  return openingHours.find((rule) => rule.days.includes(day));
+function ruleForDay(day: Weekday, hoursByDay: HoursByDay): DayHours | undefined {
+  const hours = hoursByDay[day];
+  return hours.is_open ? hours : undefined;
 }
 
 /** Aktualny dzień tygodnia i minuta doby w Polsce (niezależnie od strefy użytkownika). */
@@ -59,9 +87,9 @@ export interface OpenStatus {
  * Nie uwzględnia świąt ani wyjątków – dlatego na stronie jest wskazówka,
  * żeby w razie wątpliwości zadzwonić.
  */
-export function getOpenStatus(now: Date = new Date()): OpenStatus {
+export function getOpenStatus(now: Date = new Date(), hoursByDay: HoursByDay = defaultHoursByDay()): OpenStatus {
   const { day, minutes } = warsawNow(now);
-  const today = ruleForDay(day);
+  const today = ruleForDay(day, hoursByDay);
 
   if (today) {
     const opens = toMinutes(today.opens);
@@ -76,7 +104,7 @@ export function getOpenStatus(now: Date = new Date()): OpenStatus {
 
   for (let offset = 1; offset <= 7; offset += 1) {
     const nextDay = ((day + offset) % 7) as Weekday;
-    const rule = ruleForDay(nextDay);
+    const rule = ruleForDay(nextDay, hoursByDay);
     if (rule) {
       const when = offset === 1 ? "jutro" : NEXT_DAY_LABEL[nextDay];
       return { isOpen: false, label: `Zamknięte · otwieramy ${when} o ${rule.opens}` };
@@ -87,7 +115,7 @@ export function getOpenStatus(now: Date = new Date()): OpenStatus {
 }
 
 /** Godziny na dziś, np. „12:00–18:00” (do krótkich podsumowań). */
-export function getTodayHours(now: Date = new Date()): string | null {
-  const rule = ruleForDay(warsawNow(now).day);
+export function getTodayHours(now: Date = new Date(), hoursByDay: HoursByDay = defaultHoursByDay()): string | null {
+  const rule = ruleForDay(warsawNow(now).day, hoursByDay);
   return rule ? `${rule.opens}–${rule.closes}` : null;
 }

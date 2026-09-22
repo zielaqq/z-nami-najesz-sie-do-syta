@@ -3,10 +3,12 @@
 import Image from "next/image";
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 
+import { GalleryPhotoPicker } from "@/components/panel/GalleryPhotoPicker";
 import { NoticeBanner, fieldClass, type PanelNotice } from "@/components/panel/NoticeBanner";
+import { PhotoLightbox } from "@/components/panel/PhotoLightbox";
 import { buttonClasses } from "@/components/ui/Button";
-import { CloseIcon, ImagePlus, Utensils } from "@/components/ui/icons";
-import { isTextOnlyCategory, menuCategories, type MenuCategoryId } from "@/data/menu";
+import { CloseIcon, ImagePlus, Images, Utensils } from "@/components/ui/icons";
+import { menuCategories, type MenuCategoryId } from "@/data/menu";
 import { dishPhotoUrl, type Dish } from "@/lib/daily-menu";
 import { describeError, saveDish } from "@/lib/panel-data";
 
@@ -26,8 +28,10 @@ interface DishFormProps {
 }
 
 /**
- * Formularz dania w oknie dialogowym: nazwa, kategoria, cena i opis; pole zdjęcia (z aparatu lub galerii) pokazuje
- * się tylko dla kategorii spoza `textOnlyCategories` (obecnie żadnej – patrz src/data/menu.ts).
+ * Formularz dania w oknie dialogowym: nazwa, kategoria, cena, opis i zdjęcie (nieobowiązkowe – menu na stronie jest
+ * listą bez zdjęć niezależnie od tego pola). Zdjęcie można zrobić aparatem, wybrać z galerii telefonu albo wybrać
+ * jedno z tych, które są już w galerii restauracji (`GalleryPhotoPicker`). Kliknięcie podglądu powiększa zdjęcie
+ * (`PhotoLightbox`).
  */
 export function DishForm({ dish, onClose, onSaved }: DishFormProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -39,6 +43,8 @@ export function DishForm({ dish, onClose, onSaved }: DishFormProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<PanelNotice | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [lightbox, setLightbox] = useState<{ src: string; title: string } | null>(null);
 
   // Okno otwiera się razem z formularzem; po odmontowaniu znika z DOM (nie wywołujemy close() w sprzątaniu,
   // bo w trybie deweloperskim React montuje komponenty dwa razy).
@@ -60,6 +66,14 @@ export function DishForm({ dish, onClose, onSaved }: DishFormProps) {
     if (!file) return;
     setPhoto(file);
     setPreview(URL.createObjectURL(file));
+  };
+
+  // Zdjęcie wybrane w oknie „Wybierz z galerii” – ląduje w tym samym `photo`/`preview`, więc dalej idzie tą samą
+  // ścieżką co zwykły wybór pliku (zmniejszenie i wgranie przy zapisie). Poprzedni podgląd zwalnia efekt niżej.
+  const onPickedFromGallery = (file: File, previewUrl: string) => {
+    setPhoto(file);
+    setPreview(previewUrl);
+    setPickerOpen(false);
   };
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -92,6 +106,7 @@ export function DishForm({ dish, onClose, onSaved }: DishFormProps) {
   const shownPhoto = preview ?? dishPhotoUrl(dish?.photo_path);
 
   return (
+    <>
     <dialog
       ref={dialogRef}
       aria-labelledby="dish-form-title"
@@ -165,23 +180,27 @@ export function DishForm({ dish, onClose, onSaved }: DishFormProps) {
             />
           </label>
 
-          {isTextOnlyCategory(category) ? (
-            <p className="text-xs text-mute">
-              Ta kategoria pokazuje się na stronie jako zwykła lista z cenami – zdjęcie nie jest potrzebne.
-            </p>
-          ) : (
-            <div>
-              <span className="text-sm font-semibold">Zdjęcie</span>
-              <div className="mt-1.5 flex items-center gap-4">
-                <div className="relative size-24 shrink-0 overflow-hidden bg-sand">
-                  {shownPhoto ? (
-                    <Image src={shownPhoto} alt="Podgląd zdjęcia dania" fill unoptimized sizes="96px" className="object-cover" />
-                  ) : (
-                    <span className="absolute inset-0 grid place-items-center text-mute" aria-hidden="true">
-                      <Utensils className="size-8 opacity-50" />
-                    </span>
-                  )}
-                </div>
+          <div>
+            <span className="text-sm font-semibold">
+              Zdjęcie <span className="font-normal text-mute">(nieobowiązkowe)</span>
+            </span>
+            <div className="mt-1.5 flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => shownPhoto && setLightbox({ src: shownPhoto, title: name.trim() || "Podgląd zdjęcia dania" })}
+                disabled={!shownPhoto}
+                aria-label={shownPhoto ? "Powiększ zdjęcie dania" : "Brak zdjęcia"}
+                className="relative size-24 shrink-0 overflow-hidden bg-sand disabled:cursor-default"
+              >
+                {shownPhoto ? (
+                  <Image src={shownPhoto} alt="" fill unoptimized sizes="96px" className="object-cover" />
+                ) : (
+                  <span className="absolute inset-0 grid place-items-center text-mute" aria-hidden="true">
+                    <Utensils className="size-8 opacity-50" />
+                  </span>
+                )}
+              </button>
+              <div className="flex flex-col gap-2">
                 <label
                   className={buttonClasses(
                     "secondary",
@@ -193,12 +212,17 @@ export function DishForm({ dish, onClose, onSaved }: DishFormProps) {
                   {shownPhoto ? "Zmień zdjęcie" : "Dodaj zdjęcie"}
                   <input type="file" accept="image/*" onChange={onPick} className="sr-only" />
                 </label>
+                <button type="button" onClick={() => setPickerOpen(true)} className={buttonClasses("secondary", "md")}>
+                  <Images className="size-4" aria-hidden="true" />
+                  Wybierz z galerii
+                </button>
               </div>
-              <p className="mt-2 text-xs text-mute">
-                Zdjęcie z telefonu zmniejszymy automatycznie. Najlepiej danie z góry, przy dobrym świetle.
-              </p>
             </div>
-          )}
+            <p className="mt-2 text-xs text-mute">
+              Zdjęcie z telefonu zmniejszymy automatycznie. Najlepiej danie z góry, przy dobrym świetle. Menu na stronie
+              i tak jest listą bez zdjęć – to zdjęcie przyda się np. w galerii (zakładka „Galeria” → „Skopiuj zdjęcia dań”).
+            </p>
+          </div>
 
           <NoticeBanner notice={notice} />
         </div>
@@ -213,5 +237,8 @@ export function DishForm({ dish, onClose, onSaved }: DishFormProps) {
         </div>
       </form>
     </dialog>
+    {pickerOpen ? <GalleryPhotoPicker onClose={() => setPickerOpen(false)} onPicked={onPickedFromGallery} /> : null}
+    <PhotoLightbox photo={lightbox} onClose={() => setLightbox(null)} />
+    </>
   );
 }

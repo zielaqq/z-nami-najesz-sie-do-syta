@@ -1,5 +1,5 @@
 import { galleryImages, type GalleryCategory } from "@/data/gallery";
-import { dishPhotoUrl } from "@/lib/daily-menu";
+import { dishPhotoUrl, type Dish } from "@/lib/daily-menu";
 import { GALLERY_COLUMNS, type GalleryRow } from "@/lib/gallery-live";
 import { resizeImageDetailed } from "@/lib/image-resize";
 import { listDishes } from "@/lib/panel-data";
@@ -107,35 +107,40 @@ export async function saveGalleryOrder(ordered: GalleryRecord[]): Promise<Galler
   return renumbered;
 }
 
-/**
- * Kopiuje do galerii (kategoria „Dania”, podpis = nazwa dania) zdjęcia z bazy dań, które mają jeszcze wgrane
- * zdjęcie (dania bez zdjęcia – bo menu jest teraz listą bez zdjęć – są pomijane). Oryginał w bazie dań zostaje
- * bez zmian; w galerii powstaje osobna kopia pliku. Można uruchamiać wielokrotnie – danie, którego nazwa już jest
- * podpisem zdjęcia w kategorii „Dania”, jest pomijane, żeby nie powielać tego samego zdjęcia.
- */
-export async function copyDishPhotosToGallery(
-  startOrder: number,
-  onProgress?: (done: number, total: number) => void,
-): Promise<{ added: GalleryRecord[]; skipped: number; error: unknown | null }> {
-  const supabase = await getSupabase();
-  const [dishes, existing] = await Promise.all([listDishes(false), listGallery()]);
-  const alreadyCopied = new Set(
+/** Dania (nieukryte) z wgranym zdjęciem – lista do wyboru w oknie „Skopiuj zdjęcia dań” w galerii. */
+export async function listDishesWithPhotos(): Promise<Dish[]> {
+  const dishes = await listDishes(false);
+  return dishes.filter((dish) => dish.photo_path);
+}
+
+/** Nazwy dań (małe litery, bez spacji na końcach), które już mają zdjęcie w galerii w kategorii „Dania”. */
+export async function copiedDishNames(): Promise<Set<string>> {
+  const existing = await listGallery();
+  return new Set(
     existing
       .filter((photo) => photo.category === "dania")
       .map((photo) => (photo.caption ?? "").trim().toLocaleLowerCase("pl")),
   );
-  const candidates = dishes.filter(
-    (dish) => dish.photo_path && !alreadyCopied.has(dish.name.trim().toLocaleLowerCase("pl")),
-  );
-  const skipped = dishes.length - candidates.length;
+}
 
+/**
+ * Kopiuje do galerii (kategoria „Dania”, podpis = nazwa dania) zdjęcia wybranych dań z bazy dań. Oryginał w bazie
+ * dań zostaje bez zmian – w galerii powstaje osobna kopia pliku. Dania do skopiowania wybiera się w
+ * `DishPhotoPicker`; ta funkcja kopiuje dokładnie te, które dostanie (bez własnego pomijania duplikatów).
+ */
+export async function copyDishPhotosToGallery(
+  dishes: Dish[],
+  startOrder: number,
+  onProgress?: (done: number, total: number) => void,
+): Promise<{ added: GalleryRecord[]; error: unknown | null }> {
+  const supabase = await getSupabase();
   const added: GalleryRecord[] = [];
-  for (const [index, dish] of candidates.entries()) {
-    onProgress?.(index, candidates.length);
+  for (const [index, dish] of dishes.entries()) {
+    onProgress?.(index, dishes.length);
     let uploaded: string | null = null;
     try {
       const sourceUrl = dishPhotoUrl(dish.photo_path);
-      if (!sourceUrl) continue; // nie powinno się zdarzyć (już odfiltrowane wyżej) – dla bezpieczeństwa typów
+      if (!sourceUrl) continue; // danie bez zdjęcia – nie powinno tu trafić, ale dla bezpieczeństwa typów
       const response = await fetch(sourceUrl);
       if (!response.ok) throw new Error(`Nie udało się pobrać zdjęcia dania (HTTP ${response.status})`);
       const sourceBlob = await response.blob();
@@ -165,11 +170,11 @@ export async function copyDishPhotosToGallery(
       added.push(saved);
     } catch (error) {
       if (uploaded) await supabase.storage.from(BUCKET).remove([uploaded]);
-      return { added, skipped, error };
+      return { added, error };
     }
   }
-  onProgress?.(candidates.length, candidates.length);
-  return { added, skipped, error: null };
+  onProgress?.(dishes.length, dishes.length);
+  return { added, error: null };
 }
 
 /** Przenosi do bazy zdjęcia domyślne z kodu (`src/data/gallery.ts`), żeby można je było układać i kasować w panelu. */

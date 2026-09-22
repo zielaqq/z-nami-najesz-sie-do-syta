@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import { DishForm } from "@/components/panel/DishForm";
 import { NoticeBanner, fieldClass, type PanelNotice } from "@/components/panel/NoticeBanner";
+import { PhotoLightbox } from "@/components/panel/PhotoLightbox";
 import { buttonClasses } from "@/components/ui/Button";
 import { Eye, EyeOff, Pencil, Plus, Search, Utensils } from "@/components/ui/icons";
 import { cx } from "@/lib/cx";
@@ -22,6 +23,7 @@ export function DishLibrary() {
   const [showArchived, setShowArchived] = useState(false);
   const [query, setQuery] = useState("");
   const [editing, setEditing] = useState<Dish | "new" | null>(null);
+  const [lightbox, setLightbox] = useState<{ src: string; title: string } | null>(null);
   const [notice, setNotice] = useState<PanelNotice | null>(null);
 
   useEffect(() => {
@@ -140,7 +142,13 @@ export function DishLibrary() {
             </h3>
             <ul className="divide-y divide-ink/10">
               {group.dishes.map((dish) => (
-                <DishRow key={dish.id} dish={dish} onEdit={() => setEditing(dish)} onToggleArchived={() => void toggleArchived(dish)} />
+                <DishRow
+                  key={dish.id}
+                  dish={dish}
+                  onEdit={() => setEditing(dish)}
+                  onToggleArchived={() => void toggleArchived(dish)}
+                  onPreview={(photo) => setLightbox({ src: photo, title: dish.name })}
+                />
               ))}
             </ul>
           </section>
@@ -155,15 +163,32 @@ export function DishLibrary() {
           onSaved={onSaved}
         />
       ) : null}
+      <PhotoLightbox photo={lightbox} onClose={() => setLightbox(null)} />
     </section>
   );
 }
 
-function DishRow({ dish, onEdit, onToggleArchived }: { dish: Dish; onEdit: () => void; onToggleArchived: () => void }) {
+function DishRow({
+  dish,
+  onEdit,
+  onToggleArchived,
+  onPreview,
+}: {
+  dish: Dish;
+  onEdit: () => void;
+  onToggleArchived: () => void;
+  onPreview: (photoUrl: string) => void;
+}) {
   const photo = dishPhotoUrl(dish.photo_path);
   return (
     <li className={cx("flex items-center gap-4 py-3", dish.archived && "opacity-60")}>
-      <div className="relative size-16 shrink-0 overflow-hidden bg-sand sm:size-20">
+      <button
+        type="button"
+        onClick={() => photo && onPreview(photo)}
+        disabled={!photo}
+        aria-label={photo ? `Powiększ zdjęcie: ${dish.name}` : "Brak zdjęcia"}
+        className="relative size-16 shrink-0 overflow-hidden bg-sand disabled:cursor-default sm:size-20"
+      >
         {photo ? (
           <Image src={photo} alt="" fill unoptimized sizes="80px" className="object-cover" />
         ) : (
@@ -171,7 +196,7 @@ function DishRow({ dish, onEdit, onToggleArchived }: { dish: Dish; onEdit: () =>
             <Utensils className="size-6 opacity-50" />
           </span>
         )}
-      </div>
+      </button>
       <div className="min-w-0 flex-1">
         <p className="font-serif text-lg leading-snug">
           {dish.name}

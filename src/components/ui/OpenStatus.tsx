@@ -3,27 +3,31 @@
 import { useSyncExternalStore } from "react";
 
 import { cx } from "@/lib/cx";
-import { getOpenStatus } from "@/lib/hours";
+import { getOpenStatus, hoursByDayFromRows } from "@/lib/hours";
+import { useOpeningHoursRows } from "@/lib/opening-hours-live";
 
 function subscribe(onChange: () => void) {
   const id = window.setInterval(onChange, 60_000);
   return () => window.clearInterval(id);
 }
 
-/** Migawka jako tekst – React porównuje wartość, więc nie renderuje bez potrzeby. */
-function getSnapshot(): string {
-  const status = getOpenStatus();
-  return `${status.isOpen ? "1" : "0"}|${status.label}`;
-}
-
 const getServerSnapshot = (): string | null => null;
 
 /**
- * „Otwarte teraz · do 18:00” – liczone w przeglądarce, wg czasu w Polsce.
- * Na serwerze i przy pierwszym renderze zajmuje tylko miejsce (bez skoków układu).
- * Bazuje na regularnych godzinach – nie zna świąt (stąd wskazówka o telefonie w sekcji kontakt).
+ * „Otwarte teraz · do 18:00” – liczone w przeglądarce, wg czasu w Polsce, na podstawie godzin z panelu
+ * (a do czasu ich wczytania – z kodu). Na serwerze i przy pierwszym renderze zajmuje tylko miejsce (bez
+ * skoków układu). Bazuje na regularnych godzinach – nie zna świąt (stąd wskazówka o telefonie w kontakcie).
  */
 export function OpenStatus({ className }: { className?: string }) {
+  const rows = useOpeningHoursRows();
+  const hoursByDay = rows ? hoursByDayFromRows(rows) : undefined;
+
+  // Migawka jako tekst – React porównuje wartość, więc nie renderuje bez potrzeby.
+  const getSnapshot = (): string => {
+    const status = getOpenStatus(new Date(), hoursByDay);
+    return `${status.isOpen ? "1" : "0"}|${status.label}`;
+  };
+
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   if (!snapshot) {

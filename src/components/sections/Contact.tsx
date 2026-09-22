@@ -1,9 +1,10 @@
 import { MapEmbed } from "@/components/sections/MapEmbed";
 import { ButtonLink } from "@/components/ui/Button";
 import { MapPin, Navigation, Phone } from "@/components/ui/icons";
+import { OpeningHoursList } from "@/components/ui/OpeningHoursList";
 import { OpenStatus } from "@/components/ui/OpenStatus";
 import { Section, SectionHeading, type SectionTone } from "@/components/ui/Section";
-import { openingHours, siteConfig } from "@/data/site";
+import { siteConfig } from "@/data/site";
 import { directionsUrl, getMapEmbedUrl } from "@/lib/maps";
 
 export function Contact({ tone = "cream" }: { tone?: SectionTone }) {
@@ -44,16 +45,7 @@ export function Contact({ tone = "cream" }: { tone?: SectionTone }) {
 
           <div className="mt-10" data-reveal>
             <h3 className="eyebrow">Godziny otwarcia</h3>
-            <dl className="mt-4 divide-y divide-ink/15 border-y border-ink/15">
-              {openingHours.map((rule) => (
-                <div key={rule.id} className="flex items-baseline justify-between gap-4 py-3.5">
-                  <dt className="text-ink-soft">{rule.label}</dt>
-                  <dd className="tabular font-semibold text-ink">
-                    {rule.opens}–{rule.closes}
-                  </dd>
-                </div>
-              ))}
-            </dl>
+            <OpeningHoursList variant="contact" />
             <OpenStatus className="mt-4 text-[0.9375rem] font-medium text-ink" />
             <p className="mt-3 text-sm text-mute">
               Przed wizytą w święta lub z większą grupą zadzwoń i potwierdź szczegóły.

@@ -15,6 +15,7 @@ export {
   Eye,
   EyeOff,
   ImagePlus,
+  Images,
   LogOut,
   MapPin,
   Menu as MenuIcon,

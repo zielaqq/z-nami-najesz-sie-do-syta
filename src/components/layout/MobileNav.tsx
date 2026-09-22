@@ -5,8 +5,9 @@ import { useEffect, useRef, type MouseEvent } from "react";
 import { Logo } from "@/components/layout/Logo";
 import { ButtonLink } from "@/components/ui/Button";
 import { CloseIcon, MapPin, MenuIcon, Phone } from "@/components/ui/icons";
-import { fullAddress, navItems, openingHours, siteConfig } from "@/data/site";
+import { fullAddress, navItems, siteConfig } from "@/data/site";
 import { withBase } from "@/lib/base-path";
+import { useOpeningHoursGroups } from "@/lib/opening-hours-live";
 
 /**
  * Menu mobilne jako natywny <dialog> otwarty przez showModal():
@@ -15,6 +16,7 @@ import { withBase } from "@/lib/base-path";
  */
 export function MobileNav() {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const hoursGroups = useOpeningHoursGroups();
 
   // Po powiększeniu okna do układu desktopowego zamknij otwarte menu.
   useEffect(() => {
@@ -98,9 +100,9 @@ export function MobileNav() {
               <span>{fullAddress}</span>
             </p>
             <ul className="mt-3 space-y-1 pl-[1.625rem] text-sm text-mute">
-              {openingHours.map((rule) => (
-                <li key={rule.id} className="tabular">
-                  {rule.label}: {rule.opens}–{rule.closes}
+              {hoursGroups.map((group) => (
+                <li key={group.id} className="tabular">
+                  {group.label}: {group.closed ? "nieczynne" : `${group.opens}–${group.closes}`}
                 </li>
               ))}
             </ul>

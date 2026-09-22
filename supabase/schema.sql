@@ -279,3 +279,40 @@ drop policy if exists "gallery_photos_admin_delete" on storage.objects;
 create policy "gallery_photos_admin_delete" on storage.objects
   for delete to authenticated
   using (bucket_id = 'gallery-photos' and public.is_admin());
+
+-- 7) Godziny otwarcia (7 stałych wierszy, jeden na dzień tygodnia; edytowane w panelu) -----
+--    `weekday` jak w JS Date#getDay(): 0 = niedziela, 1 = poniedziałek … 6 = sobota.
+create table if not exists public.opening_hours (
+  weekday smallint primary key check (weekday between 0 and 6),
+  is_open boolean not null default true,
+  opens text not null default '12:00' check (opens ~ '^([01]\d|2[0-3]):[0-5]\d$'),
+  closes text not null default '18:00' check (closes ~ '^([01]\d|2[0-3]):[0-5]\d$')
+);
+
+-- Wiersze startowe – zgodne z dotychczasowymi godzinami w kodzie (codziennie 12:00–18:00).
+-- Bezpieczne przy ponownym uruchomieniu: istniejące wiersze zostają bez zmian.
+insert into public.opening_hours (weekday, is_open, opens, closes)
+values (0, true, '12:00', '18:00'),
+       (1, true, '12:00', '18:00'),
+       (2, true, '12:00', '18:00'),
+       (3, true, '12:00', '18:00'),
+       (4, true, '12:00', '18:00'),
+       (5, true, '12:00', '18:00'),
+       (6, true, '12:00', '18:00')
+on conflict (weekday) do nothing;
+
+alter table public.opening_hours enable row level security;
+
+drop policy if exists "opening_hours_public_read" on public.opening_hours;
+create policy "opening_hours_public_read" on public.opening_hours
+  for select to anon, authenticated
+  using (true);
+
+drop policy if exists "opening_hours_admin_update" on public.opening_hours;
+create policy "opening_hours_admin_update" on public.opening_hours
+  for update to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+grant select on public.opening_hours to anon;
+grant select, update on public.opening_hours to authenticated;

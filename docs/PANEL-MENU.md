@@ -26,9 +26,10 @@ i jest ukryty przed wyszukiwarkami.
 **Kategorie dań:** **Obiad dnia, Danie specjalne, Zupy, Drugie dania, Ryby, Pierogi, Napoje, Piwo.**
 W „Obiedzie dnia” wpisz zestaw jako jedno danie (np. „Pomidorowa + schabowy”, cena zestawu, ewentualnie opis).
 „Danie specjalne” jest na to, co nie pasuje do żadnej innej kategorii (np. propozycja szefa kuchni na dziś).
-**Menu na stronie jest listą** „nazwa … cena”, bez zdjęć dań – nie trzeba ich fotografować. Formularz dania w ogóle
-nie pyta o zdjęcie. (Da się to zmienić dla wybranej kategorii – patrz komentarz `textOnlyCategories` w
-`src/data/menu.ts` – wtedy ta kategoria wraca do kafelków ze zdjęciem, jak dawniej.)
+**Menu na stronie jest listą** „nazwa … cena”, bez zdjęć dań – nie trzeba ich fotografować. Zdjęcie w formularzu
+dania jest więc **nieobowiązkowe** (patrz „Nowe danie” niżej) – dodaje się je głównie po to, żeby móc je przenieść do
+**galerii**. (Da się przywrócić kafelki ze zdjęciem na stronie dla wybranej kategorii – patrz komentarz
+`textOnlyCategories` w `src/data/menu.ts`.)
 
 ### Kolejność dań na stronie
 
@@ -51,9 +52,9 @@ Zakładka **„Galeria”** – zdjęcia ze strony (wnętrze, ogródek, dania). 
 * **Dodaj zdjęcia** – wybierz jedno albo kilka zdjęć naraz (z aparatu lub galerii telefonu), ustaw **kategorię**
   (Wnętrze / Ogródek / Dania) i, jeśli chcesz, **podpis** (widać go w powiększeniu). Zdjęcia zmniejszymy automatycznie
   i dodamy na koniec galerii.
-* **Skopiuj zdjęcia dań** – jednym kliknięciem kopiuje do galerii (kategoria „Dania”, podpis = nazwa dania) zdjęcia,
-  które masz wgrane przy daniach w „Bazie dań”. Danie bez zdjęcia jest pomijane; danie już raz skopiowane (po nazwie)
-  też, więc można klikać ten przycisk wielokrotnie, np. po dodaniu nowego dania ze zdjęciem – doda tylko nowe.
+* **Skopiuj zdjęcia dań** – otwiera okno z daniami z „Bazy dań”, które mają zdjęcie; zaznaczasz, które mają trafić do
+  galerii (kategoria „Dania”, podpis = nazwa dania), i klikasz „Skopiuj zaznaczone”. Danie, które już raz skopiowano
+  (po nazwie), jest domyślnie odznaczone – możesz je zaznaczyć ponownie, jeśli naprawdę chcesz dodać je drugi raz.
   Oryginał w „Bazie dań” zostaje bez zmian, w galerii powstaje osobna kopia zdjęcia.
 * **Strzałki w lewo / w prawo** przy zdjęciu zmieniają kolejność – na stronie zdjęcia układają się od lewej do prawej,
   rząd po rzędzie.
@@ -74,9 +75,30 @@ o ich zgodę.
 
 ### Nowe danie
 
-Zakładka **„Baza dań” → „Dodaj danie”**: nazwa, kategoria, cena (nieobowiązkowa) i krótki opis (nieobowiązkowy) –
-zdjęcia nie trzeba dodawać, formularz o nie nie pyta. Ołówek przy daniu zmienia nazwę, cenę i opis. Oko **ukrywa**
-danie zamiast je usuwać: znika ze strony i z wyboru, ale można je przywrócić („Pokaż ukryte”).
+Zakładka **„Baza dań” → „Dodaj danie”**: nazwa, kategoria, cena (nieobowiązkowa), krótki opis (nieobowiązkowy) i
+zdjęcie (**nieobowiązkowe** – menu na stronie i tak jest listą cen bez zdjęć, niezależnie od tego pola). Zdjęcie
+dodajesz na dwa sposoby: **„Dodaj zdjęcie”** (aparat albo galeria telefonu, zmniejszamy je automatycznie) albo
+**„Wybierz z galerii”** – gdy dobre zdjęcie tego dania jest już w galerii strony, użyjesz go bez robienia nowego.
+Kliknięcie miniatury zdjęcia (w formularzu i na liście dań) pokazuje je na większym ekranie. Ołówek przy daniu
+zmienia nazwę, cenę, opis i zdjęcie. Oko **ukrywa** danie zamiast je usuwać: znika ze strony i z wyboru, ale można
+je przywrócić („Pokaż ukryte”).
+
+Po co w takim razie zdjęcie dania, skoro menu jest listą? Głównie po to, żeby łatwo przenieść je do **galerii**
+(patrz niżej) – to najprostszy sposób na dorzucenie do galerii kolejnych zdjęć potraw.
+
+### Godziny otwarcia
+
+Zakładka **„Godziny”** – godziny widoczne na stronie: status „otwarte teraz” przy zdjęciu głównym, sekcja Kontakt,
+stopka i menu mobilne (telefon). Każdy dzień tygodnia ma swój wiersz z godziną otwarcia i zamknięcia.
+
+* **Odznacz dzień**, żeby pokazać go jako **nieczynny** (święto, dzień wolny, sezonowa przerwa) – godziny tego dnia
+  zostają zapamiętane, więc po ponownym zaznaczeniu wracają takie, jakie były.
+* Dni z takimi samymi godzinami pod rząd łączą się na stronie w jedną linijkę (np. „Wtorek – Sobota: 12:00–18:00”),
+  a gdy wszystkie dni mają te same godziny, strona pokazuje po prostu „Codziennie”.
+* **„Zapisz zmiany”** zapisuje wszystkie 7 dni naraz – zmiana jest widoczna na stronie od razu po odświeżeniu.
+
+Godziny w kodzie (`src/data/site.ts`) to tylko wartości startowe (pierwsze wiersze w bazie i dane strukturalne SEO) –
+od momentu skonfigurowania bazy realne godziny na stronie pochodzą z tej zakładki, nie z kodu.
 
 ---
 
@@ -141,7 +163,8 @@ krok 3.
 
 ## Dla programisty
 
-* Schemat i reguły: `supabase/schema.sql` (tabele `dishes`, `daily_menu`, `events`, `admins`, bucket `dish-photos`).
+* Schemat i reguły: `supabase/schema.sql` (tabele `dishes`, `daily_menu`, `events`, `gallery_photos`, `opening_hours`,
+  `admins`; magazyny `dish-photos`, `gallery-photos`).
 * Wydarzenia: publiczny odczyt `src/lib/events-live.ts` (jedno zapytanie na wejście na stronę), sekcja
   `src/components/sections/LiveEvents.tsx`; panel: `EventsManager` i `EventForm` (+ `src/lib/panel-events.ts`).
   Sekcja „Wydarzenia” ma tło „sand”, więc kolory sąsiednich sekcji nie zależą od tego, czy wydarzenia są.
@@ -157,3 +180,11 @@ krok 3.
   pokazuje zdjęcia domyślne z `src/data/gallery.ts`); panel: `GalleryManager`, `GalleryPhotoForm`, `src/lib/panel-gallery.ts`.
   Zdjęcie z `photo_path` zaczynającym się od „/” to plik z folderu `public` (import zdjęć domyślnych).
 * Nagrania z Facebooka (sekcja „Obserwuj nas”) są na razie w pliku `src/data/videos.ts`.
+* Godziny otwarcia: tabela `opening_hours` (7 stałych wierszy, jeden na dzień tygodnia – bez insert/delete z panelu,
+  tylko update). Publiczny odczyt i grupowanie w etykiety: `src/lib/opening-hours-live.ts`
+  (`useOpeningHoursRows`/`useOpeningHoursGroups`, jedno zapytanie na wejście na stronę); wyświetlanie:
+  `OpeningHoursList` (Kontakt, stopka) i bezpośrednio w `MobileNav`. Status „otwarte teraz”: `src/lib/hours.ts`
+  (`getOpenStatus`/`hoursByDayFromRows`) + `OpenStatus`. Panel: `OpeningHoursManager` + `src/lib/panel-opening-hours.ts`.
+  Dane strukturalne SEO (`src/lib/schema.ts`) i wartości startowe w bazie nadal biorą się z `openingHours` w
+  `src/data/site.ts` – budowane są raz przy eksporcie strony, więc **nie** aktualizują się same po zmianie w panelu
+  (tak samo jak przykładowe menu w JSON-LD).

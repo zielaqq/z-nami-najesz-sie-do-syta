@@ -3,11 +3,13 @@
 import Image from "next/image";
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
+import { DishPhotoPicker } from "@/components/panel/DishPhotoPicker";
 import { GalleryPhotoForm } from "@/components/panel/GalleryPhotoForm";
 import { NoticeBanner, type PanelNotice } from "@/components/panel/NoticeBanner";
 import { buttonClasses } from "@/components/ui/Button";
 import { ChevronLeft, ChevronRight, Copy, Pencil, Plus, Trash2 } from "@/components/ui/icons";
 import { defaultGalleryAlt, galleryCategories } from "@/data/gallery";
+import type { Dish } from "@/lib/daily-menu";
 import { galleryPhotoUrl } from "@/lib/gallery-live";
 import { describeError } from "@/lib/panel-data";
 import {
@@ -29,6 +31,7 @@ export function GalleryManager() {
   const [editing, setEditing] = useState<GalleryRecord | "new" | null>(null);
   const [notice, setNotice] = useState<PanelNotice | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [copyProgress, setCopyProgress] = useState<{ done: number; total: number } | null>(null);
   const [announcement, setAnnouncement] = useState("");
   // Zapisy kolejności idą jeden po drugim, żeby wolniejsza odpowiedź nie nadpisała nowszej zmiany.
@@ -111,13 +114,14 @@ export function GalleryManager() {
     }
   };
 
-  const copyDishPhotos = async () => {
+  const copyDishPhotos = async (dishes: Dish[]) => {
+    setPickerOpen(false);
     setBusy(true);
     setNotice(null);
     setCopyProgress(null);
     try {
       const startOrder = photos ? photos.reduce((max, item) => Math.max(max, item.sort_order + 1), 0) : 0;
-      const { added, skipped, error } = await copyDishPhotosToGallery(startOrder, (done, total) =>
+      const { added, error } = await copyDishPhotosToGallery(dishes, startOrder, (done, total) =>
         setCopyProgress({ done, total }),
       );
       if (added.length > 0) setPhotos((current) => [...(current ?? []), ...added]);
@@ -125,14 +129,6 @@ export function GalleryManager() {
         setNotice({
           tone: "error",
           text: `${added.length > 0 ? `Skopiowano ${added.length} zdjęć. ` : ""}${describeError(error)}`,
-        });
-      } else if (added.length === 0) {
-        setNotice({
-          tone: "ok",
-          text:
-            skipped > 0
-              ? "Wszystkie dania ze zdjęciem są już skopiowane do galerii."
-              : "Żadne danie w bazie nie ma jeszcze zdjęcia – nie ma czego kopiować.",
         });
       } else {
         setNotice({
@@ -164,7 +160,7 @@ export function GalleryManager() {
         <div className="flex flex-wrap gap-3">
           <button
             type="button"
-            onClick={() => void copyDishPhotos()}
+            onClick={() => setPickerOpen(true)}
             disabled={busy}
             className={buttonClasses("secondary", "md", "disabled:opacity-60")}
           >
@@ -254,6 +250,7 @@ export function GalleryManager() {
           }}
         />
       ) : null}
+      {pickerOpen ? <DishPhotoPicker onClose={() => setPickerOpen(false)} onConfirm={(dishes) => void copyDishPhotos(dishes)} /> : null}
     </section>
   );
 }

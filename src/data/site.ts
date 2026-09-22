@@ -20,7 +20,11 @@ export interface OpeningHoursRule {
   closes: string;
 }
 
-/** Godziny otwarcia. Zmiana tutaj aktualizuje też status „otwarte teraz” i SEO. */
+/**
+ * Godziny otwarcia – WARTOŚCI STARTOWE. Klientka zmienia rzeczywiste godziny sama w panelu (zakładka „Godziny”,
+ * tabela `opening_hours` w bazie) – strona wtedy pokazuje godziny z bazy, a te tutaj służą tylko jako pierwsze
+ * wiersze w bazie, dane strukturalne SEO i awaryjny podgląd, zanim przeglądarka wczyta dane z bazy.
+ */
 export const openingHours: OpeningHoursRule[] = [
   {
     id: "daily",

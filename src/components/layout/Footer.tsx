@@ -5,7 +5,8 @@ import { EventsNavItem } from "@/components/layout/EventsNavItem";
 import { Logo } from "@/components/layout/Logo";
 import { ButtonLink } from "@/components/ui/Button";
 import { FacebookIcon, MapPin, Phone } from "@/components/ui/icons";
-import { navItems, openingHours, siteConfig } from "@/data/site";
+import { OpeningHoursList } from "@/components/ui/OpeningHoursList";
+import { navItems, siteConfig } from "@/data/site";
 import { withBase } from "@/lib/base-path";
 
 interface FooterProps {
@@ -99,16 +100,7 @@ export function Footer({ hasEvents }: FooterProps) {
 
           <div className="lg:col-span-2">
             <h2 className="eyebrow !text-accent-on-dark font-sans">Godziny</h2>
-            <dl className="mt-5 space-y-4 text-cream/90">
-              {openingHours.map((rule) => (
-                <div key={rule.id}>
-                  <dt className="text-sm text-on-dark-mute">{rule.label}</dt>
-                  <dd className="tabular">
-                    {rule.opens}–{rule.closes}
-                  </dd>
-                </div>
-              ))}
-            </dl>
+            <OpeningHoursList variant="footer" />
           </div>
         </div>
 
