@@ -36,6 +36,8 @@ const nextConfig: NextConfig = isStaticExport
   : {
       reactStrictMode: true,
       poweredByHeader: false,
+      // Samodzielny serwer w folderze .next/standalone (tylko potrzebne node_modules) – używa go Dockerfile.
+      output: "standalone",
       images: {
         // Nowoczesne formaty – zdjęcia wgrane przez właściciela (JPG/PNG) są
         // automatycznie konwertowane do AVIF/WebP i skalowane do urządzenia.
