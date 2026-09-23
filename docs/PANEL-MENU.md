@@ -29,7 +29,7 @@ poniedziałek–niedzielę z datami, ale **z jutrem włącznie** – kolejne dni
 („Zobaczysz tutaj jutro”), nawet jeśli już ustawiłaś dla nich menu strzałką do przodu. To zamierzona „ciekawostka”:
 odwiedzający widzą, co było i co będzie jutro, a reszta tygodnia odsłania się dzień po dniu.
 
-**Kategorie dań:** **Obiad dnia, Danie specjalne, Zupy, Drugie dania, Ryby, Pierogi, Napoje, Piwo.**
+**Kategorie dań:** **Obiad dnia, Danie specjalne, Zupy, Drugie dania, Kluski, Ryby, Pierogi, Napoje, Piwo.**
 W „Obiedzie dnia” wpisz zestaw jako jedno danie (np. „Pomidorowa + schabowy”, cena zestawu, ewentualnie opis).
 „Danie specjalne” jest na to, co nie pasuje do żadnej innej kategorii (np. propozycja szefa kuchni na dziś).
 **Menu na stronie jest listą** „nazwa … cena”, bez zdjęć dań – nie trzeba ich fotografować. Zdjęcie w formularzu
@@ -94,6 +94,13 @@ Galerii. Widoczne są tylko dania, które mają zdjęcie.
 
 Po co w takim razie zdjęcie dania, skoro menu jest listą? Głównie po to, żeby łatwo przenieść je do **galerii**
 (patrz niżej) – to najprostszy sposób na dorzucenie do galerii kolejnych zdjęć potraw.
+
+### Kolejność kategorii
+
+Sekcja **„Kolejność kategorii”** (pod listą dań w „Baza dań”) – strzałki w górę/w dół przy każdej kategorii
+(Obiad dnia, Danie specjalne, Zupy, Drugie dania, Kluski, Ryby, Pierogi, Napoje, Piwo). Kolejność zapisuje się
+od razu po kliknięciu strzałki, bez osobnego przycisku „Zapisz”, i obowiązuje wszędzie: w menu na stronie
+(„Menu na dziś” i „Cały tydzień”), w liście dań w panelu i przy wyborze dań na dany dzień.
 
 ### Godziny otwarcia
 

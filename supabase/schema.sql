@@ -41,7 +41,7 @@ grant select on public.admins to authenticated;
 create table if not exists public.dishes (
   id uuid primary key default gen_random_uuid(),
   name text not null check (char_length(btrim(name)) between 1 and 120),
-  category text not null check (category in ('obiad-dnia', 'danie-specjalne', 'zupy', 'drugie-dania', 'ryby', 'pierogi', 'napoje', 'piwo')),
+  category text not null check (category in ('obiad-dnia', 'danie-specjalne', 'zupy', 'drugie-dania', 'kluski', 'ryby', 'pierogi', 'napoje', 'piwo')),
   price numeric(7, 2) check (price is null or price >= 0),
   description text check (description is null or char_length(description) <= 300),
   photo_path text,
@@ -49,8 +49,8 @@ create table if not exists public.dishes (
   created_at timestamptz not null default now()
 );
 
--- Kategorie zgodne z tablicą w restauracji: obiad dnia, danie specjalne, zupy, drugie dania, ryby, pierogi, napoje, piwo.
--- Starsze kategorie (dania główne/mięsne/bezmięsne, dodatki, sałatki, desery) trafiają do „drugich dań”,
+-- Kategorie zgodne z tablicą w restauracji: obiad dnia, danie specjalne, zupy, drugie dania, kluski, ryby, pierogi,
+-- napoje, piwo. Starsze kategorie (dania główne/mięsne/bezmięsne, dodatki, sałatki, desery) trafiają do „drugich dań”,
 -- a ograniczenie jest zakładane od nowa. Bezpieczne przy ponownym uruchomieniu.
 alter table public.dishes drop constraint if exists dishes_category_check;
 update public.dishes
@@ -58,7 +58,7 @@ update public.dishes
  where category in ('dania-glowne', 'dania-miesne', 'dania-bezmiesne', 'dodatki', 'salatki', 'desery');
 alter table public.dishes
   add constraint dishes_category_check
-  check (category in ('obiad-dnia', 'danie-specjalne', 'zupy', 'drugie-dania', 'ryby', 'pierogi', 'napoje', 'piwo'));
+  check (category in ('obiad-dnia', 'danie-specjalne', 'zupy', 'drugie-dania', 'kluski', 'ryby', 'pierogi', 'napoje', 'piwo'));
 
 alter table public.dishes enable row level security;
 
@@ -327,6 +327,13 @@ create table if not exists public.site_settings (
 insert into public.site_settings (id, weekly_menu_visible)
 values (1, false)
 on conflict (id) do nothing;
+
+-- Kolejność kategorii menu (ustawiana w panelu) – lista id kategorii z src/data/menu.ts. Domyślnie kolejność
+-- z kodu; kolumna dodawana bezpiecznie przy ponownym uruchomieniu skryptu na już istniejącej tabeli.
+alter table public.site_settings
+  add column if not exists menu_category_order text[] not null default array[
+    'obiad-dnia', 'danie-specjalne', 'zupy', 'drugie-dania', 'kluski', 'ryby', 'pierogi', 'napoje', 'piwo'
+  ];
 
 alter table public.site_settings enable row level security;
 

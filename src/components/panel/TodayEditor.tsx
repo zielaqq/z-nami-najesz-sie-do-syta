@@ -8,7 +8,7 @@ import { NoticeBanner, fieldClass, type PanelNotice } from "@/components/panel/N
 import { WeeklyMenuToggle } from "@/components/panel/WeeklyMenuToggle";
 import { buttonClasses } from "@/components/ui/Button";
 import { Check, ChevronLeft, ChevronRight, Copy, Search, Utensils } from "@/components/ui/icons";
-import { isTextOnlyCategory } from "@/data/menu";
+import { isTextOnlyCategory, menuCategories, type MenuCategoryId } from "@/data/menu";
 import { cx } from "@/lib/cx";
 import { compareByOrder, dishCountLabel, dishPhotoUrl, groupDishes, type Dish } from "@/lib/daily-menu";
 import { formatDayLabel, formatPrice, shiftDay, todayInWarsaw } from "@/lib/format";
@@ -22,6 +22,7 @@ import {
   setSelected,
   type SelectedDish,
 } from "@/lib/panel-data";
+import { getMenuCategoryOrder } from "@/lib/panel-settings";
 
 interface TodayEditorProps {
   /** Przejście do zakładki „Baza dań” (gdy baza jest pusta) */
@@ -41,6 +42,7 @@ export function TodayEditor({ onOpenLibrary }: TodayEditorProps) {
   const [mode, setMode] = useState<Mode>("select");
   const [dishes, setDishes] = useState<Dish[] | null>(null);
   const [loadError, setLoadError] = useState(false);
+  const [categoryOrder, setCategoryOrder] = useState<MenuCategoryId[]>(menuCategories.map((c) => c.id));
   // Wybór jest przypisany do dnia, dla którego go pobrano – zmiana dnia od razu „unieważnia” starą listę.
   const [selection, setSelection] = useState<{ day: string; items: SelectedDish[] } | null>(null);
   const [query, setQuery] = useState("");
@@ -59,6 +61,20 @@ export function TodayEditor({ onOpenLibrary }: TodayEditorProps) {
       })
       .catch(() => {
         if (active) setLoadError(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    getMenuCategoryOrder()
+      .then((order) => {
+        if (active) setCategoryOrder(order);
+      })
+      .catch(() => {
+        /* zostaje domyślna kolejność z kodu */
       });
     return () => {
       active = false;
@@ -96,8 +112,8 @@ export function TodayEditor({ onOpenLibrary }: TodayEditorProps) {
       })
       .sort(compareByOrder)
       .map((entry) => entry.dish);
-    return groupDishes(ordered, "keep");
-  }, [items, dishById]);
+    return groupDishes(ordered, "keep", categoryOrder);
+  }, [items, dishById, categoryOrder]);
 
   // Po przesunięciu przeglądarka potrafi zgubić fokus (element zmienia miejsce w drzewie) – przywracamy go.
   useLayoutEffect(() => {
@@ -209,7 +225,11 @@ export function TodayEditor({ onOpenLibrary }: TodayEditorProps) {
   };
 
   const needle = query.trim().toLocaleLowerCase("pl");
-  const groups = groupDishes((dishes ?? []).filter((dish) => !needle || dish.name.toLocaleLowerCase("pl").includes(needle)));
+  const groups = groupDishes(
+    (dishes ?? []).filter((dish) => !needle || dish.name.toLocaleLowerCase("pl").includes(needle)),
+    "alphabetical",
+    categoryOrder,
+  );
   const count = ids?.size ?? 0;
 
   return (

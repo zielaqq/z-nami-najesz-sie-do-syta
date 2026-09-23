@@ -8,6 +8,7 @@ import { FacebookIcon, Phone } from "@/components/ui/icons";
 import { siteConfig } from "@/data/site";
 import { dishPhotoUrl, fetchDailyMenu, groupDishes, type Dish } from "@/lib/daily-menu";
 import { formatDayLabel, todayInWarsaw } from "@/lib/format";
+import { useMenuCategoryOrder } from "@/lib/menu-category-order-live";
 
 type State =
   | { status: "loading" }
@@ -27,6 +28,7 @@ interface LiveMenuProps {
  * ustawione albo baza nie odpowiada, nie pokazujemy nieaktualnych dań – tylko uczciwy komunikat i telefon.
  */
 export function LiveMenu({ initialDay, initialDishes }: LiveMenuProps) {
+  const categoryOrder = useMenuCategoryOrder();
   const [state, setState] = useState<State>(
     initialDay !== undefined && initialDishes !== undefined
       ? { status: "ready", day: initialDay, dishes: initialDishes }
@@ -77,7 +79,7 @@ export function LiveMenu({ initialDay, initialDishes }: LiveMenuProps) {
     );
   }
 
-  const groups: MenuBrowserGroup[] = groupDishes(state.dishes, "keep").map((group) => ({
+  const groups: MenuBrowserGroup[] = groupDishes(state.dishes, "keep", categoryOrder).map((group) => ({
     id: group.id,
     label: group.label,
     items: group.dishes.map((dish) => ({

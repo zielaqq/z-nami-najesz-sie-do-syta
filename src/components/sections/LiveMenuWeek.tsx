@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 
+import type { MenuCategoryId } from "@/data/menu";
 import { fetchWeekMenu, groupDishes, type Dish } from "@/lib/daily-menu";
 import { formatEventDate, formatPrice, mondayOfWeek, shiftDay, todayInWarsaw } from "@/lib/format";
+import { useMenuCategoryOrder } from "@/lib/menu-category-order-live";
 
 interface DayEntry {
   day: string;
@@ -21,6 +23,7 @@ type State = { status: "loading" } | { status: "ready"; days: DayEntry[] } | { s
  * ma to być miła niespodzianka „co będzie dalej”, a nie ujawnienie całego planu z góry.
  */
 export function LiveMenuWeek() {
+  const categoryOrder = useMenuCategoryOrder();
   const [state, setState] = useState<State>({ status: "loading" });
 
   useEffect(() => {
@@ -61,15 +64,15 @@ export function LiveMenuWeek() {
   return (
     <ul className="mt-8 divide-y divide-ink/10 border-y border-ink/10">
       {state.days.map((entry) => (
-        <WeekDayRow key={entry.day} entry={entry} />
+        <WeekDayRow key={entry.day} entry={entry} categoryOrder={categoryOrder} />
       ))}
     </ul>
   );
 }
 
-function WeekDayRow({ entry }: { entry: DayEntry }) {
+function WeekDayRow({ entry, categoryOrder }: { entry: DayEntry; categoryOrder: MenuCategoryId[] }) {
   const date = formatEventDate(entry.day);
-  const groups = groupDishes(entry.dishes, "keep");
+  const groups = groupDishes(entry.dishes, "keep", categoryOrder);
 
   return (
     <li className={`py-6 ${entry.isToday ? "bg-accent/5" : ""}`}>

@@ -3,17 +3,20 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
+import { CategoryOrderManager } from "@/components/panel/CategoryOrderManager";
 import { DishForm } from "@/components/panel/DishForm";
 import { NoticeBanner, fieldClass, type PanelNotice } from "@/components/panel/NoticeBanner";
 import { PhotoDownloadPicker } from "@/components/panel/PhotoDownloadPicker";
 import { PhotoLightbox } from "@/components/panel/PhotoLightbox";
 import { buttonClasses } from "@/components/ui/Button";
 import { Download, Eye, EyeOff, Pencil, Plus, Search, Trash2, Utensils } from "@/components/ui/icons";
+import { menuCategories, type MenuCategoryId } from "@/data/menu";
 import { cx } from "@/lib/cx";
 import { dishCountLabel, dishPhotoUrl, groupDishes, type Dish } from "@/lib/daily-menu";
 import { safeFileName } from "@/lib/download-file";
 import { formatPrice } from "@/lib/format";
 import { deleteDish, describeError, listDishes, setArchived } from "@/lib/panel-data";
+import { getMenuCategoryOrder } from "@/lib/panel-settings";
 
 /**
  * Baza dań: dodawanie (ze zdjęciem z telefonu), zmiana, ukrywanie i przywracanie dań.
@@ -27,6 +30,7 @@ export function DishLibrary() {
   const [editing, setEditing] = useState<Dish | "new" | null>(null);
   const [lightbox, setLightbox] = useState<{ src: string; title: string } | null>(null);
   const [downloadPickerOpen, setDownloadPickerOpen] = useState(false);
+  const [categoryOrder, setCategoryOrder] = useState<MenuCategoryId[]>(menuCategories.map((c) => c.id));
   const [notice, setNotice] = useState<PanelNotice | null>(null);
 
   useEffect(() => {
@@ -37,6 +41,20 @@ export function DishLibrary() {
       })
       .catch(() => {
         if (active) setLoadError(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    getMenuCategoryOrder()
+      .then((order) => {
+        if (active) setCategoryOrder(order);
+      })
+      .catch(() => {
+        /* zostaje domyślna kolejność z kodu */
       });
     return () => {
       active = false;
@@ -92,7 +110,7 @@ export function DishLibrary() {
   const visible = (dishes ?? []).filter(
     (dish) => (showArchived || !dish.archived) && (!needle || dish.name.toLocaleLowerCase("pl").includes(needle)),
   );
-  const groups = groupDishes(visible);
+  const groups = groupDishes(visible, "alphabetical", categoryOrder);
   const activeCount = (dishes ?? []).filter((dish) => !dish.archived).length;
   const hiddenCount = (dishes ?? []).length - activeCount;
 
@@ -148,6 +166,8 @@ export function DishLibrary() {
           </label>
         ) : null}
       </div>
+
+      <CategoryOrderManager order={categoryOrder} onSaved={setCategoryOrder} />
 
       {loadError ? (
         <p role="alert" className="mt-8 text-accent-deep">

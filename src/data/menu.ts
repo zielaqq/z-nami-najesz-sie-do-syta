@@ -7,7 +7,7 @@
  *
  *  ⚠ PRZYKŁADOWE DANE. Dania i ceny poniżej są tylko demonstracją układu strony.
  *
- *  KATEGORIE: Obiad dnia, Danie specjalne (to, co nie pasuje do innych), Zupy, Drugie dania, Ryby, Pierogi, Napoje, Piwo.
+ *  KATEGORIE: Obiad dnia, Danie specjalne (to, co nie pasuje do innych), Zupy, Drugie dania, Kluski, Ryby, Pierogi, Napoje, Piwo.
  *  Menu na stronie jest listą „nazwa … cena”, bez zdjęć (patrz `textOnlyCategories` niżej) – pole `image` jest więc
  *  tylko wymagane przez typ (`MenuItem`) i się nie wyświetla; zostaw dowolną istniejącą ścieżkę.
  *  JAK ZMIENIĆ CENĘ?      Zmień liczbę w polu `price` (w zł, np. 18 albo 18.5).
@@ -29,6 +29,7 @@ export const menuCategories = [
   { id: "danie-specjalne", label: "Danie specjalne" },
   { id: "zupy", label: "Zupy" },
   { id: "drugie-dania", label: "Drugie dania" },
+  { id: "kluski", label: "Kluski" },
   { id: "ryby", label: "Ryby" },
   { id: "pierogi", label: "Pierogi" },
   { id: "napoje", label: "Napoje" },
@@ -88,7 +89,9 @@ export const menuItems: MenuItem[] = [
   { name: "Filet z kurczaka", category: "drugie-dania", price: 34, image: "/images/menu/filet-z-kurczaka.jpg" },
   { name: "Placki ziemniaczane", category: "drugie-dania", price: 26, image: "/images/menu/placki-ziemniaczane.jpg" },
   { name: "Naleśniki z serem", category: "drugie-dania", price: 22, image: "/images/menu/nalesniki-z-serem.jpg" },
-  { name: "Kopytka", category: "drugie-dania", price: 22, image: "/images/menu/kopytka.jpg" },
+
+  // ── Kluski ──────────────────────────────────────────────────────────────
+  { name: "Kopytka", category: "kluski", price: 22, image: "/images/menu/kopytka.jpg" },
 
   // ── Pierogi ─────────────────────────────────────────────────────────────
   { name: "Pierogi ruskie", category: "pierogi", price: 26, image: "/images/menu/pierogi-ruskie.jpg" },

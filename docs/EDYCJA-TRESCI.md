@@ -32,7 +32,8 @@ Każde danie to jeden wiersz:
 ```
 
 * **Cena** – liczba w złotych: `16` albo `16.5` (wyświetli się „16,50 zł”).
-* **Kategoria** – jedna z (jak na tablicy w restauracji): `obiad-dnia`, `zupy`, `drugie-dania`, `pierogi`, `napoje`, `piwo`.
+* **Kategoria** – jedna z (jak na tablicy w restauracji): `obiad-dnia`, `danie-specjalne`, `zupy`, `drugie-dania`,
+  `kluski`, `ryby`, `pierogi`, `napoje`, `piwo`.
   Edytor kodu podpowie/podkreśli literówkę. Nową kategorię dodajesz w tablicy `menuCategories` (oraz w regule
   `category` w `supabase/schema.sql`, jeśli używasz panelu).
 * **Zdjęcie** – patrz niżej. Najprościej podmienić plik o tej samej nazwie.

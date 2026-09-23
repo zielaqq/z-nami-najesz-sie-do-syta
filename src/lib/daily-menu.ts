@@ -39,17 +39,23 @@ export interface DishGroup {
 }
 
 /**
- * Grupuje dania według kategorii (w kolejności z `menuCategories`).
+ * Grupuje dania według kategorii (domyślnie w kolejności z `menuCategories`, albo w kolejności podanej w
+ * `categoryOrder` – patrz `menu-category-order-live.ts` i `panel-settings.ts`, gdy klientka ustawi ją w panelu).
  * `alphabetical` (domyślnie) sortuje dania w grupach po nazwie; `keep` zachowuje kolejność wejściową
  * (np. kolejność ustawioną przez klientkę w menu na dany dzień).
  */
-export function groupDishes(dishes: Dish[], order: "alphabetical" | "keep" = "alphabetical"): DishGroup[] {
-  return menuCategories
-    .map((category) => {
-      const inCategory = dishes.filter((dish) => dish.category === category.id);
+export function groupDishes(
+  dishes: Dish[],
+  order: "alphabetical" | "keep" = "alphabetical",
+  categoryOrder: readonly MenuCategoryId[] = menuCategories.map((category) => category.id),
+): DishGroup[] {
+  return categoryOrder
+    .map((id) => {
+      const label = menuCategories.find((category) => category.id === id)?.label ?? id;
+      const inCategory = dishes.filter((dish) => dish.category === id);
       return {
-        id: category.id,
-        label: category.label,
+        id,
+        label,
         dishes: order === "keep" ? inCategory : inCategory.sort((a, b) => a.name.localeCompare(b.name, "pl")),
       };
     })
