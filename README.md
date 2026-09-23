@@ -28,7 +28,7 @@ npm run dev        # http://localhost:3000
 
 Node.js ≥ 20.9. Skopiuj `.env.example` → `.env.local` i uzupełnij zmienne (patrz niżej).
 
-## Gdzie co jest
+
 
 Właściciel/edytor zmienia **tylko pliki w `src/data/`** – szczegóły w [docs/EDYCJA-TRESCI.md](docs/EDYCJA-TRESCI.md).
 
