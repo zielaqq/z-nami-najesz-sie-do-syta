@@ -1,19 +1,32 @@
 import { Fragment, type CSSProperties } from "react";
 
+import { HeroPhoto } from "@/components/sections/HeroPhoto";
 import { ButtonLink } from "@/components/ui/Button";
 import { Phone } from "@/components/ui/icons";
 import { OpenStatus } from "@/components/ui/OpenStatus";
-import { Photo } from "@/components/ui/Photo";
 import { heroContent } from "@/data/about";
 import { siteConfig } from "@/data/site";
 import { withBase } from "@/lib/base-path";
+import { fetchHeroImage, type HeroImage } from "@/lib/hero-photo-live";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 /** Opóźnienie animacji wejścia (CSS zmienna --d, patrz globals.css → .hero-in) */
 const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
-export function Hero() {
-  const { eyebrow, titleLines, lead, services, photoAlt } = heroContent;
+export async function Hero() {
+  const { eyebrow, titleLines, lead, services } = heroContent;
   const lastLine = titleLines.length - 1;
+
+  // Zdjęcie główne wybrane w panelu – pobrane już na serwerze, żeby było w HTML od razu (to największy obraz strony).
+  // Błąd tutaj nie psuje strony: zostaje zdjęcie sali, a `HeroPhoto` i tak sprawdza bazę jeszcze raz w przeglądarce.
+  let initialPhoto: HeroImage | null = null;
+  if (isSupabaseConfigured) {
+    try {
+      initialPhoto = await fetchHeroImage();
+    } catch {
+      initialPhoto = null;
+    }
+  }
 
   return (
     <section aria-labelledby="hero-title" className="relative bg-cream">
@@ -71,15 +84,7 @@ export function Hero() {
 
         <div className="relative lg:col-span-7">
           <div className="hero-photo hero-in" style={delay(200)}>
-            <Photo
-              src="/images/gallery/sala-1.jpg"
-              alt={photoAlt}
-              sizes="(min-width: 1024px) 58vw, 100vw"
-              ratio="aspect-[5/4] sm:aspect-[16/11] lg:aspect-[6/7] lg:max-h-[calc(100svh-var(--header-h)-3rem)] lg:min-h-[28rem]"
-              eager
-              quality={90}
-              focus="50% 62%"
-            />
+            <HeroPhoto initial={initialPhoto} live={isSupabaseConfigured} />
           </div>
         </div>
       </div>

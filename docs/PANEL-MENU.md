@@ -77,6 +77,29 @@ Dobre zdjęcie do galerii: w dobrym świetle, bez bałaganu w kadrze i ze stoła
 kafelki mają proporcje 4:5 (pionowe), a w powiększeniu widać całe zdjęcie. Przy zdjęciach z gośćmi lub personelem zadbaj
 o ich zgodę.
 
+### Zdjęcie główne
+
+Zakładka **„Zdjęcie główne”** – duże zdjęcie na samej górze strony, obok nazwy restauracji. Domyślnie jest tam zdjęcie
+sali; możesz wstawić w jego miejsce np. **plakat z aktualną ofertą** (Wigilia firmowa, Sylwester, nowe menu), a potem
+jednym kliknięciem wrócić do zdjęcia sali. Wszystko zapisuje się od razu – na stronie widać zmianę po odświeżeniu.
+
+* **Dodaj zdjęcie** – wybierz zdjęcie albo gotowy plakat (JPG, PNG) i wpisz **opis** (co jest na zdjęciu albo
+  najważniejsze informacje z plakatu – na stronie go nie widać, czytają go osoby niewidome i Google). Zaznacz, jak je
+  pokazać:
+  * **W całości** – nic nie zostanie ucięte. Wybierz to dla **plakatów i grafik z tekstem**.
+  * **Na całą ramkę** – zdjęcie wypełni ramkę jak zdjęcie sali, ale brzegi mogą zostać przycięte. Dla zwykłych zdjęć.
+
+  Pole **„Od razu pokaż na stronie”** (zaznaczone) wstawia zdjęcie na stronę od razu po dodaniu.
+* **Pokaż na stronie** przy dowolnym zdjęciu (także przy „Zdjęciu sali”) zmienia to, co jest na stronie. Zdjęcie, które
+  jest teraz na stronie, ma czerwoną ramkę i napis **„Na stronie”**.
+* **Ołówek** zmienia opis i sposób pokazania, **kosz** usuwa zdjęcie. Jeśli usuniesz zdjęcie, które jest na stronie,
+  wróci zdjęcie sali. Zdjęcia sali nie da się usunąć.
+* Wgrane zdjęcia zostają w panelu, więc przyszłoroczny plakat albo ulubione zdjęcie możesz wstawić ponownie bez
+  wgrywania od nowa.
+
+Na stronie kliknięcie zdjęcia z panelu powiększa je na cały ekran – na telefonie da się wtedy wygodnie przeczytać
+drobny tekst z plakatu.
+
 ### Nowe danie
 
 Zakładka **„Baza dań” → „Dodaj danie”**: nazwa, kategoria, cena (nieobowiązkowa), krótki opis (nieobowiązkowy) i
@@ -164,7 +187,7 @@ krok 3.
 * Każdy może **czytać** menu (to publiczna informacja), ale **zapisywać** może tylko osoba z listy `admins`.
   Sprawdza to baza (reguły Row Level Security), a nie sama strona – więc nie da się tego obejść z przeglądarki.
 * Zdjęcia dań leżą w publicznym magazynie `dish-photos`; wgrywać i usuwać może tylko administrator (limit 3 MB,
-  tylko JPG/PNG/WebP).
+  tylko JPG/PNG/WebP). Tak samo galeria (`gallery-photos`) i zdjęcie główne (`hero-photos`), z limitem 5 MB.
 * Reguły zostały sprawdzone kilkudziesięcioma testami na lokalnej kopii bazy (także dla galerii i wydarzeń): anonimowa osoba i zalogowana osoba **bez** uprawnień
   nie mogą niczego dodać, zmienić ani usunąć; ukryte dania są niewidoczne publicznie.
 * Klucz w kodzie strony jest publiczny z założenia; klucza `service_role` w projekcie nie ma i nie może być.
@@ -180,9 +203,17 @@ krok 3.
 ## Dla programisty
 
 * Schemat i reguły: `supabase/schema.sql` (tabele `dishes`, `daily_menu`, `events`, `gallery_photos`, `opening_hours`,
-  `site_settings`, `admins`; magazyny `dish-photos`, `gallery-photos`).
-* Ustawienia strony (na razie tylko widoczność przycisku „Cały tydzień”): tabela `site_settings` (jeden wiersz,
-  `id=1`), publiczny odczyt `src/lib/site-settings-live.ts`, panel: `WeeklyMenuToggle.tsx` + `src/lib/panel-settings.ts`.
+  `site_settings`, `hero_photos`, `admins`; magazyny `dish-photos`, `gallery-photos`, `hero-photos`).
+* Zdjęcie główne: tabela `hero_photos` (opis, `fit` = `contain`/`cover`, wymiary) i magazyn `hero-photos` (limit 5 MB,
+  zdjęcia zmniejszane w przeglądarce do 1800 px); wybrane zdjęcie wskazuje `site_settings.hero_photo_id`
+  (`null` = zdjęcie sali z kodu, usunięcie wybranego zdjęcia ustawia `null` przez `on delete set null`). Publiczny
+  odczyt: `src/lib/hero-photo-live.ts` (`fetchHeroImage`, jedno zapytanie z osadzeniem `hero_photos`); `Hero` pobiera
+  je na serwerze (zdjęcie jest w HTML od razu – to największy obraz strony), a `HeroPhoto` sprawdza bazę ponownie
+  w przeglądarce (ważne przy eksporcie statycznym). Błąd albo baza sprzed tej funkcji = zdjęcie sali. Panel:
+  `HeroPhotoManager`, `HeroPhotoForm`, `src/lib/panel-hero.ts`.
+* Ustawienia strony (widoczność przycisku „Cały tydzień”, kolejność kategorii, wybrane zdjęcie główne): tabela
+  `site_settings` (jeden wiersz, `id=1`), publiczny odczyt `src/lib/site-settings-live.ts`, panel:
+  `WeeklyMenuToggle.tsx` + `src/lib/panel-settings.ts` (zdjęcie główne – patrz niżej).
 * Wydarzenia: publiczny odczyt `src/lib/events-live.ts` (jedno zapytanie na wejście na stronę), sekcja
   `src/components/sections/LiveEvents.tsx`; panel: `EventsManager` i `EventForm` (+ `src/lib/panel-events.ts`).
   Sekcja „Wydarzenia” ma tło „sand”, więc kolory sąsiednich sekcji nie zależą od tego, czy wydarzenia są.

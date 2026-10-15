@@ -350,3 +350,74 @@ create policy "site_settings_admin_update" on public.site_settings
 
 grant select on public.site_settings to anon;
 grant select, update on public.site_settings to authenticated;
+
+-- 9) Zdjęcie główne (duże zdjęcie na górze strony – np. plakat z aktualną ofertą; wgrywane i wybierane w panelu) -------
+--    Na stronie jest to zdjęcie, które wskazuje `site_settings.hero_photo_id`; brak wyboru (null) = zdjęcie sali z kodu.
+--    `fit`: 'contain' = całe zdjęcie, bez przycinania (plakat z tekstem), 'cover' = wypełnia ramkę (brzegi mogą być przycięte).
+create table if not exists public.hero_photos (
+  id uuid primary key default gen_random_uuid(),
+  photo_path text not null check (char_length(photo_path) between 1 and 300),
+  alt text not null check (char_length(btrim(alt)) between 1 and 300),
+  fit text not null default 'contain' check (fit in ('contain', 'cover')),
+  width integer not null check (width > 0),
+  height integer not null check (height > 0),
+  created_at timestamptz not null default now()
+);
+alter table public.hero_photos enable row level security;
+
+drop policy if exists "hero_photos_public_read" on public.hero_photos;
+create policy "hero_photos_public_read" on public.hero_photos
+  for select to anon, authenticated
+  using (true);
+
+drop policy if exists "hero_photos_admin_insert" on public.hero_photos;
+create policy "hero_photos_admin_insert" on public.hero_photos
+  for insert to authenticated
+  with check (public.is_admin());
+
+drop policy if exists "hero_photos_admin_update" on public.hero_photos;
+create policy "hero_photos_admin_update" on public.hero_photos
+  for update to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop policy if exists "hero_photos_admin_delete" on public.hero_photos;
+create policy "hero_photos_admin_delete" on public.hero_photos
+  for delete to authenticated
+  using (public.is_admin());
+
+grant select on public.hero_photos to anon;
+grant select, insert, update, delete on public.hero_photos to authenticated;
+
+-- Które zdjęcie jest teraz na stronie. Usunięcie tego zdjęcia w panelu przywraca zdjęcie sali (null).
+alter table public.site_settings
+  add column if not exists hero_photo_id uuid references public.hero_photos (id) on delete set null;
+
+-- Magazyn zdjęć głównych (publiczny odczyt, zapis tylko dla administratora, do 5 MB)
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('hero-photos', 'hero-photos', true, 5242880, array['image/jpeg', 'image/png', 'image/webp'])
+on conflict (id) do update
+  set public = excluded.public,
+      file_size_limit = excluded.file_size_limit,
+      allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "hero_photos_files_public_read" on storage.objects;
+create policy "hero_photos_files_public_read" on storage.objects
+  for select to anon, authenticated
+  using (bucket_id = 'hero-photos');
+
+drop policy if exists "hero_photos_files_admin_insert" on storage.objects;
+create policy "hero_photos_files_admin_insert" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'hero-photos' and public.is_admin());
+
+drop policy if exists "hero_photos_files_admin_update" on storage.objects;
+create policy "hero_photos_files_admin_update" on storage.objects
+  for update to authenticated
+  using (bucket_id = 'hero-photos' and public.is_admin())
+  with check (bucket_id = 'hero-photos' and public.is_admin());
+
+drop policy if exists "hero_photos_files_admin_delete" on storage.objects;
+create policy "hero_photos_files_admin_delete" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'hero-photos' and public.is_admin());

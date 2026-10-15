@@ -6,6 +6,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { DishLibrary } from "@/components/panel/DishLibrary";
 import { EventsManager } from "@/components/panel/EventsManager";
 import { GalleryManager } from "@/components/panel/GalleryManager";
+import { HeroPhotoManager } from "@/components/panel/HeroPhotoManager";
 import { LoginForm } from "@/components/panel/LoginForm";
 import { OpeningHoursManager } from "@/components/panel/OpeningHoursManager";
 import { TodayEditor } from "@/components/panel/TodayEditor";
@@ -23,20 +24,21 @@ type Auth =
   | { status: "error" }
   | { status: "ready"; email: string };
 
-type Tab = "today" | "dishes" | "events" | "gallery" | "hours";
+type Tab = "today" | "dishes" | "events" | "gallery" | "hero" | "hours";
 
 const tabs: Array<{ id: Tab; label: string }> = [
   { id: "today", label: "Menu na dziś" },
   { id: "dishes", label: "Baza dań" },
   { id: "events", label: "Wydarzenia" },
   { id: "gallery", label: "Galeria" },
+  { id: "hero", label: "Zdjęcie główne" },
   { id: "hours", label: "Godziny" },
 ];
 
 /**
  * Panel klientki (/panel): logowanie → wybór dań na dziś (kafelki ze zdjęciami), baza dań, wydarzenia,
- * galeria i godziny otwarcia. Wszystko działa w przeglądarce; dostępu do zapisu pilnują reguły w bazie
- * (supabase/schema.sql).
+ * galeria, zdjęcie główne i godziny otwarcia. Wszystko działa w przeglądarce; dostępu do zapisu pilnują reguły
+ * w bazie (supabase/schema.sql).
  */
 export function PanelApp() {
   if (!isSupabaseConfigured) {
@@ -154,6 +156,7 @@ function ConfiguredPanel() {
             {tab === "dishes" ? <DishLibrary /> : null}
             {tab === "events" ? <EventsManager /> : null}
             {tab === "gallery" ? <GalleryManager /> : null}
+            {tab === "hero" ? <HeroPhotoManager /> : null}
             {tab === "hours" ? <OpeningHoursManager /> : null}
           </div>
         </>
