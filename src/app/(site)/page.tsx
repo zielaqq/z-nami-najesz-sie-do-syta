@@ -8,10 +8,12 @@ import { LiveEvents } from "@/components/sections/LiveEvents";
 import { Menu } from "@/components/sections/Menu";
 import { Reviews } from "@/components/sections/Reviews";
 import { Social } from "@/components/sections/Social";
+import { LiveSpecialOffers } from "@/components/sections/SpecialOffers";
 import type { RestaurantEvent } from "@/data/events";
 import { getUpcomingEvents } from "@/lib/content";
 import { fetchUpcomingEvents } from "@/lib/events-live";
 import { todayInWarsaw } from "@/lib/format";
+import { getSpecialOffersOnServer } from "@/lib/special-offers-server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 // Strona jest statyczna i odświeża się raz na dobę (tryb bez bazy: miniona data wydarzenia z pliku znika sama).
@@ -36,13 +38,18 @@ export default async function HomePage() {
     upcomingEvents = await getUpcomingEvents();
   }
 
+  // Oferty specjalne (Komunia, Święta…) – te same dane co w nawigacji (SiteChrome); `cache` łączy oba zapytania w jedno.
+  const initialOffers = await getSpecialOffersOnServer();
+
   // Tła sekcji naprzemiennie: opinie (paper) → wydarzenia (sand, opcjonalne) → social (cream) → kontakt (paper).
   // „Sand” odcina się od sąsiadów, więc kolory pozostałych sekcji nie zależą od tego, czy wydarzenia są.
+  // Oferty specjalne (paper/sand na zmianę) leżą między menu (cream) a cateringiem (ink), więc też się odcinają.
   return (
     <>
       <Hero />
       <About />
       <Menu />
+      {isSupabaseConfigured ? <LiveSpecialOffers initialOffers={initialOffers} /> : null}
       <CateringDelivery />
       <Gallery />
       <Reviews />

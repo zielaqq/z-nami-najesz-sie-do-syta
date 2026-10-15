@@ -3,18 +3,21 @@ import Link from "next/link";
 import { CookieSettingsLink } from "@/components/layout/CookieSettingsLink";
 import { EventsNavItem } from "@/components/layout/EventsNavItem";
 import { Logo } from "@/components/layout/Logo";
+import { NavLinks } from "@/components/layout/NavLinks";
 import { ButtonLink } from "@/components/ui/Button";
 import { FacebookIcon, MapPin, Phone } from "@/components/ui/icons";
 import { OpeningHoursList } from "@/components/ui/OpeningHoursList";
-import { navItems, siteConfig } from "@/data/site";
-import { withBase } from "@/lib/base-path";
+import { siteConfig } from "@/data/site";
+import type { SpecialOffer } from "@/lib/special-offers-live";
 
 interface FooterProps {
   /** Gdy są zaplanowane wydarzenia, w stopce pojawia się link do ich sekcji. */
   hasEvents: boolean;
+  /** Oferty specjalne pobrane na serwerze (patrz `NavLinks`). */
+  initialOffers?: SpecialOffer[];
 }
 
-export function Footer({ hasEvents }: FooterProps) {
+export function Footer({ hasEvents, initialOffers }: FooterProps) {
   const { address, contact, links } = siteConfig;
   const year = new Date().getFullYear();
 
@@ -41,13 +44,7 @@ export function Footer({ hasEvents }: FooterProps) {
           <nav aria-label="Nawigacja w stopce" className="lg:col-span-2">
             <h2 className="eyebrow !text-accent-on-dark font-sans">Na stronie</h2>
             <ul className="mt-5 space-y-3">
-              {navItems.map((item) => (
-                <li key={item.id}>
-                  <a href={withBase(`/#${item.id}`)} className="link-underline text-cream/90 hover:text-cream">
-                    {item.label}
-                  </a>
-                </li>
-              ))}
+              <NavLinks initialOffers={initialOffers} linkClassName="link-underline text-cream/90 hover:text-cream" />
               <EventsNavItem staticHasEvents={hasEvents} />
             </ul>
           </nav>

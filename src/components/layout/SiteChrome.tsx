@@ -7,13 +7,24 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { getUpcomingEvents } from "@/lib/content";
 import { buildStructuredData } from "@/lib/schema";
+import type { SpecialOffer } from "@/lib/special-offers-live";
+
+interface SiteChromeProps {
+  children: ReactNode;
+  /**
+   * Oferty specjalne z panelu (np. „Komunia”) do nawigacji, pobrane na serwerze – żeby nagłówek nie przeskakiwał.
+   * Podaje je `(site)/layout.tsx`; strona 404 ich nie pobiera (jest częścią każdej trasy, także panelu – zapytanie
+   * do bazy zrobiłoby z nich strony dynamiczne), więc tam linki do ofert doładowuje przeglądarka.
+   */
+  initialOffers?: SpecialOffer[];
+}
 
 /**
  * „Ramka” strony publicznej: link „Przejdź do treści”, nagłówek, treść, stopka, animacje i dane
  * strukturalne. Używają jej strony z grupy `(site)` oraz strona 404. Panel klientki (/panel) jej nie
  * używa – ma własny, czysty widok.
  */
-export async function SiteChrome({ children }: { children: ReactNode }) {
+export async function SiteChrome({ children, initialOffers }: SiteChromeProps) {
   const upcomingEvents = await getUpcomingEvents();
 
   return (
@@ -24,11 +35,11 @@ export async function SiteChrome({ children }: { children: ReactNode }) {
       >
         Przejdź do treści
       </a>
-      <Header />
+      <Header initialOffers={initialOffers} />
       <main id="main" tabIndex={-1} className="outline-none">
         {children}
       </main>
-      <Footer hasEvents={upcomingEvents.length > 0} />
+      <Footer hasEvents={upcomingEvents.length > 0} initialOffers={initialOffers} />
       <CookieConsent />
       <ScrollReveal />
       <JsonLd data={buildStructuredData()} />

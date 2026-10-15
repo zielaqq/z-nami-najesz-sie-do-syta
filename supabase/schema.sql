@@ -421,3 +421,114 @@ drop policy if exists "hero_photos_files_admin_delete" on storage.objects;
 create policy "hero_photos_files_admin_delete" on storage.objects
   for delete to authenticated
   using (bucket_id = 'hero-photos' and public.is_admin());
+
+-- 10) Oferty specjalne (np. Komunia, Święta) – każda to osobna sekcja na stronie (pod menu) i, jeśli klientka chce,
+--     pozycja w nawigacji. Opis, zdjęcia, kolejność i czas wyświetlania ustawia się w panelu.
+--     `visible = false` = ukryta (szkic); `show_from`/`show_until` (oba nieobowiązkowe) = pokazuj tylko w tych dniach.
+create table if not exists public.special_offers (
+  id uuid primary key default gen_random_uuid(),
+  title text not null check (char_length(btrim(title)) between 1 and 40),
+  eyebrow text check (eyebrow is null or char_length(eyebrow) <= 60),
+  description text not null default '' check (char_length(description) <= 2000),
+  show_from date,
+  show_until date,
+  visible boolean not null default true,
+  in_nav boolean not null default true,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  constraint special_offers_dates_check check (show_from is null or show_until is null or show_until >= show_from)
+);
+create index if not exists special_offers_sort_idx on public.special_offers (sort_order);
+alter table public.special_offers enable row level security;
+
+-- Ukryte oferty (szkice) widzi tylko administrator.
+drop policy if exists "special_offers_public_read" on public.special_offers;
+create policy "special_offers_public_read" on public.special_offers
+  for select to anon, authenticated
+  using (visible or public.is_admin());
+
+drop policy if exists "special_offers_admin_insert" on public.special_offers;
+create policy "special_offers_admin_insert" on public.special_offers
+  for insert to authenticated
+  with check (public.is_admin());
+
+drop policy if exists "special_offers_admin_update" on public.special_offers;
+create policy "special_offers_admin_update" on public.special_offers
+  for update to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop policy if exists "special_offers_admin_delete" on public.special_offers;
+create policy "special_offers_admin_delete" on public.special_offers
+  for delete to authenticated
+  using (public.is_admin());
+
+grant select on public.special_offers to anon;
+grant select, insert, update, delete on public.special_offers to authenticated;
+
+-- Zdjęcia ofert (np. plakaty z wariantami menu). Usunięcie oferty usuwa też jej zdjęcia.
+create table if not exists public.special_offer_photos (
+  id uuid primary key default gen_random_uuid(),
+  offer_id uuid not null references public.special_offers (id) on delete cascade,
+  photo_path text not null check (char_length(photo_path) between 1 and 300),
+  caption text check (caption is null or char_length(caption) <= 120),
+  width integer not null check (width > 0),
+  height integer not null check (height > 0),
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now()
+);
+create index if not exists special_offer_photos_offer_idx on public.special_offer_photos (offer_id, sort_order);
+alter table public.special_offer_photos enable row level security;
+
+drop policy if exists "special_offer_photos_public_read" on public.special_offer_photos;
+create policy "special_offer_photos_public_read" on public.special_offer_photos
+  for select to anon, authenticated
+  using (true);
+
+drop policy if exists "special_offer_photos_admin_insert" on public.special_offer_photos;
+create policy "special_offer_photos_admin_insert" on public.special_offer_photos
+  for insert to authenticated
+  with check (public.is_admin());
+
+drop policy if exists "special_offer_photos_admin_update" on public.special_offer_photos;
+create policy "special_offer_photos_admin_update" on public.special_offer_photos
+  for update to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop policy if exists "special_offer_photos_admin_delete" on public.special_offer_photos;
+create policy "special_offer_photos_admin_delete" on public.special_offer_photos
+  for delete to authenticated
+  using (public.is_admin());
+
+grant select on public.special_offer_photos to anon;
+grant select, insert, update, delete on public.special_offer_photos to authenticated;
+
+-- Magazyn zdjęć ofert (publiczny odczyt, zapis tylko dla administratora, do 5 MB)
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('offer-photos', 'offer-photos', true, 5242880, array['image/jpeg', 'image/png', 'image/webp'])
+on conflict (id) do update
+  set public = excluded.public,
+      file_size_limit = excluded.file_size_limit,
+      allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "offer_photos_files_public_read" on storage.objects;
+create policy "offer_photos_files_public_read" on storage.objects
+  for select to anon, authenticated
+  using (bucket_id = 'offer-photos');
+
+drop policy if exists "offer_photos_files_admin_insert" on storage.objects;
+create policy "offer_photos_files_admin_insert" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'offer-photos' and public.is_admin());
+
+drop policy if exists "offer_photos_files_admin_update" on storage.objects;
+create policy "offer_photos_files_admin_update" on storage.objects
+  for update to authenticated
+  using (bucket_id = 'offer-photos' and public.is_admin())
+  with check (bucket_id = 'offer-photos' and public.is_admin());
+
+drop policy if exists "offer_photos_files_admin_delete" on storage.objects;
+create policy "offer_photos_files_admin_delete" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'offer-photos' and public.is_admin());

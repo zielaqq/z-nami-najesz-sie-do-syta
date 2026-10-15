@@ -8,6 +8,7 @@ import { EventsManager } from "@/components/panel/EventsManager";
 import { GalleryManager } from "@/components/panel/GalleryManager";
 import { HeroPhotoManager } from "@/components/panel/HeroPhotoManager";
 import { LoginForm } from "@/components/panel/LoginForm";
+import { OffersManager } from "@/components/panel/OffersManager";
 import { OpeningHoursManager } from "@/components/panel/OpeningHoursManager";
 import { TodayEditor } from "@/components/panel/TodayEditor";
 import { buttonClasses } from "@/components/ui/Button";
@@ -24,11 +25,12 @@ type Auth =
   | { status: "error" }
   | { status: "ready"; email: string };
 
-type Tab = "today" | "dishes" | "events" | "gallery" | "hero" | "hours";
+type Tab = "today" | "dishes" | "offers" | "events" | "gallery" | "hero" | "hours";
 
 const tabs: Array<{ id: Tab; label: string }> = [
   { id: "today", label: "Menu na dziś" },
   { id: "dishes", label: "Baza dań" },
+  { id: "offers", label: "Oferty specjalne" },
   { id: "events", label: "Wydarzenia" },
   { id: "gallery", label: "Galeria" },
   { id: "hero", label: "Zdjęcie główne" },
@@ -36,7 +38,7 @@ const tabs: Array<{ id: Tab; label: string }> = [
 ];
 
 /**
- * Panel klientki (/panel): logowanie → wybór dań na dziś (kafelki ze zdjęciami), baza dań, wydarzenia,
+ * Panel klientki (/panel): logowanie → wybór dań na dziś (kafelki ze zdjęciami), baza dań, oferty specjalne, wydarzenia,
  * galeria, zdjęcie główne i godziny otwarcia. Wszystko działa w przeglądarce; dostępu do zapisu pilnują reguły
  * w bazie (supabase/schema.sql).
  */
@@ -154,6 +156,7 @@ function ConfiguredPanel() {
           <div className="mt-8">
             {tab === "today" ? <TodayEditor onOpenLibrary={() => setTab("dishes")} /> : null}
             {tab === "dishes" ? <DishLibrary /> : null}
+            {tab === "offers" ? <OffersManager /> : null}
             {tab === "events" ? <EventsManager /> : null}
             {tab === "gallery" ? <GalleryManager /> : null}
             {tab === "hero" ? <HeroPhotoManager /> : null}

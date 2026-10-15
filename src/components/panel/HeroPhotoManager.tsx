@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import { HeroPhotoForm } from "@/components/panel/HeroPhotoForm";
+import { IconButton } from "@/components/panel/IconButton";
 import { NoticeBanner, type PanelNotice } from "@/components/panel/NoticeBanner";
 import { buttonClasses } from "@/components/ui/Button";
 import { Check, Pencil, Plus, Trash2 } from "@/components/ui/icons";
@@ -240,24 +241,12 @@ function HeroTile({
         )}
         {onEdit && onDelete ? (
           <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={onEdit}
-              disabled={busy}
-              aria-label={`Edytuj zdjęcie: ${title}`}
-              className="inline-flex h-11 items-center justify-center rounded-[3px] border border-ink/25 text-ink transition-colors hover:border-ink hover:bg-ink/5 disabled:opacity-30"
-            >
+            <IconButton label={`Edytuj zdjęcie: ${title}`} disabled={busy} onClick={onEdit}>
               <Pencil className="size-5" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              onClick={onDelete}
-              disabled={busy}
-              aria-label={`Usuń zdjęcie: ${title}`}
-              className="inline-flex h-11 items-center justify-center rounded-[3px] border border-accent/40 text-accent-deep transition-colors hover:border-accent hover:bg-accent/5 disabled:opacity-30"
-            >
+            </IconButton>
+            <IconButton label={`Usuń zdjęcie: ${title}`} disabled={busy} onClick={onDelete} danger>
               <Trash2 className="size-5" aria-hidden="true" />
-            </button>
+            </IconButton>
           </div>
         ) : null}
       </div>

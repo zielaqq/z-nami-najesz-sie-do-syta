@@ -5,18 +5,21 @@ import { useEffect, useRef, type MouseEvent } from "react";
 import { Logo } from "@/components/layout/Logo";
 import { ButtonLink } from "@/components/ui/Button";
 import { CloseIcon, MapPin, MenuIcon, Phone } from "@/components/ui/icons";
-import { fullAddress, navItems, siteConfig } from "@/data/site";
+import { fullAddress, siteConfig } from "@/data/site";
 import { withBase } from "@/lib/base-path";
 import { useOpeningHoursGroups } from "@/lib/opening-hours-live";
+import { navItemsWithOffers, type SpecialOffer } from "@/lib/special-offers-live";
+import { useSpecialOffers } from "@/lib/use-special-offers";
 
 /**
  * Menu mobilne jako natywny <dialog> otwarty przez showModal():
  * przeglądarka sama zapewnia pułapkę fokusu, zamykanie klawiszem Esc,
  * `inert` dla reszty strony i powrót fokusu na przycisk otwierający.
  */
-export function MobileNav() {
+export function MobileNav({ initialOffers }: { initialOffers?: SpecialOffer[] }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const hoursGroups = useOpeningHoursGroups();
+  const items = navItemsWithOffers(useSpecialOffers(initialOffers));
 
   // Po powiększeniu okna do układu desktopowego zamknij otwarte menu.
   useEffect(() => {
@@ -69,7 +72,7 @@ export function MobileNav() {
 
           <nav aria-label="Menu mobilne" className="container-page flex-1 py-6">
             <ul className="divide-y divide-ink/10 border-b border-ink/10">
-              {navItems.map((item, index) => (
+              {items.map((item, index) => (
                 <li key={item.id}>
                   <a
                     href={withBase(`/#${item.id}`)}

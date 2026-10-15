@@ -1,9 +1,8 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 
-import { CloseIcon } from "@/components/ui/icons";
+import { Lightbox } from "@/components/ui/Lightbox";
 import { Photo } from "@/components/ui/Photo";
 import { heroContent } from "@/data/about";
 import { fetchHeroImage, type HeroImage } from "@/lib/hero-photo-live";
@@ -56,21 +55,9 @@ export function HeroPhoto({ initial, live }: HeroPhotoProps) {
 }
 
 function PanelPhoto({ image }: { image: HeroImage }) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const whole = image.fit === "contain";
-
-  const open = () => {
-    setIsOpen(true);
-    dialogRef.current?.showModal();
-  };
-
-  const close = () => dialogRef.current?.close();
-
-  const onBackdropClick = (event: MouseEvent<HTMLDialogElement>) => {
-    if (event.target === event.currentTarget) close();
-  };
 
   // Całe zdjęcie (plakat): proporcje pliku, a szerokość ograniczona tak, żeby zmieściło się w wysokości ekranu.
   const wholeStyle = {
@@ -83,7 +70,7 @@ function PanelPhoto({ image }: { image: HeroImage }) {
       <button
         ref={triggerRef}
         type="button"
-        onClick={open}
+        onClick={() => setIsOpen(true)}
         aria-label={`Powiększ zdjęcie: ${image.alt}`}
         aria-haspopup="dialog"
         className={whole ? "mx-auto block w-full cursor-zoom-in" : "block w-full cursor-zoom-in"}
@@ -100,36 +87,16 @@ function PanelPhoto({ image }: { image: HeroImage }) {
         />
       </button>
 
-      <dialog
-        ref={dialogRef}
-        aria-label="Podgląd zdjęcia"
+      <Lightbox
+        // Pusty podpis: opis plakatu jest dla czytników ekranu i Google, pod powiększeniem byłby powtórzeniem.
+        images={[{ src: image.src, alt: image.alt, caption: "", remote: true }]}
+        index={isOpen ? 0 : null}
+        onIndexChange={() => {}}
         onClose={() => {
           setIsOpen(false);
           triggerRef.current?.focus();
         }}
-        onClick={onBackdropClick}
-        className="lightbox m-0 h-dvh max-h-none w-screen max-w-none bg-ink/95 p-0 text-cream"
-      >
-        <div className="flex h-full flex-col">
-          <div className="flex shrink-0 justify-end px-4 py-3 sm:px-6">
-            <button
-              type="button"
-              onClick={close}
-              aria-label="Zamknij podgląd"
-              className="inline-flex size-11 items-center justify-center rounded-[3px] text-cream transition-colors hover:bg-cream/10"
-            >
-              <CloseIcon className="size-6" aria-hidden="true" />
-            </button>
-          </div>
-          <div className="relative min-h-0 flex-1 px-2 pb-4 sm:px-6 sm:pb-6">
-            {isOpen ? (
-              <div className="relative size-full">
-                <Image src={image.src} alt={image.alt} fill unoptimized sizes="100vw" className="object-contain" />
-              </div>
-            ) : null}
-          </div>
-        </div>
-      </dialog>
+      />
     </>
   );
 }

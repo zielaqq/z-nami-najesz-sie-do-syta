@@ -77,6 +77,36 @@ Dobre zdjęcie do galerii: w dobrym świetle, bez bałaganu w kadrze i ze stoła
 kafelki mają proporcje 4:5 (pionowe), a w powiększeniu widać całe zdjęcie. Przy zdjęciach z gośćmi lub personelem zadbaj
 o ich zgodę.
 
+### Oferty specjalne
+
+Zakładka **„Oferty specjalne”** – osobne sekcje na stronie, zaraz pod menu, np. **Komunia** (z wariantami menu) albo
+**Święta**. Każda oferta ma swoją nazwę, opis i zdjęcia, a jeśli chcesz – także link w menu na górze strony. Wszystko
+zapisuje się od razu.
+
+* **Dodaj ofertę** – wpisz:
+  * **Nazwę** – krótko, np. „Komunia”. Tak będzie podpisana sekcja i link w menu.
+  * **Dopisek nad nazwą** (nieobowiązkowy) – mały napis nad nazwą, np. „Przez cały rok” albo „Tylko w grudniu”.
+    Gdy go nie wpiszesz, pojawi się „Oferta specjalna”.
+  * **Opis** (nieobowiązkowy) – pusta linia zaczyna nowy akapit.
+  * **Kiedy pokazywać na stronie:**
+    * **Cały czas** – oferta jest na stronie, dopóki jej nie ukryjesz (np. Komunia).
+    * **Tylko w wybranych dniach** – oferta pojawi się i zniknie sama (np. Święta od 1 listopada do 24 grudnia).
+      Wystarczy jedna z dat: samo „od” albo samo „do”.
+    * **Ukryta** – nie ma jej na stronie; możesz ją spokojnie przygotować i pokazać później.
+  * **Pokaż link do oferty w menu na górze strony** – na komputerze mieszczą się tam 2 takie oferty (pierwsze z listy),
+    kolejne są w menu na telefonie i w stopce. Bardzo długie nazwy w górnym menu są skracane „…”.
+* **Dodaj zdjęcia** przy ofercie – np. plakaty z wariantami menu. Możesz wybrać kilka naraz; na stronie pokazują się
+  **w całości, bez przycinania**, a kliknięcie powiększa zdjęcie na cały ekran (strzałkami przechodzi się do
+  następnego). **Ołówek** przy zdjęciu zmienia **podpis** widoczny pod nim – przy plakacie warto wpisać nazwę wariantu
+  i cenę, np. „Wariant I – 150 zł / osoba”. Strzałki **← / →** zmieniają kolejność zdjęć, kosz usuwa zdjęcie.
+* Strzałki **↑ / ↓** przy ofercie zmieniają kolejność ofert na stronie i w menu. **Ołówek** zmienia nazwę, opis i czas
+  pokazywania, **kosz** usuwa ofertę razem ze zdjęciami (tego nie da się cofnąć – żeby tylko zdjąć ofertę ze strony,
+  ustaw „Ukryta”).
+* Przy każdej ofercie widać, czy jest teraz na stronie („Na stronie – cały czas”, „Na stronie do 24.12.2026”,
+  „Pojawi się 01.11.2026”, „Zakończona…”, „Ukryta”).
+
+Pod opisem każdej oferty jest przycisk **„Zapytaj o ofertę”** (telefon) – strona nie przyjmuje zamówień sama.
+
 ### Zdjęcie główne
 
 Zakładka **„Zdjęcie główne”** – duże zdjęcie na samej górze strony, obok nazwy restauracji. Domyślnie jest tam zdjęcie
@@ -203,7 +233,21 @@ krok 3.
 ## Dla programisty
 
 * Schemat i reguły: `supabase/schema.sql` (tabele `dishes`, `daily_menu`, `events`, `gallery_photos`, `opening_hours`,
-  `site_settings`, `hero_photos`, `admins`; magazyny `dish-photos`, `gallery-photos`, `hero-photos`).
+  `site_settings`, `hero_photos`, `special_offers`, `special_offer_photos`, `admins`; magazyny `dish-photos`,
+  `gallery-photos`, `hero-photos`, `offer-photos`).
+* Oferty specjalne: tabele `special_offers` (nazwa, dopisek, opis, `show_from`/`show_until`, `visible`, `in_nav`,
+  `sort_order`; ukryte widzi tylko administrator) i `special_offer_photos` (`on delete cascade`), magazyn
+  `offer-photos` (5 MB, zdjęcia zmniejszane w przeglądarce do 1800 px). Publiczny odczyt i reguły wyświetlania
+  (daty liczone w strefie Europe/Warsaw, kotwice sekcji z nazwy – „Komunia” → `#komunia`, nazwy zajęte przez stałe
+  sekcje dostają przedrostek `oferta-`): `src/lib/special-offers-live.ts`. Na serwerze oferty pobiera
+  `(site)/layout.tsx` (nawigacja) i `page.tsx` (sekcje) – jedno zapytanie dzięki `cache` w
+  `src/lib/special-offers-server.ts`; w przeglądarce `useSpecialOffers` (`src/lib/use-special-offers.ts`, jedno zapytanie
+  na wejście na stronę) odświeża sekcje (`SpecialOffers.tsx`) i wszystkie nawigacje (`NavLinks`, `MobileNav`).
+  Przez nawigację z ofertami **polityka prywatności też jest renderowana dynamicznie**; strona 404 ofert na serwerze nie
+  pobiera (jest częścią każdej trasy – zrobiłaby z panelu stronę dynamiczną), linki doładowuje przeglądarka.
+  W nagłówku na komputerze najwyżej 2 oferty (`maxOffers` w `Header`). Panel: `OffersManager`, `OfferForm`,
+  `OfferPhotoForm`, `src/lib/panel-offers.ts`. Powiększanie zdjęć (galeria, oferty, zdjęcie główne): wspólny
+  `src/components/ui/Lightbox.tsx`.
 * Zdjęcie główne: tabela `hero_photos` (opis, `fit` = `contain`/`cover`, wymiary) i magazyn `hero-photos` (limit 5 MB,
   zdjęcia zmniejszane w przeglądarce do 1800 px); wybrane zdjęcie wskazuje `site_settings.hero_photo_id`
   (`null` = zdjęcie sali z kodu, usunięcie wybranego zdjęcia ustawia `null` przez `on delete set null`). Publiczny

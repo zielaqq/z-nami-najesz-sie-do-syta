@@ -1,39 +1,39 @@
 import { Logo } from "@/components/layout/Logo";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { NavLinks } from "@/components/layout/NavLinks";
 import { ButtonLink } from "@/components/ui/Button";
 import { Phone } from "@/components/ui/icons";
-import { navItems, siteConfig } from "@/data/site";
-import { withBase } from "@/lib/base-path";
+import { siteConfig } from "@/data/site";
+import type { SpecialOffer } from "@/lib/special-offers-live";
 
 /**
  * Nagłówek (sticky). Ma stałą, litą tło, a sekcje mają `scroll-padding-top`
  * równe jego wysokości (zmienna --header-h), więc niczego nie zasłania.
  * Mobile: hamburger · logo · przycisk telefonu. Desktop: logo · nawigacja · przycisk.
+ * W nawigacji są też oferty specjalne z panelu (np. „Komunia”) – patrz `NavLinks`.
  */
-export function Header() {
+export function Header({ initialOffers }: { initialOffers?: SpecialOffer[] }) {
   const { phoneDisplay, phoneHref } = siteConfig.contact;
 
   return (
     <header className="sticky top-0 z-40 border-b border-ink/10 bg-cream/95 backdrop-blur-md">
       <div className="container-page flex h-[var(--header-h)] items-center gap-3">
-        <MobileNav />
+        <MobileNav initialOffers={initialOffers} />
 
         <div className="flex min-w-0 flex-1 justify-center lg:flex-none lg:justify-start">
           <Logo />
         </div>
 
         <nav aria-label="Główna nawigacja" className="hidden flex-1 justify-center lg:flex">
-          <ul className="flex items-center gap-7 xl:gap-9">
-            {navItems.map((item) => (
-              <li key={item.id}>
-                <a
-                  href={withBase(`/#${item.id}`)}
-                  className="link-underline inline-block py-2 text-[0.9375rem] font-medium text-ink-soft transition-colors hover:text-ink"
-                >
-                  {item.label}
-                </a>
-              </li>
-            ))}
+          {/* Na komputerze mieszczą się najwyżej 2 oferty z panelu (długie nazwy skrócone „…”), żeby nawigacja nie
+              wypchnęła przycisku telefonu nawet przy 1024 px. Pozostałe są w menu mobilnym, stopce i na stronie. */}
+          <ul className="flex items-center gap-5 xl:gap-8">
+            <NavLinks
+              initialOffers={initialOffers}
+              maxOffers={2}
+              linkClassName="link-underline inline-block whitespace-nowrap py-2 text-[0.9375rem] font-medium text-ink-soft transition-colors hover:text-ink"
+              offerLinkClassName="max-w-[8rem] truncate align-bottom"
+            />
           </ul>
         </nav>
 
