@@ -10,7 +10,7 @@ import { buttonClasses } from "@/components/ui/Button";
 import { Check, Pencil, Plus, Trash2 } from "@/components/ui/icons";
 import { withBase } from "@/lib/base-path";
 import { cx } from "@/lib/cx";
-import { heroPhotoUrl, type HeroFit, type HeroPhotoRow } from "@/lib/hero-photo-live";
+import { heroPhotoUrl, type HeroFit, type HeroPhotoRow, type HeroSize } from "@/lib/hero-photo-live";
 import { describeError } from "@/lib/panel-data";
 import { deleteHeroPhoto, loadHeroPhotos, setActiveHeroPhoto } from "@/lib/panel-hero";
 
@@ -18,9 +18,18 @@ import { deleteHeroPhoto, loadHeroPhotos, setActiveHeroPhoto } from "@/lib/panel
 const DEFAULT_PHOTO = "/images/gallery/sala-1.jpg";
 
 const fitLabels: Record<HeroFit, string> = {
-  contain: "Pokazywane w całości",
+  contain: "W całości",
   cover: "Na całą ramkę",
 };
+
+const sizeLabels: Record<HeroSize, string> = { large: "duże", medium: "średnie", small: "małe" };
+
+/** „W całości · średnie · napis „Nowość”” – ustawienia zdjęcia w jednej linijce pod kafelkiem. */
+function heroPhotoDetail(photo: HeroPhotoRow): string {
+  const parts = [fitLabels[photo.fit], sizeLabels[photo.size ?? "large"]];
+  if (photo.badge?.trim()) parts.push(`napis „${photo.badge.trim()}”`);
+  return parts.join(" · ");
+}
 
 /**
  * Zdjęcie główne – duże zdjęcie na górze strony, obok nazwy restauracji. Klientka wgrywa własne zdjęcia (np. plakat
@@ -137,7 +146,7 @@ export function HeroPhotoManager() {
               <HeroTile
                 src={heroPhotoUrl(photo.photo_path)}
                 title={photo.alt}
-                detail={fitLabels[photo.fit]}
+                detail={heroPhotoDetail(photo)}
                 fit={photo.fit}
                 active={activeId === photo.id}
                 busy={busy}

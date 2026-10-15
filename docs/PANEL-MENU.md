@@ -119,10 +119,14 @@ jednym kliknięciem wrócić do zdjęcia sali. Wszystko zapisuje się od razu �
   * **W całości** – nic nie zostanie ucięte. Wybierz to dla **plakatów i grafik z tekstem**.
   * **Na całą ramkę** – zdjęcie wypełni ramkę jak zdjęcie sali, ale brzegi mogą zostać przycięte. Dla zwykłych zdjęć.
 
+  **Wielkość na komputerze** – Duże / Średnie / Małe (na telefonie zdjęcie zawsze zajmuje całą szerokość ekranu,
+  żeby tekst na plakacie był czytelny). **Napis na zdjęciu** (nieobowiązkowy) – wyróżniona etykieta w rogu, np.
+  „Nowość” albo „Nowa oferta” (gotowe przyciski) lub dowolny własny tekst do 24 znaków; puste = bez napisu.
+
   Pole **„Od razu pokaż na stronie”** (zaznaczone) wstawia zdjęcie na stronę od razu po dodaniu.
 * **Pokaż na stronie** przy dowolnym zdjęciu (także przy „Zdjęciu sali”) zmienia to, co jest na stronie. Zdjęcie, które
   jest teraz na stronie, ma czerwoną ramkę i napis **„Na stronie”**.
-* **Ołówek** zmienia opis i sposób pokazania, **kosz** usuwa zdjęcie. Jeśli usuniesz zdjęcie, które jest na stronie,
+* **Ołówek** zmienia opis, sposób pokazania, wielkość i napis, **kosz** usuwa zdjęcie. Jeśli usuniesz zdjęcie, które jest na stronie,
   wróci zdjęcie sali. Zdjęcia sali nie da się usunąć.
 * Wgrane zdjęcia zostają w panelu, więc przyszłoroczny plakat albo ulubione zdjęcie możesz wstawić ponownie bez
   wgrywania od nowa.
@@ -248,7 +252,8 @@ krok 3.
   W nagłówku na komputerze najwyżej 2 oferty (`maxOffers` w `Header`). Panel: `OffersManager`, `OfferForm`,
   `OfferPhotoForm`, `src/lib/panel-offers.ts`. Powiększanie zdjęć (galeria, oferty, zdjęcie główne): wspólny
   `src/components/ui/Lightbox.tsx`.
-* Zdjęcie główne: tabela `hero_photos` (opis, `fit` = `contain`/`cover`, wymiary) i magazyn `hero-photos` (limit 5 MB,
+* Zdjęcie główne: tabela `hero_photos` (opis, `fit` = `contain`/`cover`, `size` = `large`/`medium`/`small` – ułamek
+  wielkości na komputerze, `HERO_SIZE_SCALE`; `badge` – napis w rogu, wymiary) i magazyn `hero-photos` (limit 5 MB,
   zdjęcia zmniejszane w przeglądarce do 1800 px); wybrane zdjęcie wskazuje `site_settings.hero_photo_id`
   (`null` = zdjęcie sali z kodu, usunięcie wybranego zdjęcia ustawia `null` przez `on delete set null`). Publiczny
   odczyt: `src/lib/hero-photo-live.ts` (`fetchHeroImage`, jedno zapytanie z osadzeniem `hero_photos`); `Hero` pobiera

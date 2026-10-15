@@ -1,4 +1,4 @@
-import { HERO_PHOTO_COLUMNS, type HeroFit, type HeroPhotoRow } from "@/lib/hero-photo-live";
+import { HERO_PHOTO_COLUMNS, type HeroPhotoRow } from "@/lib/hero-photo-live";
 import { resizeImageDetailed } from "@/lib/image-resize";
 import { getSupabase } from "@/lib/supabase/client";
 
@@ -9,6 +9,9 @@ const BUCKET = "hero-photos";
  */
 const MAX_SIDE = 1800;
 const QUALITY = 0.88;
+
+/** Ustawienia zdjęcia edytowane w formularzu. */
+export type HeroPhotoFields = Pick<HeroPhotoRow, "alt" | "fit" | "size" | "badge">;
 
 /** Wszystkie wgrane zdjęcia główne (najnowsze pierwsze) i to, które jest teraz na stronie (`null` = zdjęcie sali). */
 export async function loadHeroPhotos(): Promise<{ photos: HeroPhotoRow[]; activeId: string | null }> {
@@ -33,7 +36,7 @@ export async function setActiveHeroPhoto(id: string | null): Promise<void> {
 }
 
 /** Zmniejsza zdjęcie, wgrywa je do magazynu i zapisuje w bazie. Przy błędzie wgrany plik jest sprzątany. */
-export async function addHeroPhoto(file: File, options: { alt: string; fit: HeroFit }): Promise<HeroPhotoRow> {
+export async function addHeroPhoto(file: File, fields: HeroPhotoFields): Promise<HeroPhotoRow> {
   const supabase = await getSupabase();
   const { blob, width, height } = await resizeImageDetailed(file, MAX_SIDE, QUALITY);
   const path = `${crypto.randomUUID()}.jpg`;
@@ -45,7 +48,7 @@ export async function addHeroPhoto(file: File, options: { alt: string; fit: Hero
   try {
     const { data, error } = await supabase
       .from("hero_photos")
-      .insert({ photo_path: path, alt: options.alt, fit: options.fit, width, height })
+      .insert({ ...fields, photo_path: path, width, height })
       .select(HERO_PHOTO_COLUMNS);
     const saved = data?.[0] as HeroPhotoRow | undefined;
     if (error || !saved) throw error ?? new Error("Brak odpowiedzi z bazy");
@@ -56,8 +59,8 @@ export async function addHeroPhoto(file: File, options: { alt: string; fit: Hero
   }
 }
 
-/** Zmienia opis i sposób pokazania zdjęcia. */
-export async function updateHeroPhoto(id: string, changes: { alt: string; fit: HeroFit }): Promise<HeroPhotoRow> {
+/** Zmienia opis, sposób pokazania, wielkość i napis zdjęcia. */
+export async function updateHeroPhoto(id: string, changes: HeroPhotoFields): Promise<HeroPhotoRow> {
   const supabase = await getSupabase();
   const { data, error } = await supabase.from("hero_photos").update(changes).eq("id", id).select(HERO_PHOTO_COLUMNS);
   const saved = data?.[0] as HeroPhotoRow | undefined;

@@ -389,6 +389,12 @@ create policy "hero_photos_admin_delete" on public.hero_photos
 grant select on public.hero_photos to anon;
 grant select, insert, update, delete on public.hero_photos to authenticated;
 
+-- Wielkość na komputerze (na telefonie zdjęcie zawsze ma szerokość ekranu) i nieobowiązkowy napis w rogu, np. „Nowość”.
+alter table public.hero_photos
+  add column if not exists size text not null default 'medium' check (size in ('large', 'medium', 'small'));
+alter table public.hero_photos
+  add column if not exists badge text check (badge is null or char_length(badge) <= 24);
+
 -- Które zdjęcie jest teraz na stronie. Usunięcie tego zdjęcia w panelu przywraca zdjęcie sali (null).
 alter table public.site_settings
   add column if not exists hero_photo_id uuid references public.hero_photos (id) on delete set null;

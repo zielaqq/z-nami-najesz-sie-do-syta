@@ -7,7 +7,7 @@ import { NoticeBanner, fieldClass, type PanelNotice } from "@/components/panel/N
 import { buttonClasses } from "@/components/ui/Button";
 import { CloseIcon, ImagePlus } from "@/components/ui/icons";
 import { cx } from "@/lib/cx";
-import { heroPhotoUrl, type HeroFit, type HeroPhotoRow } from "@/lib/hero-photo-live";
+import { heroPhotoUrl, type HeroFit, type HeroPhotoRow, type HeroSize } from "@/lib/hero-photo-live";
 import { describeError } from "@/lib/panel-data";
 import { addHeroPhoto, updateHeroPhoto } from "@/lib/panel-hero";
 
@@ -24,6 +24,15 @@ const fitOptions: Array<{ id: HeroFit; label: string; hint: string }> = [
   },
 ];
 
+const sizeOptions: Array<{ id: HeroSize; label: string }> = [
+  { id: "large", label: "Duże" },
+  { id: "medium", label: "Średnie" },
+  { id: "small", label: "Małe" },
+];
+
+/** Gotowe napisy do wstawienia jednym kliknięciem (można też wpisać własny). */
+const badgeSuggestions = ["Nowość", "Nowa oferta"];
+
 interface HeroPhotoFormProps {
   /** null = dodawanie nowego zdjęcia, inaczej edycja opisu i sposobu pokazania */
   photo: HeroPhotoRow | null;
@@ -33,12 +42,14 @@ interface HeroPhotoFormProps {
   onSaved: (photo: HeroPhotoRow) => void;
 }
 
-/** Okno dialogowe zdjęcia głównego: wybór pliku, opis (dla niewidomych i Google) i sposób pokazania. */
+/** Okno dialogowe zdjęcia głównego: wybór pliku, opis (dla niewidomych i Google), sposób pokazania, wielkość i napis. */
 export function HeroPhotoForm({ photo, onClose, onAdded, onSaved }: HeroPhotoFormProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [alt, setAlt] = useState(photo?.alt ?? "");
   const [fit, setFit] = useState<HeroFit>(photo?.fit ?? "contain");
+  const [size, setSize] = useState<HeroSize>(photo?.size ?? "medium");
+  const [badge, setBadge] = useState(photo?.badge ?? "");
   const [show, setShow] = useState(true);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<PanelNotice | null>(null);
@@ -74,8 +85,9 @@ export function HeroPhotoForm({ photo, onClose, onAdded, onSaved }: HeroPhotoFor
     setBusy(true);
     setNotice(null);
     try {
-      if (photo) onSaved(await updateHeroPhoto(photo.id, { alt: text, fit }));
-      else if (file) onAdded(await addHeroPhoto(file, { alt: text, fit }), show);
+      const fields = { alt: text, fit, size, badge: badge.trim() || null };
+      if (photo) onSaved(await updateHeroPhoto(photo.id, fields));
+      else if (file) onAdded(await addHeroPhoto(file, fields), show);
     } catch (error) {
       setNotice({ tone: "error", text: describeError(error) });
       setBusy(false);
@@ -136,6 +148,11 @@ export function HeroPhotoForm({ photo, onClose, onAdded, onSaved }: HeroPhotoFor
                 sizes="256px"
                 className={fit === "contain" ? "object-contain" : "object-cover"}
               />
+              {badge.trim() ? (
+                <span className="absolute left-2 top-2 rounded-[3px] bg-accent px-2 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-white">
+                  {badge.trim()}
+                </span>
+              ) : null}
             </div>
           ) : null}
 
@@ -166,6 +183,72 @@ export function HeroPhotoForm({ photo, onClose, onAdded, onSaved }: HeroPhotoFor
               ))}
             </div>
           </fieldset>
+
+          <fieldset>
+            <legend className="text-sm font-semibold">Wielkość na komputerze</legend>
+            <div className="mt-1.5 grid grid-cols-3 gap-2">
+              {sizeOptions.map((option) => (
+                <label
+                  key={option.id}
+                  className={cx(
+                    "flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-[3px] border bg-white px-2 text-sm font-semibold",
+                    size === option.id ? "border-ink" : "border-ink/20",
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="hero-size"
+                    value={option.id}
+                    checked={size === option.id}
+                    onChange={() => setSize(option.id)}
+                    className="size-4 shrink-0 accent-[var(--color-accent)]"
+                  />
+                  {option.label}
+                </label>
+              ))}
+            </div>
+            <p className="mt-1.5 text-xs text-mute">Na telefonie zdjęcie zawsze zajmuje całą szerokość ekranu.</p>
+          </fieldset>
+
+          <div>
+            <label htmlFor="hero-badge" className="block text-sm font-semibold">
+              Napis na zdjęciu <span className="font-normal text-mute">(nieobowiązkowy)</span>
+            </label>
+            <input
+              id="hero-badge"
+              type="text"
+              value={badge}
+              maxLength={24}
+              onChange={(event) => setBadge(event.target.value)}
+              aria-describedby="hero-badge-hint"
+              placeholder="np. Nowość"
+              className={fieldClass}
+            />
+            <div className="mt-2 flex flex-wrap gap-2">
+              {badgeSuggestions.map((text) => (
+                <button
+                  key={text}
+                  type="button"
+                  onClick={() => setBadge(text)}
+                  className="min-h-9 rounded-full border border-ink/25 bg-white px-3 text-sm hover:border-ink"
+                >
+                  {text}
+                </button>
+              ))}
+              {badge ? (
+                <button
+                  type="button"
+                  onClick={() => setBadge("")}
+                  className="min-h-9 rounded-full px-3 text-sm text-accent-deep underline-offset-2 hover:underline"
+                >
+                  Bez napisu
+                </button>
+              ) : null}
+            </div>
+            <p id="hero-badge-hint" className="mt-1.5 text-xs text-mute">
+              Wyróżniony napis w rogu zdjęcia na stronie. Zostaw puste, żeby go nie było.
+            </p>
+          </div>
 
           <div>
             <label htmlFor="hero-alt" className="block text-sm font-semibold">
