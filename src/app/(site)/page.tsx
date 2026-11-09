@@ -38,12 +38,12 @@ export default async function HomePage() {
     upcomingEvents = await getUpcomingEvents();
   }
 
-  // Oferty specjalne (Komunia, Święta…) – te same dane co w nawigacji (SiteChrome); `cache` łączy oba zapytania w jedno.
+  // Oferty (działy „Oferta specjalna” i „Oferta”) – te same dane co w nawigacji (SiteChrome); `cache` łączy oba zapytania w jedno.
   const initialOffers = await getSpecialOffersOnServer();
 
   // Tła sekcji naprzemiennie: opinie (paper) → wydarzenia (sand, opcjonalne) → social (cream) → kontakt (paper).
   // „Sand” odcina się od sąsiadów, więc kolory pozostałych sekcji nie zależą od tego, czy wydarzenia są.
-  // Oferty specjalne (paper/sand na zmianę) leżą między menu (cream) a cateringiem (ink), więc też się odcinają.
+  // Działy ofert (paper/sand na zmianę) leżą między menu (cream) a cateringiem (ink), więc też się odcinają.
   return (
     <>
       <Hero />

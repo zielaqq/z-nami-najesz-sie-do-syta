@@ -60,8 +60,8 @@ materialy/                surowe pliki (filmy, oryginały logo) – wyłączone 
 
 **Menu na dziś** pochodzi z bazy i jest edytowane w panelu `/panel` (gdy ustawione są zmienne Supabase) – patrz
 [docs/PANEL-MENU.md](docs/PANEL-MENU.md). Galeria jest ustawiana w panelu (zakładka „Galeria”), a duże zdjęcie na górze strony – w zakładce „Zdjęcie główne”
-(np. plakat z aktualną ofertą zamiast zdjęcia sali). **Oferty specjalne** (np. Komunia, Święta – sekcje pod menu z opisem,
-zdjęciami i linkiem w nawigacji, pokazywane cały czas albo w wybranych dniach) – zakładka „Oferty specjalne”. **Pozostałe treści** (wydarzenia, nagrania, teksty) komponenty czytają
+(np. plakat z aktualną ofertą zamiast zdjęcia sali). **Oferty** (dwa działy pod menu, każdy z linkiem w nawigacji: „Oferta” – produkty
+dostępne stale, „Oferta specjalna” – tymczasowe, pokazywane w wybranych dniach) – zakładka „Oferty”. **Pozostałe treści** (wydarzenia, nagrania, teksty) komponenty czytają
 przez asynchroniczne funkcje z `src/lib/content.ts` (`getGallery`, `getUpcomingEvents`, `getVideos`) – wystarczy zmienić
 ich wnętrze, żeby podłączyć CMS; kształt danych zostaje.
 

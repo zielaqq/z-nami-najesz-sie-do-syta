@@ -155,8 +155,8 @@ export function OfferPhotoForm({
                 </>
               ) : null}
               <p className="mt-2 text-xs text-mute">
-                Zdjęcia albo gotowe plakaty (np. warianty menu). Możesz wybrać kilka naraz – pokażą się w całości, bez
-                przycinania, w kolejności wyboru.
+                Zdjęcia albo gotowe plakaty, pionowe i poziome (np. warianty menu). Możesz wybrać kilka naraz – pokażą się
+                w całości, bez przycinania, w kolejności wyboru.
               </p>
             </div>
           )}

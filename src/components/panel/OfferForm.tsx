@@ -8,24 +8,16 @@ import { CloseIcon } from "@/components/ui/icons";
 import { cx } from "@/lib/cx";
 import { describeError } from "@/lib/panel-data";
 import { saveOffer, type OfferRecord } from "@/lib/panel-offers";
+import { offerKind, type OfferKind } from "@/lib/special-offers-live";
 
-type Mode = "always" | "dates" | "hidden";
-
-const modeOptions: Array<{ id: Mode; label: string; hint: string }> = [
-  { id: "always", label: "Cały czas", hint: "Oferta jest na stronie, dopóki jej nie ukryjesz." },
+const kindOptions: Array<{ id: OfferKind; label: string; hint: string }> = [
+  { id: "regular", label: "Oferta", hint: "Produkt dostępny stale – jest na stronie cały czas." },
   {
-    id: "dates",
-    label: "Tylko w wybranych dniach",
-    hint: "Pojawi się i zniknie sama, np. oferta świąteczna od 1 listopada do 24 grudnia.",
+    id: "special",
+    label: "Oferta specjalna",
+    hint: "Tymczasowa, np. wigilijna – osobny dział na stronie. Pojawi się i zniknie sama.",
   },
-  { id: "hidden", label: "Ukryta", hint: "Nie ma jej na stronie – możesz ją spokojnie przygotować i pokazać później." },
 ];
-
-function initialMode(offer: OfferRecord | null): Mode {
-  if (!offer) return "always";
-  if (!offer.visible) return "hidden";
-  return offer.show_from || offer.show_until ? "dates" : "always";
-}
 
 interface OfferFormProps {
   /** null = nowa oferta */
@@ -36,16 +28,15 @@ interface OfferFormProps {
   onSaved: (offer: OfferRecord) => void;
 }
 
-/** Formularz oferty specjalnej w oknie dialogowym: nazwa, dopisek, opis, kiedy pokazywać i link w menu. */
+/** Formularz oferty w oknie dialogowym: nazwa, rodzaj (stała albo tymczasowa, z datami), opis i ukrywanie. */
 export function OfferForm({ offer, sortOrder, onClose, onSaved }: OfferFormProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [title, setTitle] = useState(offer?.title ?? "");
-  const [eyebrow, setEyebrow] = useState(offer?.eyebrow ?? "");
+  const [kind, setKind] = useState<OfferKind>(offer ? offerKind(offer) : "regular");
   const [description, setDescription] = useState(offer?.description ?? "");
-  const [mode, setMode] = useState<Mode>(initialMode(offer));
   const [showFrom, setShowFrom] = useState(offer?.show_from ?? "");
   const [showUntil, setShowUntil] = useState(offer?.show_until ?? "");
-  const [inNav, setInNav] = useState(offer?.in_nav ?? true);
+  const [hidden, setHidden] = useState(offer ? !offer.visible : false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<PanelNotice | null>(null);
 
@@ -62,11 +53,15 @@ export function OfferForm({ offer, sortOrder, onClose, onSaved }: OfferFormProps
       setNotice({ tone: "error", text: "Wpisz nazwę oferty." });
       return;
     }
-    if (mode === "dates" && !showFrom && !showUntil) {
-      setNotice({ tone: "error", text: "Wybierz, od kiedy albo do kiedy pokazywać ofertę." });
+    if (!description.trim()) {
+      setNotice({ tone: "error", text: "Wpisz opis oferty." });
       return;
     }
-    if (mode === "dates" && showFrom && showUntil && showUntil < showFrom) {
+    if (kind === "special" && !showUntil) {
+      setNotice({ tone: "error", text: "Wybierz, do kiedy pokazywać ofertę specjalną." });
+      return;
+    }
+    if (kind === "special" && showFrom && showUntil < showFrom) {
       setNotice({ tone: "error", text: "Data „do” nie może być wcześniejsza niż data „od”." });
       return;
     }
@@ -76,13 +71,11 @@ export function OfferForm({ offer, sortOrder, onClose, onSaved }: OfferFormProps
       const saved = await saveOffer(
         {
           title: trimmed,
-          eyebrow: eyebrow.trim() || null,
           description: description.trim(),
-          visible: mode !== "hidden",
-          // „Cały czas” czyści daty; ukryta oferta je zachowuje, żeby po ponownym włączeniu nie trzeba ich wpisywać.
-          show_from: mode === "always" ? null : showFrom || null,
-          show_until: mode === "always" ? null : showUntil || null,
-          in_nav: inNav,
+          visible: !hidden,
+          // Rodzaj oferty wynika z dat: oferta stała nie ma ich wcale.
+          show_from: kind === "special" ? showFrom || null : null,
+          show_until: kind === "special" ? showUntil : null,
         },
         offer?.id ?? null,
         sortOrder,
@@ -104,7 +97,7 @@ export function OfferForm({ offer, sortOrder, onClose, onSaved }: OfferFormProps
       <form onSubmit={submit} className="flex max-h-[92dvh] flex-col">
         <div className="flex items-center justify-between border-b border-ink/15 px-5 py-3">
           <h2 id="offer-form-title" className="font-serif text-xl">
-            {offer ? "Edytuj ofertę" : "Nowa oferta specjalna"}
+            {offer ? "Edytuj ofertę" : "Nowa oferta"}
           </h2>
           <button
             type="button"
@@ -131,68 +124,30 @@ export function OfferForm({ offer, sortOrder, onClose, onSaved }: OfferFormProps
               onChange={(event) => setTitle(event.target.value)}
               aria-describedby="offer-title-hint"
               className={fieldClass}
-              placeholder="np. Komunia"
+              placeholder="np. Śniadania"
             />
             <p id="offer-title-hint" className="mt-1.5 text-xs text-mute">
-              Krótko – tak będzie podpisana sekcja na stronie i link w menu na górze strony.
-            </p>
-          </div>
-
-          <div>
-            <label htmlFor="offer-eyebrow" className="block text-sm font-semibold">
-              Dopisek nad nazwą <span className="font-normal text-mute">(nieobowiązkowy)</span>
-            </label>
-            <input
-              id="offer-eyebrow"
-              type="text"
-              maxLength={60}
-              value={eyebrow}
-              onChange={(event) => setEyebrow(event.target.value)}
-              aria-describedby="offer-eyebrow-hint"
-              className={fieldClass}
-              placeholder="np. Przez cały rok"
-            />
-            <p id="offer-eyebrow-hint" className="mt-1.5 text-xs text-mute">
-              Mały napis nad nazwą. Gdy zostawisz puste, pojawi się „Oferta specjalna”.
-            </p>
-          </div>
-
-          <div>
-            <label htmlFor="offer-description" className="block text-sm font-semibold">
-              Opis <span className="font-normal text-mute">(nieobowiązkowy)</span>
-            </label>
-            <textarea
-              id="offer-description"
-              rows={6}
-              maxLength={2000}
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              aria-describedby="offer-description-hint"
-              className={fieldClass}
-              placeholder="np. Organizujemy przyjęcia komunijne na miejscu i z cateringiem. Wybierz jeden z trzech wariantów menu."
-            />
-            <p id="offer-description-hint" className="mt-1.5 text-xs text-mute">
-              Pusta linia zaczyna nowy akapit.
+              Krótko – tak będzie podpisana oferta na stronie.
             </p>
           </div>
 
           <fieldset>
-            <legend className="text-sm font-semibold">Kiedy pokazywać na stronie</legend>
+            <legend className="text-sm font-semibold">Rodzaj</legend>
             <div className="mt-1.5 space-y-2">
-              {modeOptions.map((option) => (
+              {kindOptions.map((option) => (
                 <label
                   key={option.id}
                   className={cx(
                     "flex cursor-pointer gap-3 rounded-[3px] border bg-white px-3.5 py-3",
-                    mode === option.id ? "border-ink" : "border-ink/20",
+                    kind === option.id ? "border-ink" : "border-ink/20",
                   )}
                 >
                   <input
                     type="radio"
-                    name="offer-mode"
+                    name="offer-kind"
                     value={option.id}
-                    checked={mode === option.id}
-                    onChange={() => setMode(option.id)}
+                    checked={kind === option.id}
+                    onChange={() => setKind(option.id)}
                     className="mt-0.5 size-5 shrink-0 accent-[var(--color-accent)]"
                   />
                   <span>
@@ -202,10 +157,10 @@ export function OfferForm({ offer, sortOrder, onClose, onSaved }: OfferFormProps
                 </label>
               ))}
             </div>
-            {mode === "dates" ? (
+            {kind === "special" ? (
               <div className="mt-3 grid gap-5 sm:grid-cols-2">
                 <label className="block text-sm font-semibold">
-                  Od dnia
+                  Od dnia <span className="font-normal text-mute">(puste = od razu)</span>
                   <input
                     type="date"
                     value={showFrom}
@@ -218,6 +173,7 @@ export function OfferForm({ offer, sortOrder, onClose, onSaved }: OfferFormProps
                   Do dnia <span className="font-normal text-mute">(włącznie)</span>
                   <input
                     type="date"
+                    required
                     value={showUntil}
                     min={showFrom || undefined}
                     onChange={(event) => setShowUntil(event.target.value)}
@@ -229,19 +185,38 @@ export function OfferForm({ offer, sortOrder, onClose, onSaved }: OfferFormProps
           </fieldset>
 
           <div>
+            <label htmlFor="offer-description" className="block text-sm font-semibold">
+              Opis
+            </label>
+            <textarea
+              id="offer-description"
+              rows={6}
+              required
+              maxLength={2000}
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              aria-describedby="offer-description-hint"
+              className={fieldClass}
+              placeholder="np. Oferujemy trzy zestawy śniadaniowe do wyboru. Kanapka z szynką i serem, jajecznica na maśle lub zestaw śniadaniowy z jajkami sadzonymi i frankfurterkami. Do każdego zestawu kawa, herbata lub gorąca czekolada do wyboru. Ceny od 15 zł."
+            />
+            <p id="offer-description-hint" className="mt-1.5 text-xs text-mute">
+              Napisz w 2–3 zdaniach, co oferujesz, co wchodzi w skład i ile to kosztuje. Pusta linia zaczyna nowy akapit.
+            </p>
+          </div>
+
+          <div>
             <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm">
               <input
                 type="checkbox"
-                checked={inNav}
-                onChange={(event) => setInNav(event.target.checked)}
-                aria-describedby="offer-nav-hint"
+                checked={hidden}
+                onChange={(event) => setHidden(event.target.checked)}
+                aria-describedby="offer-hidden-hint"
                 className="size-5 accent-[var(--color-accent)]"
               />
-              Pokaż link do oferty w menu na górze strony
+              Ukryj na stronie
             </label>
-            <p id="offer-nav-hint" className="text-xs text-mute">
-              Na komputerze w górnym menu mieszczą się 2 takie oferty (pierwsze z listy) – kolejne są w menu na telefonie i
-              w stopce strony.
+            <p id="offer-hidden-hint" className="text-xs text-mute">
+              Oferta zostaje w panelu, ale nie ma jej na stronie – możesz ją spokojnie przygotować i pokazać później.
             </p>
           </div>
 

@@ -21,7 +21,9 @@ import {
   type OfferPhotoRecord,
   type OfferRecord,
 } from "@/lib/panel-offers";
-import { offerPhotoUrl } from "@/lib/special-offers-live";
+import { offerGroups, offerKind, offerPhotoUrl, type OfferKind } from "@/lib/special-offers-live";
+
+const GROUP_TITLES: Record<OfferKind, string> = { special: "Oferty specjalne", regular: "Oferty stałe" };
 
 /** „2026-12-24” → „24.12.2026” */
 function shortDate(isoDate: string): string {
@@ -41,8 +43,9 @@ function offerStatus(offer: OfferRecord, today: string): { text: string; live: b
 }
 
 /**
- * Oferty specjalne (np. Komunia, Święta) – osobne sekcje na stronie pod menu, z opisem, zdjęciami i (jeśli klientka
- * chce) linkiem w nawigacji. Kolejność ofert i zdjęć ustawia się strzałkami; wszystko zapisuje się od razu.
+ * Oferty w dwóch grupach: stałe (np. Śniadania) i specjalne, czyli tymczasowe (np. Wigilia). Na stronie każda grupa to
+ * osobny dział pod menu z własnym linkiem w nawigacji. Kolejność ofert (w obrębie grupy) i zdjęć ustawia się
+ * strzałkami; wszystko zapisuje się od razu.
  */
 export function OffersManager() {
   const [offers, setOffers] = useState<OfferRecord[] | null>(null);
@@ -101,14 +104,16 @@ export function OffersManager() {
 
   const moveOffer = (offer: OfferRecord, direction: -1 | 1) => {
     if (!offers) return;
-    const from = offers.findIndex((item) => item.id === offer.id);
+    // Oferty przesuwają się tylko w obrębie swojej grupy (stałe albo specjalne).
+    const group = offers.filter((item) => offerKind(item) === offerKind(offer));
+    const from = group.findIndex((item) => item.id === offer.id);
     const to = from + direction;
-    if (from < 0 || to < 0 || to >= offers.length) return;
-    const next = [...offers];
-    [next[from], next[to]] = [next[to], next[from]];
+    if (from < 0 || to < 0 || to >= group.length) return;
+    const neighbour = group[to];
+    const next = offers.map((item) => (item.id === offer.id ? neighbour : item.id === neighbour.id ? offer : item));
     const renumbered = next.map((item, sort_order) => ({ ...item, sort_order }));
     setNotice(null);
-    setAnnouncement(`Oferta „${offer.title}”: miejsce ${to + 1} z ${offers.length}`);
+    setAnnouncement(`Oferta „${offer.title}”: miejsce ${to + 1} z ${group.length}`);
     pendingFocus.current = { prefix: `offer-${offer.id}`, direction };
     setOffers(renumbered);
     enqueueWrite(() => saveOfferOrder(renumbered));
@@ -160,12 +165,12 @@ export function OffersManager() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 id="offers-manager-title" className="font-serif text-2xl leading-tight sm:text-3xl">
-            Oferty specjalne
+            Oferty
           </h2>
           <p className="max-w-[60ch] text-sm text-mute">
-            Osobne sekcje na stronie, zaraz pod menu – np. Komunia albo Święta – z opisem i zdjęciami (np. plakatami z
-            wariantami menu). Każda może mieć link w menu na górze strony i pokazywać się cały czas albo tylko w
-            wybranych dniach.
+            Na stronie, zaraz pod menu, są dwa działy, każdy z własnym linkiem w menu na górze strony. „Oferta” to
+            produkty dostępne stale, np. Śniadania. „Oferta specjalna” to oferty tymczasowe, np. Wigilia – pojawiają się
+            i znikają same.
           </p>
         </div>
         <button type="button" onClick={() => setEditing("new")} className={buttonClasses("primary", "md")}>
@@ -189,35 +194,43 @@ export function OffersManager() {
         </p>
       ) : offers.length === 0 ? (
         <div className="mt-8 border border-ink/15 bg-white p-6">
-          <p className="font-serif text-xl">Nie ma jeszcze żadnej oferty specjalnej</p>
+          <p className="font-serif text-xl">Nie ma jeszcze żadnej oferty</p>
           <p className="mt-2 max-w-[56ch] text-ink-soft">
-            Dodaj np. „Komunia” – z opisem i zdjęciami wariantów menu. Pojawi się na stronie pod menu i w menu na górze
-            strony.
+            Dodaj np. „Śniadania” – z opisem i zdjęciem menu. Pojawi się na stronie pod menu i w menu na górze strony.
           </p>
           <button type="button" onClick={() => setEditing("new")} className={buttonClasses("primary", "md", "mt-5")}>
             Dodaj ofertę
           </button>
         </div>
       ) : (
-        <ul className="mt-6 space-y-6">
-          {offers.map((offer, index) => (
-            <li key={offer.id}>
-              <OfferCard
-                offer={offer}
-                status={offerStatus(offer, today)}
-                position={index + 1}
-                total={offers.length}
-                onMove={(direction) => moveOffer(offer, direction)}
-                onEdit={() => setEditing(offer)}
-                onDelete={() => void removeOffer(offer)}
-                onAddPhotos={() => setPhotoForm({ offer, photo: null })}
-                onEditPhoto={(photo) => setPhotoForm({ offer, photo })}
-                onMovePhoto={(photo, direction) => movePhoto(offer, photo, direction)}
-                onDeletePhoto={(photo) => void removePhoto(offer, photo)}
-              />
-            </li>
-          ))}
-        </ul>
+        offerGroups.map((group) => {
+          const groupOffers = offers.filter((offer) => offerKind(offer) === group.kind);
+          if (groupOffers.length === 0) return null;
+          return (
+            <div key={group.kind} className="mt-8">
+              <h3 className="font-serif text-xl leading-tight">{GROUP_TITLES[group.kind]}</h3>
+              <ul className="mt-3 space-y-6">
+                {groupOffers.map((offer, index) => (
+                  <li key={offer.id}>
+                    <OfferCard
+                      offer={offer}
+                      status={offerStatus(offer, today)}
+                      position={index + 1}
+                      total={groupOffers.length}
+                      onMove={(direction) => moveOffer(offer, direction)}
+                      onEdit={() => setEditing(offer)}
+                      onDelete={() => void removeOffer(offer)}
+                      onAddPhotos={() => setPhotoForm({ offer, photo: null })}
+                      onEditPhoto={(photo) => setPhotoForm({ offer, photo })}
+                      onMovePhoto={(photo, direction) => movePhoto(offer, photo, direction)}
+                      onDeletePhoto={(photo) => void removePhoto(offer, photo)}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })
       )}
 
       {editing ? (
@@ -300,10 +313,7 @@ function OfferCard({
     <article aria-label={`Oferta „${offer.title}”`} className="rounded-[3px] border-2 border-ink/15 bg-white">
       <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5">
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-accent">
-            {offer.eyebrow?.trim() || "Oferta specjalna"}
-          </p>
-          <h3 className="mt-1 font-serif text-2xl leading-tight">{offer.title}</h3>
+          <h4 className="font-serif text-2xl leading-tight">{offer.title}</h4>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-semibold">
             <span
               className={cx(
@@ -312,9 +322,6 @@ function OfferCard({
               )}
             >
               {status.text}
-            </span>
-            <span className="rounded-full border border-ink/20 px-2.5 py-1 text-ink-soft">
-              {offer.in_nav ? "Link w menu strony" : "Bez linku w menu"}
             </span>
           </div>
           {offer.description ? (
@@ -361,10 +368,12 @@ function OfferCard({
           <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
             {photos.map((photo, index) => {
               const title = photo.caption?.trim() || `Zdjęcie ${index + 1}`;
+              // Poziome zdjęcie zajmuje dwie kolumny – inaczej w pionowej ramce byłoby malutkie.
+              const landscape = photo.width > photo.height;
               return (
-                <li key={photo.id}>
+                <li key={photo.id} className={cx(landscape && "col-span-2")}>
                   <div className="flex h-full flex-col overflow-hidden rounded-[3px] border border-ink/15 bg-white">
-                    <div className="relative aspect-[3/4] bg-sand">
+                    <div className={cx("relative bg-sand", landscape ? "aspect-[3/2]" : "aspect-[3/4]")}>
                       <Image
                         src={offerPhotoUrl(photo.photo_path)}
                         alt=""

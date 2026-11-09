@@ -30,7 +30,7 @@ type Tab = "today" | "dishes" | "offers" | "events" | "gallery" | "hero" | "hour
 const tabs: Array<{ id: Tab; label: string }> = [
   { id: "today", label: "Menu na dziś" },
   { id: "dishes", label: "Baza dań" },
-  { id: "offers", label: "Oferty specjalne" },
+  { id: "offers", label: "Oferty" },
   { id: "events", label: "Wydarzenia" },
   { id: "gallery", label: "Galeria" },
   { id: "hero", label: "Zdjęcie główne" },
@@ -38,7 +38,7 @@ const tabs: Array<{ id: Tab; label: string }> = [
 ];
 
 /**
- * Panel klientki (/panel): logowanie → wybór dań na dziś (kafelki ze zdjęciami), baza dań, oferty specjalne, wydarzenia,
+ * Panel klientki (/panel): logowanie → wybór dań na dziś (kafelki ze zdjęciami), baza dań, oferty, wydarzenia,
  * galeria, zdjęcie główne i godziny otwarcia. Wszystko działa w przeglądarce; dostępu do zapisu pilnują reguły
  * w bazie (supabase/schema.sql).
  */

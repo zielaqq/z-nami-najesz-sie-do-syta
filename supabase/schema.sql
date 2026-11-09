@@ -91,6 +91,48 @@ create policy "dishes_admin_delete" on public.dishes
 grant select on public.dishes to anon;
 grant select, insert, update, delete on public.dishes to authenticated;
 
+-- Ochrona przed duplikatami: nie da się dodać dania o nazwie, która już jest w bazie (także wśród ukrytych). Porównanie
+-- ignoruje wielkość liter, polskie znaki, interpunkcję i nadmiarowe spacje – tak samo jak `dishNameKey` w src/lib/panel-data.ts.
+-- Celowo wyzwalacz, a nie unikalny indeks: indeksu nie dałoby się założyć, gdyby w bazie były już powtórzone nazwy.
+-- Istniejące dania z powtórzoną nazwą można dalej edytować, dopóki ich nazwa się nie zmienia.
+create or replace function public.dish_name_key(value text)
+returns text
+language sql
+immutable
+set search_path = ''
+as $$
+  select btrim(regexp_replace(
+    lower(translate(value, 'ĄĆĘŁŃÓŚŹŻąćęłńóśźż', 'ACELNOSZZacelnoszz')),
+    '[^a-z0-9]+', ' ', 'g'
+  ));
+$$;
+
+revoke all on function public.dish_name_key(text) from public;
+grant execute on function public.dish_name_key(text) to authenticated;
+
+create or replace function public.dishes_block_duplicate_name()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+declare
+  new_key text := public.dish_name_key(new.name);
+begin
+  if new_key = '' or (tg_op = 'UPDATE' and new_key = public.dish_name_key(old.name)) then
+    return new;
+  end if;
+  if exists (select 1 from public.dishes d where d.id <> new.id and public.dish_name_key(d.name) = new_key) then
+    raise exception 'Danie o takiej nazwie już jest w bazie' using errcode = 'unique_violation';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists dishes_block_duplicate_name on public.dishes;
+create trigger dishes_block_duplicate_name
+  before insert or update of name on public.dishes
+  for each row execute function public.dishes_block_duplicate_name();
+
 -- 3) Menu na dany dzień (które dania są danego dnia) --------------------------------
 create table if not exists public.daily_menu (
   day date not null,
@@ -428,9 +470,10 @@ create policy "hero_photos_files_admin_delete" on storage.objects
   for delete to authenticated
   using (bucket_id = 'hero-photos' and public.is_admin());
 
--- 10) Oferty specjalne (np. Komunia, Święta) – każda to osobna sekcja na stronie (pod menu) i, jeśli klientka chce,
---     pozycja w nawigacji. Opis, zdjęcia, kolejność i czas wyświetlania ustawia się w panelu.
---     `visible = false` = ukryta (szkic); `show_from`/`show_until` (oba nieobowiązkowe) = pokazuj tylko w tych dniach.
+-- 10) Oferty – na stronie dwa działy pod menu: „Oferta” (bez dat, dostępna stale) i „Oferta specjalna” (z datami, tymczasowa).
+--     Opis, zdjęcia, kolejność i czas wyświetlania ustawia się w panelu.
+--     `visible = false` = ukryta (szkic); `show_from`/`show_until` = pokazuj tylko w tych dniach (oferta z datą jest specjalna).
+--     Kolumny `eyebrow` i `in_nav` zostały po dawnym formularzu i nie są już używane.
 create table if not exists public.special_offers (
   id uuid primary key default gen_random_uuid(),
   title text not null check (char_length(btrim(title)) between 1 and 40),

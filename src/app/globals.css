@@ -178,6 +178,24 @@
   color: var(--color-accent);
 }
 
+/* Zdjęcie oferty w rzędzie: szerokość proporcjonalna do --r (szerokość / wysokość), więc zdjęcia w rzędzie mają równą
+   wysokość, a poziome same zajmują więcej miejsca. Na telefonie każde na całą szerokość. */
+@utility offer-photo {
+  flex: 1 1 100%;
+  min-width: 0;
+
+  @media (min-width: 40rem) {
+    flex: var(--r) 1 calc(var(--r) * 19rem);
+    max-width: calc(var(--r) * 34rem);
+  }
+  @media (min-width: 64rem) {
+    flex-basis: calc(var(--r) * 16rem);
+  }
+  @media (min-width: 80rem) {
+    flex-basis: calc(var(--r) * 20rem);
+  }
+}
+
 /* Cyfry o stałej szerokości – ceny i godziny wyrównują się w kolumnach */
 @utility tabular {
   font-variant-numeric: tabular-nums lining-nums;

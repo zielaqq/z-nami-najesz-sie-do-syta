@@ -10,7 +10,7 @@ import type { SpecialOffer } from "@/lib/special-offers-live";
  * Nagłówek (sticky). Ma stałą, litą tło, a sekcje mają `scroll-padding-top`
  * równe jego wysokości (zmienna --header-h), więc niczego nie zasłania.
  * Mobile: hamburger · logo · przycisk telefonu. Desktop: logo · nawigacja · przycisk.
- * W nawigacji są też oferty specjalne z panelu (np. „Komunia”) – patrz `NavLinks`.
+ * W nawigacji są też działy ofert z panelu („Oferta”, „Oferta specjalna”) – patrz `NavLinks`.
  */
 export function Header({ initialOffers }: { initialOffers?: SpecialOffer[] }) {
   const { phoneDisplay, phoneHref } = siteConfig.contact;
@@ -25,14 +25,10 @@ export function Header({ initialOffers }: { initialOffers?: SpecialOffer[] }) {
         </div>
 
         <nav aria-label="Główna nawigacja" className="hidden flex-1 justify-center lg:flex">
-          {/* Na komputerze mieszczą się najwyżej 2 oferty z panelu (długie nazwy skrócone „…”), żeby nawigacja nie
-              wypchnęła przycisku telefonu nawet przy 1024 px. Pozostałe są w menu mobilnym, stopce i na stronie. */}
           <ul className="flex items-center gap-5 xl:gap-8">
             <NavLinks
               initialOffers={initialOffers}
-              maxOffers={2}
               linkClassName="link-underline inline-block whitespace-nowrap py-2 text-[0.9375rem] font-medium text-ink-soft transition-colors hover:text-ink"
-              offerLinkClassName="max-w-[8rem] truncate align-bottom"
             />
           </ul>
         </nav>

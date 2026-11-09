@@ -13,16 +13,18 @@ export interface SpecialOfferPhotoRow {
   sort_order: number;
 }
 
-/** Oferta specjalna z bazy (tabela `special_offers`) razem ze zdjęciami. */
+/** Oferta z bazy (tabela `special_offers`) razem ze zdjęciami. */
 export interface SpecialOfferRow {
   id: string;
   title: string;
+  /** Kolumna z dawnego formularza – strona już jej nie pokazuje. */
   eyebrow: string | null;
   description: string;
-  /** RRRR-MM-DD; `null` = bez ograniczenia */
+  /** RRRR-MM-DD; `null` = bez ograniczenia. Oferta z datą jest ofertą specjalną (patrz `offerKind`). */
   show_from: string | null;
   show_until: string | null;
   visible: boolean;
+  /** Kolumna z dawnego formularza – linki w menu są teraz wspólne dla całego działu (`navItemsWithOffers`). */
   in_nav: boolean;
   sort_order: number;
   special_offer_photos: SpecialOfferPhotoRow[];
@@ -30,6 +32,30 @@ export interface SpecialOfferRow {
 
 export const OFFER_PHOTO_COLUMNS = "id,offer_id,photo_path,caption,width,height,sort_order";
 export const OFFER_COLUMNS = `id,title,eyebrow,description,show_from,show_until,visible,in_nav,sort_order,special_offer_photos(${OFFER_PHOTO_COLUMNS})`;
+
+/** Rodzaj oferty: stała („Oferta”) albo tymczasowa („Oferta specjalna”). */
+export type OfferKind = "regular" | "special";
+
+/** Dział ofert: osobna sekcja na stronie i osobny link w menu. */
+export interface OfferGroup {
+  kind: OfferKind;
+  /** `id` sekcji na stronie (kotwica linku w menu). */
+  anchor: string;
+  label: string;
+  /** Mały napis nad nazwą działu. */
+  eyebrow: string;
+}
+
+/** Działy w kolejności na stronie, w menu i w panelu – żeby ją odwrócić, wystarczy zamienić te dwa wpisy. */
+export const offerGroups: readonly OfferGroup[] = [
+  { kind: "special", anchor: "oferta-specjalna", label: "Oferta specjalna", eyebrow: "Tylko przez ograniczony czas" },
+  { kind: "regular", anchor: "oferta", label: "Oferta", eyebrow: "Dostępna cały czas" },
+];
+
+/** Rodzaj wynika z dat: oferta ograniczona czasowo jest specjalna, dostępna cały czas – zwykła. */
+export function offerKind(offer: Pick<SpecialOfferRow, "show_from" | "show_until">): OfferKind {
+  return offer.show_from || offer.show_until ? "special" : "regular";
+}
 
 /** Zdjęcie oferty gotowe do wyświetlenia. */
 export interface SpecialOfferPhoto {
@@ -46,10 +72,11 @@ export interface SpecialOffer {
   id: string;
   /** `id` sekcji na stronie (kotwica w nawigacji), np. „komunia”. */
   anchor: string;
+  kind: OfferKind;
   title: string;
-  eyebrow: string;
+  /** Ostatni dzień oferty (RRRR-MM-DD); `null` = bez daty końcowej. */
+  until: string | null;
   description: string;
-  inNav: boolean;
   photos: SpecialOfferPhoto[];
 }
 
@@ -72,7 +99,13 @@ export function isOfferShownOn(offer: Pick<SpecialOfferRow, "visible" | "show_fr
 }
 
 // Kotwice zajęte przez stałe sekcje strony – oferta o takiej nazwie dostaje przedrostek „oferta-”.
-const RESERVED_ANCHORS = new Set<string>([...navItems.map((item) => item.id), "wydarzenia", "social", "main"]);
+const RESERVED_ANCHORS = new Set<string>([
+  ...navItems.map((item) => item.id),
+  ...offerGroups.map((group) => group.anchor),
+  "wydarzenia",
+  "social",
+  "main",
+]);
 
 function slugify(text: string): string {
   return text
@@ -100,10 +133,10 @@ export function toSpecialOffers(rows: SpecialOfferRow[], day: string): SpecialOf
       return {
         id: row.id,
         anchor,
+        kind: offerKind(row),
         title: row.title.trim(),
-        eyebrow: row.eyebrow?.trim() || "Oferta specjalna",
+        until: row.show_until,
         description: row.description.trim(),
-        inNav: row.in_nav,
         photos: sortOfferPhotos(row.special_offer_photos ?? []).map((photo, index) => ({
           id: photo.id,
           src: offerPhotoUrl(photo.photo_path),
@@ -132,19 +165,10 @@ export async function fetchSpecialOffers(day: string, signal?: AbortSignal): Pro
   return toSpecialOffers((await response.json()) as SpecialOfferRow[], day);
 }
 
-/**
- * Nawigacja strony z ofertami (zaznaczonymi „w menu”) wstawionymi zaraz po „Menu”. `maxOffers` ogranicza ich liczbę
- * (nagłówek na komputerze ma miejsce tylko na kilka pozycji – patrz `Header`).
- */
-export function navItemsWithOffers(
-  offers: SpecialOffer[],
-  maxOffers = Infinity,
-): Array<{ id: string; label: string; isOffer: boolean }> {
-  const offerItems = offers
-    .filter((offer) => offer.inNav)
-    .slice(0, maxOffers)
-    .map((offer) => ({ id: offer.anchor, label: offer.title, isOffer: true }));
-  return navItems.flatMap((item) =>
-    item.id === "menu" ? [{ ...item, isOffer: false }, ...offerItems] : [{ ...item, isOffer: false }],
-  );
+/** Nawigacja strony: zaraz po „Menu” po jednym linku na każdy dział, w którym jest teraz jakaś oferta. */
+export function navItemsWithOffers(offers: SpecialOffer[]): Array<{ id: string; label: string }> {
+  const groupItems = offerGroups
+    .filter((group) => offers.some((offer) => offer.kind === group.kind))
+    .map((group) => ({ id: group.anchor, label: group.label }));
+  return navItems.flatMap((item) => (item.id === "menu" ? [item, ...groupItems] : [item]));
 }

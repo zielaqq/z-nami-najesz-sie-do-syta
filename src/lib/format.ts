@@ -54,6 +54,15 @@ export function formatDayLabel(isoDate: string): string {
   }).format(new Date(`${isoDate}T12:00:00Z`));
 }
 
+/** Dzień i miesiąc, np. „24 grudnia” (strefa Europe/Warsaw). */
+export function formatDayMonth(isoDate: string): string {
+  return new Intl.DateTimeFormat("pl-PL", {
+    day: "numeric",
+    month: "long",
+    timeZone: "Europe/Warsaw",
+  }).format(new Date(`${isoDate}T12:00:00Z`));
+}
+
 /** Przesuwa datę ISO (RRRR-MM-DD) o `days` dni; wartość może być ujemna. */
 export function shiftDay(isoDate: string, days: number): string {
   const date = new Date(`${isoDate}T12:00:00Z`);

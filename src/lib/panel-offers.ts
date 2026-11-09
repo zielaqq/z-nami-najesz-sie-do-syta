@@ -8,15 +8,12 @@ import {
 } from "@/lib/special-offers-live";
 import { getSupabase } from "@/lib/supabase/client";
 
-/** Oferta specjalna w panelu (wiersz `special_offers` ze zdjęciami w kolejności z panelu). */
+/** Oferta w panelu (wiersz `special_offers` ze zdjęciami w kolejności z panelu). */
 export type OfferRecord = SpecialOfferRow;
 export type OfferPhotoRecord = SpecialOfferPhotoRow;
 
 /** Pola oferty edytowane w formularzu. */
-export type OfferFields = Pick<
-  OfferRecord,
-  "title" | "eyebrow" | "description" | "show_from" | "show_until" | "visible" | "in_nav"
->;
+export type OfferFields = Pick<OfferRecord, "title" | "description" | "show_from" | "show_until" | "visible">;
 
 const BUCKET = "offer-photos";
 /** Jak przy zdjęciu głównym: na plakatach z wariantami menu musi być czytelny drobny tekst. */

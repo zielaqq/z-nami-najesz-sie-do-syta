@@ -12,7 +12,7 @@ import type { SpecialOffer } from "@/lib/special-offers-live";
 interface SiteChromeProps {
   children: ReactNode;
   /**
-   * Oferty specjalne z panelu (np. „Komunia”) do nawigacji, pobrane na serwerze – żeby nagłówek nie przeskakiwał.
+   * Oferty z panelu do nawigacji (linki „Oferta” / „Oferta specjalna”), pobrane na serwerze – żeby nagłówek nie przeskakiwał.
    * Podaje je `(site)/layout.tsx`; strona 404 ich nie pobiera (jest częścią każdej trasy, także panelu – zapytanie
    * do bazy zrobiłoby z nich strony dynamiczne), więc tam linki do ofert doładowuje przeglądarka.
    */

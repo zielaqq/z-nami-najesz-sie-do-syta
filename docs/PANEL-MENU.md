@@ -77,31 +77,35 @@ Dobre zdjęcie do galerii: w dobrym świetle, bez bałaganu w kadrze i ze stoła
 kafelki mają proporcje 4:5 (pionowe), a w powiększeniu widać całe zdjęcie. Przy zdjęciach z gośćmi lub personelem zadbaj
 o ich zgodę.
 
-### Oferty specjalne
+### Oferty
 
-Zakładka **„Oferty specjalne”** – osobne sekcje na stronie, zaraz pod menu, np. **Komunia** (z wariantami menu) albo
-**Święta**. Każda oferta ma swoją nazwę, opis i zdjęcia, a jeśli chcesz – także link w menu na górze strony. Wszystko
-zapisuje się od razu.
+Zakładka **„Oferty”**. Na stronie, zaraz pod menu, są dwa działy i każdy ma własny link w menu na górze strony (także
+na telefonie i w stopce):
+
+* **Oferta** – produkty dostępne stale, np. Śniadania albo Komunia.
+* **Oferta specjalna** – oferty tymczasowe, np. wigilijna. Pojawiają się i znikają same.
+
+Dział bez żadnej oferty nie pokazuje się ani na stronie, ani w menu. Link prowadzi do nagłówka działu, a gdy w dziale
+są co najmniej dwie oferty, pod nagłówkiem pojawiają się przyciski z ich nazwami. Wszystko zapisuje się od razu.
 
 * **Dodaj ofertę** – wpisz:
-  * **Nazwę** – krótko, np. „Komunia”. Tak będzie podpisana sekcja i link w menu.
-  * **Dopisek nad nazwą** (nieobowiązkowy) – mały napis nad nazwą, np. „Przez cały rok” albo „Tylko w grudniu”.
-    Gdy go nie wpiszesz, pojawi się „Oferta specjalna”.
-  * **Opis** (nieobowiązkowy) – pusta linia zaczyna nowy akapit.
-  * **Kiedy pokazywać na stronie:**
-    * **Cały czas** – oferta jest na stronie, dopóki jej nie ukryjesz (np. Komunia).
-    * **Tylko w wybranych dniach** – oferta pojawi się i zniknie sama (np. Święta od 1 listopada do 24 grudnia).
-      Wystarczy jedna z dat: samo „od” albo samo „do”.
-    * **Ukryta** – nie ma jej na stronie; możesz ją spokojnie przygotować i pokazać później.
-  * **Pokaż link do oferty w menu na górze strony** – na komputerze mieszczą się tam 2 takie oferty (pierwsze z listy),
-    kolejne są w menu na telefonie i w stopce. Bardzo długie nazwy w górnym menu są skracane „…”.
-* **Dodaj zdjęcia** przy ofercie – np. plakaty z wariantami menu. Możesz wybrać kilka naraz; na stronie pokazują się
-  **w całości, bez przycinania**, a kliknięcie powiększa zdjęcie na cały ekran (strzałkami przechodzi się do
-  następnego). **Ołówek** przy zdjęciu zmienia **podpis** widoczny pod nim – przy plakacie warto wpisać nazwę wariantu
-  i cenę, np. „Wariant I – 150 zł / osoba”. Strzałki **← / →** zmieniają kolejność zdjęć, kosz usuwa zdjęcie.
-* Strzałki **↑ / ↓** przy ofercie zmieniają kolejność ofert na stronie i w menu. **Ołówek** zmienia nazwę, opis i czas
-  pokazywania, **kosz** usuwa ofertę razem ze zdjęciami (tego nie da się cofnąć – żeby tylko zdjąć ofertę ze strony,
-  ustaw „Ukryta”).
+  * **Nazwę** – krótko, np. „Śniadania”.
+  * **Rodzaj** – „Oferta” albo „Oferta specjalna”. Przy ofercie specjalnej ustawiasz daty: **„Do dnia”** jest
+    obowiązkowe, **„Od dnia”** można zostawić puste (oferta pojawi się od razu). Na stronie nad nazwą widać wtedy
+    termin, np. „Do 24 grudnia”.
+  * **Opis** – obowiązkowy, 2–3 zdania: co oferujesz, co wchodzi w skład i ile to kosztuje. Pusta linia zaczyna nowy
+    akapit. Google i osoby niewidome nie przeczytają tekstu z plakatu, dlatego opis jest potrzebny.
+  * **Ukryj na stronie** – oferta zostaje w panelu, ale nie ma jej na stronie; możesz ją spokojnie przygotować i
+    pokazać później.
+* **Dodaj zdjęcia** przy ofercie – pionowe albo poziome, np. plakaty z wariantami menu. Możesz wybrać kilka naraz; na
+  stronie pokazują się **w całości, bez przycinania**, a układ dobiera się sam: jedno zdjęcie stoi obok opisu, kilka
+  układa się pod opisem w rzędach równej wysokości. Kliknięcie powiększa zdjęcie na cały ekran (strzałkami przechodzi
+  się do następnego). **Ołówek** przy zdjęciu zmienia **podpis** widoczny pod nim – przy plakacie warto wpisać nazwę
+  wariantu i cenę, np. „Wariant I – 150 zł / osoba”. Strzałki **← / →** zmieniają kolejność zdjęć, kosz usuwa zdjęcie.
+* Strzałki **↑ / ↓** przy ofercie zmieniają jej miejsce w obrębie działu. **Ołówek** zmienia nazwę, rodzaj, daty i
+  opis, **kosz** usuwa ofertę razem ze zdjęciami (tego nie da się cofnąć – żeby tylko zdjąć ofertę ze strony, zaznacz
+  „Ukryj na stronie”).
+* Zakończona oferta specjalna zostaje w panelu ze statusem „Zakończona”. Za rok wystarczy zmienić jej daty.
 * Przy każdej ofercie widać, czy jest teraz na stronie („Na stronie – cały czas”, „Na stronie do 24.12.2026”,
   „Pojawi się 01.11.2026”, „Zakończona…”, „Ukryta”).
 
@@ -239,17 +243,19 @@ krok 3.
 * Schemat i reguły: `supabase/schema.sql` (tabele `dishes`, `daily_menu`, `events`, `gallery_photos`, `opening_hours`,
   `site_settings`, `hero_photos`, `special_offers`, `special_offer_photos`, `admins`; magazyny `dish-photos`,
   `gallery-photos`, `hero-photos`, `offer-photos`).
-* Oferty specjalne: tabele `special_offers` (nazwa, dopisek, opis, `show_from`/`show_until`, `visible`, `in_nav`,
-  `sort_order`; ukryte widzi tylko administrator) i `special_offer_photos` (`on delete cascade`), magazyn
-  `offer-photos` (5 MB, zdjęcia zmniejszane w przeglądarce do 1800 px). Publiczny odczyt i reguły wyświetlania
-  (daty liczone w strefie Europe/Warsaw, kotwice sekcji z nazwy – „Komunia” → `#komunia`, nazwy zajęte przez stałe
-  sekcje dostają przedrostek `oferta-`): `src/lib/special-offers-live.ts`. Na serwerze oferty pobiera
+* Oferty: tabele `special_offers` (nazwa, opis, `show_from`/`show_until`, `visible`, `sort_order`; ukryte widzi tylko
+  administrator; kolumny `eyebrow` i `in_nav` zostały po dawnym formularzu i nie są już używane) i
+  `special_offer_photos` (`on delete cascade`), magazyn `offer-photos` (5 MB, zdjęcia zmniejszane w przeglądarce do
+  1800 px). Rodzaj oferty nie ma własnej kolumny: oferta z datą to „Oferta specjalna”, bez dat – „Oferta” (`offerKind`).
+  Działy, ich kolejność i kotwice (`#oferta-specjalna`, `#oferta`): `offerGroups`. Publiczny odczyt i reguły
+  wyświetlania (daty liczone w strefie Europe/Warsaw, kotwice ofert z nazwy – „Komunia” → `#komunia`, nazwy zajęte
+  przez stałe sekcje dostają przedrostek `oferta-`): `src/lib/special-offers-live.ts`. Na serwerze oferty pobiera
   `(site)/layout.tsx` (nawigacja) i `page.tsx` (sekcje) – jedno zapytanie dzięki `cache` w
   `src/lib/special-offers-server.ts`; w przeglądarce `useSpecialOffers` (`src/lib/use-special-offers.ts`, jedno zapytanie
   na wejście na stronę) odświeża sekcje (`SpecialOffers.tsx`) i wszystkie nawigacje (`NavLinks`, `MobileNav`).
   Przez nawigację z ofertami **polityka prywatności też jest renderowana dynamicznie**; strona 404 ofert na serwerze nie
   pobiera (jest częścią każdej trasy – zrobiłaby z panelu stronę dynamiczną), linki doładowuje przeglądarka.
-  W nagłówku na komputerze najwyżej 2 oferty (`maxOffers` w `Header`). Panel: `OffersManager`, `OfferForm`,
+  Układ zdjęć: `OfferArticle` w `SpecialOffers.tsx` i narzędzie `offer-photo` w `globals.css`. Panel: `OffersManager`, `OfferForm`,
   `OfferPhotoForm`, `src/lib/panel-offers.ts`. Powiększanie zdjęć (galeria, oferty, zdjęcie główne): wspólny
   `src/components/ui/Lightbox.tsx`.
 * Zdjęcie główne: tabela `hero_photos` (opis, `fit` = `contain`/`cover`, `size` = `large`/`medium`/`small` – ułamek
