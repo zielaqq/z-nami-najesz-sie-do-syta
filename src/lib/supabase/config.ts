@@ -13,3 +13,13 @@ const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
 export const supabaseConfig = url && key ? { url, key } : null;
 export const isSupabaseConfigured = supabaseConfig !== null;
+
+/** Publiczny odczyt tabeli zwykłym `fetch` (bez biblioteki Supabase), zawsze świeże dane. */
+export function fetchRest(table: string, params: Record<string, string> | URLSearchParams, signal?: AbortSignal) {
+  if (!supabaseConfig) throw new Error("Supabase nie jest skonfigurowany");
+  return fetch(`${supabaseConfig.url}/rest/v1/${table}?${new URLSearchParams(params)}`, {
+    headers: { apikey: supabaseConfig.key, Accept: "application/json" },
+    cache: "no-store",
+    signal,
+  });
+}

@@ -15,9 +15,8 @@ export async function listOpeningHours(): Promise<OpeningHoursRow[]> {
 }
 
 /** Zapisuje wszystkie 7 dni naraz (jedno zapytanie – wszystko albo nic). */
-export async function saveOpeningHours(rows: OpeningHoursRow[]): Promise<OpeningHoursRow[]> {
+export async function saveOpeningHours(rows: OpeningHoursRow[]): Promise<void> {
   const supabase = await getSupabase();
   const { error } = await supabase.from("opening_hours").upsert(rows, { onConflict: "weekday" });
   if (error) throw error;
-  return rows;
 }

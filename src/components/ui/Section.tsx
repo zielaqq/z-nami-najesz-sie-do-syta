@@ -17,18 +17,13 @@ interface SectionProps {
   /** `id` nagłówka opisującego sekcję (aria-labelledby) */
   labelledBy: string;
   tone?: SectionTone;
-  className?: string;
   children: ReactNode;
 }
 
 /** Sekcja strony: jednolite odstępy, kotwica i semantyczne powiązanie z nagłówkiem. */
-export function Section({ id, labelledBy, tone = "cream", className, children }: SectionProps) {
+export function Section({ id, labelledBy, tone = "cream", children }: SectionProps) {
   return (
-    <section
-      id={id}
-      aria-labelledby={labelledBy}
-      className={cx("relative py-20 sm:py-28 lg:py-32", tones[tone], className)}
-    >
+    <section id={id} aria-labelledby={labelledBy} className={cx("relative py-20 sm:py-28 lg:py-32", tones[tone])}>
       <div className="container-page">{children}</div>
     </section>
   );

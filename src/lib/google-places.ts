@@ -33,16 +33,6 @@ export function isGooglePlacesConfigured(): boolean {
   return Boolean(key && placeId && PLACE_ID_PATTERN.test(placeId));
 }
 
-export class GooglePlacesError extends Error {
-  constructor(
-    message: string,
-    readonly status?: number,
-  ) {
-    super(message);
-    this.name = "GooglePlacesError";
-  }
-}
-
 interface RawLocalizedText {
   text?: string;
   languageCode?: string;
@@ -99,7 +89,7 @@ export async function fetchGoogleReviews(): Promise<GoogleReviewsPayload> {
   const apiKey = process.env.GOOGLE_PLACES_API_KEY?.trim();
   const placeId = process.env.GOOGLE_PLACE_ID?.trim();
   if (!apiKey || !placeId || !PLACE_ID_PATTERN.test(placeId)) {
-    throw new GooglePlacesError("Brak konfiguracji GOOGLE_PLACES_API_KEY / GOOGLE_PLACE_ID");
+    throw new Error("Brak konfiguracji GOOGLE_PLACES_API_KEY / GOOGLE_PLACE_ID");
   }
 
   const url = `${apiBase()}/v1/places/${encodeURIComponent(placeId)}?languageCode=pl&regionCode=PL`;
@@ -115,7 +105,7 @@ export async function fetchGoogleReviews(): Promise<GoogleReviewsPayload> {
   });
 
   if (!response.ok) {
-    throw new GooglePlacesError(`Places API zwróciło HTTP ${response.status}`, response.status);
+    throw new Error(`Places API zwróciło HTTP ${response.status}`);
   }
 
   const place = (await response.json()) as RawPlace;

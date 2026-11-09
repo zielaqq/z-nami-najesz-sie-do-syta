@@ -190,7 +190,7 @@ export async function saveDish(input: DishInput, photo: File | null, existing: D
   let uploadedPath: string | null = null;
 
   if (photo) {
-    const blob = await resizeImage(photo);
+    const { blob } = await resizeImage(photo);
     const path = `${crypto.randomUUID()}.jpg`;
     const { error: uploadError } = await supabase.storage
       .from(BUCKET)

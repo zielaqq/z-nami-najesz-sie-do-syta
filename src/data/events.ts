@@ -27,8 +27,6 @@ export interface RestaurantEvent {
   /** Wolny tekst, np. "17:00" albo "12:00–15:00" */
   time?: string;
   description: string;
-  /** Opcjonalne zdjęcie, np. "/images/events/muzyka.jpg" */
-  image?: string;
   /** true = plakietka „DEMO” (usuń to pole przy prawdziwych wydarzeniach) */
   demo?: boolean;
 }

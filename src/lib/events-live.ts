@@ -1,5 +1,5 @@
 import type { RestaurantEvent } from "@/data/events";
-import { supabaseConfig } from "@/lib/supabase/config";
+import { fetchRest, supabaseConfig } from "@/lib/supabase/config";
 
 interface EventRow {
   id: string;
@@ -17,16 +17,12 @@ interface EventRow {
  */
 export async function fetchUpcomingEvents(today: string, signal?: AbortSignal): Promise<RestaurantEvent[]> {
   if (!supabaseConfig) return [];
-  const params = new URLSearchParams({
+  const params = {
     select: "id,title,date,end_date,time_label,description",
     or: `(end_date.gte.${today},and(end_date.is.null,date.gte.${today}))`,
     order: "date.asc",
-  });
-  const response = await fetch(`${supabaseConfig.url}/rest/v1/events?${params}`, {
-    headers: { apikey: supabaseConfig.key, Accept: "application/json" },
-    cache: "no-store",
-    signal,
-  });
+  };
+  const response = await fetchRest("events", params, signal);
   if (!response.ok) throw new Error(`Wydarzenia: HTTP ${response.status}`);
   const rows = (await response.json()) as EventRow[];
   return rows.map((row) => ({

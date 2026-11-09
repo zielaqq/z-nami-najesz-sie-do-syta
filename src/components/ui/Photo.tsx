@@ -11,8 +11,6 @@ interface PhotoProps {
   sizes: string;
   /** Klasy proporcji, np. "aspect-[4/3]" (pełna nazwa klasy – Tailwind musi ją widzieć) */
   ratio?: string;
-  className?: string;
-  imageClassName?: string;
   /** Zdjęcie widoczne od razu po wejściu na stronę (LCP) – ładuj z wysokim priorytetem */
   eager?: boolean;
   quality?: 75 | 90;
@@ -31,15 +29,13 @@ export function Photo({
   alt,
   sizes,
   ratio = "aspect-[4/3]",
-  className,
-  imageClassName,
   eager = false,
   quality = 75,
   focus,
   remote = false,
 }: PhotoProps) {
   return (
-    <div className={cx("relative overflow-hidden bg-sand", ratio, className)}>
+    <div className={cx("relative overflow-hidden bg-sand", ratio)}>
       <Image
         src={remote ? src : withBase(src)}
         alt={alt}
@@ -50,7 +46,7 @@ export function Photo({
         loading={eager ? "eager" : "lazy"}
         fetchPriority={eager ? "high" : "auto"}
         style={focus ? { objectPosition: focus } : undefined}
-        className={cx("object-cover", imageClassName)}
+        className="object-cover"
       />
     </div>
   );

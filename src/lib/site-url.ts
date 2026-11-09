@@ -15,9 +15,8 @@ export const isNoIndex = process.env.NEXT_PUBLIC_NOINDEX === "true";
  */
 export function getSiteUrl(): string {
   const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
 
-  if (!explicit && !vercel && process.env.NODE_ENV === "production" && !warned) {
+  if (!explicit && process.env.NODE_ENV === "production" && !warned) {
     warned = true;
     console.warn(
       "\n⚠ Brak NEXT_PUBLIC_SITE_URL – canonical, sitemap.xml, robots.txt i dane strukturalne wskażą http://localhost:3000.\n" +
@@ -25,6 +24,5 @@ export function getSiteUrl(): string {
     );
   }
 
-  const raw = explicit || (vercel ? `https://${vercel}` : FALLBACK_URL);
-  return raw.replace(/\/+$/, "");
+  return (explicit || FALLBACK_URL).replace(/\/+$/, "");
 }

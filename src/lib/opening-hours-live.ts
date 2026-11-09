@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { openingHours, type Weekday } from "@/data/site";
-import { supabaseConfig } from "@/lib/supabase/config";
+import { fetchRest, supabaseConfig } from "@/lib/supabase/config";
 
 /** Godziny jednego dnia z bazy (tabela `opening_hours`, jeden wiersz na dzień tygodnia). */
 export interface OpeningHoursRow {
@@ -32,12 +32,7 @@ export const DAY_LABELS: Record<Weekday, string> = {
  */
 export async function fetchOpeningHours(signal?: AbortSignal): Promise<OpeningHoursRow[]> {
   if (!supabaseConfig) return [];
-  const params = new URLSearchParams({ select: OPENING_HOURS_COLUMNS, order: "weekday.asc" });
-  const response = await fetch(`${supabaseConfig.url}/rest/v1/opening_hours?${params}`, {
-    headers: { apikey: supabaseConfig.key, Accept: "application/json" },
-    cache: "no-store",
-    signal,
-  });
+  const response = await fetchRest("opening_hours", { select: OPENING_HOURS_COLUMNS, order: "weekday.asc" }, signal);
   if (!response.ok) throw new Error(`Godziny otwarcia: HTTP ${response.status}`);
   return (await response.json()) as OpeningHoursRow[];
 }

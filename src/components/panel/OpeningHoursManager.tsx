@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { NoticeBanner, fieldClass, type PanelNotice } from "@/components/panel/NoticeBanner";
 import { buttonClasses } from "@/components/ui/Button";
 import { cx } from "@/lib/cx";
-import { DAY_LABELS, WEEKDAY_ORDER, type OpeningHoursRow } from "@/lib/opening-hours-live";
+import { DAY_LABELS, type OpeningHoursRow } from "@/lib/opening-hours-live";
 import { describeError } from "@/lib/panel-data";
 import { listOpeningHours, saveOpeningHours } from "@/lib/panel-opening-hours";
 
@@ -86,46 +86,42 @@ export function OpeningHoursManager() {
       ) : (
         <>
           <ul className="mt-8 divide-y divide-ink/10">
-            {WEEKDAY_ORDER.map((weekday) => {
-              const row = rows.find((item) => item.weekday === weekday);
-              if (!row) return null;
-              return (
-                <li key={weekday} className="flex flex-wrap items-center gap-4 py-4">
-                  <label className="flex min-h-11 w-44 shrink-0 cursor-pointer items-center gap-2.5 font-semibold">
+            {rows.map((row) => (
+              <li key={row.weekday} className="flex flex-wrap items-center gap-4 py-4">
+                <label className="flex min-h-11 w-44 shrink-0 cursor-pointer items-center gap-2.5 font-semibold">
+                  <input
+                    type="checkbox"
+                    checked={row.is_open}
+                    onChange={(e) => update(row.weekday, { is_open: e.target.checked })}
+                    className="size-5 accent-[var(--color-accent)]"
+                  />
+                  {DAY_LABELS[row.weekday]}
+                </label>
+                {row.is_open ? (
+                  <div className="flex items-center gap-2">
                     <input
-                      type="checkbox"
-                      checked={row.is_open}
-                      onChange={(e) => update(weekday, { is_open: e.target.checked })}
-                      className="size-5 accent-[var(--color-accent)]"
+                      type="time"
+                      required
+                      value={row.opens}
+                      onChange={(e) => update(row.weekday, { opens: e.target.value })}
+                      className={cx(fieldClass, "mt-0 w-auto min-w-[7rem]")}
                     />
-                    {DAY_LABELS[weekday]}
-                  </label>
-                  {row.is_open ? (
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="time"
-                        required
-                        value={row.opens}
-                        onChange={(e) => update(weekday, { opens: e.target.value })}
-                        className={cx(fieldClass, "mt-0 w-auto min-w-[7rem]")}
-                      />
-                      <span aria-hidden="true" className="text-mute">
-                        –
-                      </span>
-                      <input
-                        type="time"
-                        required
-                        value={row.closes}
-                        onChange={(e) => update(weekday, { closes: e.target.value })}
-                        className={cx(fieldClass, "mt-0 w-auto min-w-[7rem]")}
-                      />
-                    </div>
-                  ) : (
-                    <p className="text-mute">Nieczynne</p>
-                  )}
-                </li>
-              );
-            })}
+                    <span aria-hidden="true" className="text-mute">
+                      –
+                    </span>
+                    <input
+                      type="time"
+                      required
+                      value={row.closes}
+                      onChange={(e) => update(row.weekday, { closes: e.target.value })}
+                      className={cx(fieldClass, "mt-0 w-auto min-w-[7rem]")}
+                    />
+                  </div>
+                ) : (
+                  <p className="text-mute">Nieczynne</p>
+                )}
+              </li>
+            ))}
           </ul>
 
           <button

@@ -3,19 +3,14 @@
 import { useEffect, useState } from "react";
 
 import { menuCategories, type MenuCategoryId } from "@/data/menu";
-import { supabaseConfig } from "@/lib/supabase/config";
+import { fetchRest, supabaseConfig } from "@/lib/supabase/config";
 
 const DEFAULT_ORDER: MenuCategoryId[] = menuCategories.map((category) => category.id);
 
 /** Kolejność kategorii menu ustawiona przez klientkę w panelu (zakładka „Menu na dziś”, strzałki przy nazwie kategorii). */
 export async function fetchMenuCategoryOrder(signal?: AbortSignal): Promise<MenuCategoryId[]> {
   if (!supabaseConfig) return DEFAULT_ORDER;
-  const params = new URLSearchParams({ select: "menu_category_order", id: "eq.1" });
-  const response = await fetch(`${supabaseConfig.url}/rest/v1/site_settings?${params}`, {
-    headers: { apikey: supabaseConfig.key, Accept: "application/json" },
-    cache: "no-store",
-    signal,
-  });
+  const response = await fetchRest("site_settings", { select: "menu_category_order", id: "eq.1" }, signal);
   if (!response.ok) throw new Error(`Kolejność kategorii: HTTP ${response.status}`);
   const rows = (await response.json()) as Array<{ menu_category_order: string[] | null }>;
   const order = rows[0]?.menu_category_order;

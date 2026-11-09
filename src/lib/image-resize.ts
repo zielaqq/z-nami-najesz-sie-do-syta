@@ -1,20 +1,15 @@
-/**
- * Zmniejsza zdjęcie z telefonu przed wysłaniem (najdłuższy bok max `maxSide` px, JPEG).
- * Lekkie pliki = szybka strona i mały transfer (darmowy plan bazy ma limit pobrań).
- * `imageOrientation: "from-image"` uwzględnia obrót zapisany przez aparat, więc zdjęcia nie są „na boku”.
- */
-export interface ResizedImage {
+interface ResizedImage {
   blob: Blob;
   width: number;
   height: number;
 }
 
-export async function resizeImage(file: File, maxSide = 900, quality = 0.82): Promise<Blob> {
-  return (await resizeImageDetailed(file, maxSide, quality)).blob;
-}
-
-/** Jak `resizeImage`, ale zwraca też wymiary zdjęcia po zmniejszeniu (np. do galerii). */
-export async function resizeImageDetailed(file: File, maxSide = 900, quality = 0.82): Promise<ResizedImage> {
+/**
+ * Zmniejsza zdjęcie z telefonu przed wysłaniem (najdłuższy bok max `maxSide` px, JPEG) i zwraca też jego wymiary.
+ * Lekkie pliki = szybka strona i mały transfer (darmowy plan bazy ma limit pobrań).
+ * `imageOrientation: "from-image"` uwzględnia obrót zapisany przez aparat, więc zdjęcia nie są „na boku”.
+ */
+export async function resizeImage(file: File, maxSide = 900, quality = 0.82): Promise<ResizedImage> {
   const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
   const width = Math.max(1, Math.round(bitmap.width * scale));

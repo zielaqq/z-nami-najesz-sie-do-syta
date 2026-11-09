@@ -20,7 +20,6 @@ npm run dev        # http://localhost:3000
 | `npm run build` / `npm start` | build produkcyjny i jego uruchomienie |
 | `npm run lint` · `npm run typecheck` | ESLint · TypeScript |
 | `npm run images:check` | sprawdza, czy wszystkie zdjęcia z plików danych istnieją |
-| `npm run images:placeholders` | (re)generuje ilustracje poglądowe ⚠ nadpisuje pliki o tych nazwach |
 | `npm run logo` | z `materialy/logo-oryginal.jpg` robi przezroczyste `logo.png` (usuwa białe tło, przycina) i generuje ikony |
 | `npm run icons` | (re)generuje z logo favicon, ikony PWA i `og-image.jpg` |
 | `npm run places:find` | wyszukuje Place ID wizytówki (wymaga klucza Google) |
@@ -39,7 +38,7 @@ src/
 │  ├─ menu.ts             menuItems + menuCategories (nazwa · cena · kategoria · zdjęcie)
 │  ├─ gallery.ts · videos.ts (nagrania z Facebooka) · events.ts · about.ts
 ├─ lib/
-│  ├─ content.ts          warstwa dostępu do treści – „szew” pod przyszły CMS
+│  ├─ content.ts          menu i wydarzenia z plików (wersja zapasowa bez bazy)
 │  ├─ google-places.ts    pobieranie opinii z Google (serwer, bez cache'u)
 │  ├─ hours.ts · format.ts · maps.ts · schema.ts (JSON-LD) · rate-limit.ts · site-url.ts
 ├─ components/
@@ -52,7 +51,7 @@ src/
                           (site)/ – strona główna i /polityka-prywatnosci, (panel)/panel – panel klientki
 supabase/schema.sql       schemat bazy menu (tabele, reguły dostępu, zdjęcia) – uruchamiany raz w Supabase
 public/images/            zdjęcia (menu/, gallery/, hero/, about/, og-image.jpg)
-scripts/                  przygotowanie logo, generatory obrazów/ikon, kontrola obrazów, wyszukiwanie Place ID
+scripts/                  przygotowanie logo, generator ikon, kontrola obrazów, wyszukiwanie Place ID
 docs/                     EDYCJA-TRESCI.md · GOOGLE-OPINIE.md · GITHUB-PAGES.md
 .github/workflows/        pages.yml – automatyczna publikacja podglądu na GitHub Pages
 materialy/                surowe pliki (filmy, oryginały logo) – wyłączone z Gita, nie trafiają na GitHuba
@@ -61,9 +60,7 @@ materialy/                surowe pliki (filmy, oryginały logo) – wyłączone 
 **Menu na dziś** pochodzi z bazy i jest edytowane w panelu `/panel` (gdy ustawione są zmienne Supabase) – patrz
 [docs/PANEL-MENU.md](docs/PANEL-MENU.md). Galeria jest ustawiana w panelu (zakładka „Galeria”), a duże zdjęcie na górze strony – w zakładce „Zdjęcie główne”
 (np. plakat z aktualną ofertą zamiast zdjęcia sali). **Oferty** (dwa działy pod menu, każdy z linkiem w nawigacji: „Oferta” – produkty
-dostępne stale, „Oferta specjalna” – tymczasowe, pokazywane w wybranych dniach) – zakładka „Oferty”. **Pozostałe treści** (wydarzenia, nagrania, teksty) komponenty czytają
-przez asynchroniczne funkcje z `src/lib/content.ts` (`getGallery`, `getUpcomingEvents`, `getVideos`) – wystarczy zmienić
-ich wnętrze, żeby podłączyć CMS; kształt danych zostaje.
+dostępne stale, „Oferta specjalna” – tymczasowe, pokazywane w wybranych dniach) – zakładka „Oferty”. **Pozostałe treści** (nagrania, teksty) są w plikach `src/data/`.
 
 ## Zmienne środowiskowe
 
@@ -85,11 +82,11 @@ Klucz trafia do przeglądarki, więc ograniczenia są obowiązkowe.
 
 * **Nic wymyślonego jako fakt.** Nie ma fikcyjnych opinii, cen dostawy, stref, minimalnych kwot ani systemu rezerwacji –
   catering, dowóz i umawianie wizyt prowadzą do rozmowy telefonicznej (`tel:+48531980401`).
-* **Dane demonstracyjne są oznaczone** i łatwo je wyłączyć: `menuMeta.isSample`, `galleryMeta.isPlaceholder`,
+* **Dane demonstracyjne są oznaczone** i łatwo je wyłączyć: `menuMeta.isSample`,
   `demo: true` w wydarzeniach, placeholdery opinii. Dane strukturalne (Schema.org) **nie zawierają** przykładowego menu,
   ocen ani przedziału cenowego.
 * **Zdjęcia z lokalu są prawdziwe:** galeria, „hero” (góra strony) i sekcja „O nas”. Tylko obrazy dań w przykładowym menu
-  (`src/data/menu.ts`, wersja zapasowa bez bazy) to tymczasowe ilustracje (skrypt `scripts/generate-placeholders.mjs`).
+  (`src/data/menu.ts`, wersja zapasowa bez bazy) to tymczasowe ilustracje.
 * **Opinie Google bez cache’u** – regulamin Google zabrania cache’owania treści Places, więc są pobierane na żywo:
   automatycznie po zgodzie w banerze cookies (przewinięcie do sekcji „Opinie”), a bez zgody dopiero po kliknięciu
   „Pokaż opinie z Google” (uzasadnienie i konfiguracja: [docs/GOOGLE-OPINIE.md](docs/GOOGLE-OPINIE.md)).

@@ -1,6 +1,5 @@
 import type { CSSProperties } from "react";
 
-import { Photo } from "@/components/ui/Photo";
 import { Phone } from "@/components/ui/icons";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import type { RestaurantEvent } from "@/data/events";
@@ -34,7 +33,7 @@ export function EventsView({ events, reveal = true }: EventsViewProps) {
           return (
             <li
               key={event.id}
-              className="grid gap-5 py-8 sm:grid-cols-[7rem_1fr] sm:gap-10 lg:grid-cols-[8rem_1fr_11rem]"
+              className="grid gap-5 py-8 sm:grid-cols-[7rem_1fr] sm:gap-10 lg:grid-cols-[8rem_1fr]"
               {...(reveal ? { "data-reveal": "" } : {})}
               style={reveal ? ({ "--reveal-delay": `${index * 90}ms` } as CSSProperties) : undefined}
             >
@@ -78,17 +77,6 @@ export function EventsView({ events, reveal = true }: EventsViewProps) {
                   Zapytaj telefonicznie
                 </a>
               </div>
-
-              {event.image ? (
-                <div className="hidden lg:block">
-                  <Photo
-                    src={event.image}
-                    alt={`Wydarzenie: ${event.title}`}
-                    sizes="176px"
-                    ratio="aspect-[4/3]"
-                  />
-                </div>
-              ) : null}
             </li>
           );
         })}

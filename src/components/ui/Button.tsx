@@ -2,7 +2,7 @@ import type { AnchorHTMLAttributes, ReactNode } from "react";
 
 import { cx } from "@/lib/cx";
 
-type Variant = "primary" | "secondary" | "inverse" | "inverse-outline" | "accent";
+type Variant = "primary" | "secondary" | "inverse" | "inverse-outline";
 type Size = "sm" | "md" | "lg";
 
 const base =
@@ -14,7 +14,6 @@ const variants: Record<Variant, string> = {
   inverse: "border-cream bg-cream text-ink hover:border-white hover:bg-white",
   "inverse-outline":
     "border-cream/45 bg-transparent text-cream hover:border-cream hover:bg-cream hover:text-ink",
-  accent: "border-accent bg-accent text-white hover:border-accent-deep hover:bg-accent-deep",
 };
 
 const sizes: Record<Size, string> = {

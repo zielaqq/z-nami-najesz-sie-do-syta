@@ -1,5 +1,5 @@
 import { menuCategories, type MenuCategoryId } from "@/data/menu";
-import { supabaseConfig } from "@/lib/supabase/config";
+import { fetchRest, supabaseConfig } from "@/lib/supabase/config";
 
 /** Danie z bazy (tabela `dishes`). */
 export interface Dish {
@@ -75,14 +75,7 @@ export function compareByOrder(
  * Reguły bazy udostępniają anonimowym użytkownikom tylko nieukryte dania.
  */
 export async function fetchDailyMenu(day: string, signal?: AbortSignal): Promise<Dish[]> {
-  if (!supabaseConfig) throw new Error("Supabase nie jest skonfigurowany");
-  const { url, key } = supabaseConfig;
-  const request = (select: string) =>
-    fetch(`${url}/rest/v1/daily_menu?${new URLSearchParams({ select, day: `eq.${day}` })}`, {
-      headers: { apikey: key, Accept: "application/json" },
-      cache: "no-store",
-      signal,
-    });
+  const request = (select: string) => fetchRest("daily_menu", { select, day: `eq.${day}` }, signal);
 
   let response = await request(`sort_order,dishes(${DISH_COLUMNS})`);
   // Baza sprzed dodania kolejności (schema.sql jeszcze nie uruchomiony ponownie): menu działa, tylko alfabetycznie.
@@ -108,19 +101,11 @@ export interface DayMenu {
  * pogrupowane po dniu. Dzień bez żadnego ustawionego dania po prostu nie pojawia się w wyniku.
  */
 export async function fetchWeekMenu(fromDay: string, toDay: string, signal?: AbortSignal): Promise<DayMenu[]> {
-  if (!supabaseConfig) throw new Error("Supabase nie jest skonfigurowany");
-  const { url, key } = supabaseConfig;
   const request = (select: string) => {
-    const params = new URLSearchParams();
-    params.append("select", select);
+    const params = new URLSearchParams({ select, order: "day.asc" });
     params.append("day", `gte.${fromDay}`);
     params.append("day", `lte.${toDay}`);
-    params.append("order", "day.asc");
-    return fetch(`${url}/rest/v1/daily_menu?${params}`, {
-      headers: { apikey: key, Accept: "application/json" },
-      cache: "no-store",
-      signal,
-    });
+    return fetchRest("daily_menu", params, signal);
   };
 
   let response = await request(`day,sort_order,dishes(${DISH_COLUMNS})`);

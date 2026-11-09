@@ -16,8 +16,8 @@ import { todayInWarsaw } from "@/lib/format";
 import { getSpecialOffersOnServer } from "@/lib/special-offers-server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
-// Strona jest statyczna i odświeża się raz na dobę (tryb bez bazy: miniona data wydarzenia z pliku znika sama).
-// (Musi być literałem: patrz dokumentacja Next.js.)
+// Bez bazy strona jest statyczna i odświeża się raz na dobę (miniona data wydarzenia z pliku znika sama); z bazą
+// renderuje się przy każdym wejściu. (Musi być literałem: patrz dokumentacja Next.js.)
 export const revalidate = 86400;
 
 export default async function HomePage() {

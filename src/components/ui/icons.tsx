@@ -5,14 +5,12 @@ import type { SVGProps } from "react";
  * których w lucide nie ma (znaki marek).
  */
 export {
-  ArrowRight,
   ArrowUpRight,
   Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   ChevronUp,
-  Clock,
   Copy,
   Download,
   Eye,
@@ -30,7 +28,6 @@ export {
   Plus,
   Search,
   Trash2,
-  Undo2,
   Utensils,
   X as CloseIcon,
 } from "lucide-react";

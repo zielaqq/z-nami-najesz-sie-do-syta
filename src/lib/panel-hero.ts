@@ -1,5 +1,5 @@
 import { HERO_PHOTO_COLUMNS, type HeroPhotoRow } from "@/lib/hero-photo-live";
-import { resizeImageDetailed } from "@/lib/image-resize";
+import { resizeImage } from "@/lib/image-resize";
 import { getSupabase } from "@/lib/supabase/client";
 
 const BUCKET = "hero-photos";
@@ -38,7 +38,7 @@ export async function setActiveHeroPhoto(id: string | null): Promise<void> {
 /** Zmniejsza zdjęcie, wgrywa je do magazynu i zapisuje w bazie. Przy błędzie wgrany plik jest sprzątany. */
 export async function addHeroPhoto(file: File, fields: HeroPhotoFields): Promise<HeroPhotoRow> {
   const supabase = await getSupabase();
-  const { blob, width, height } = await resizeImageDetailed(file, MAX_SIDE, QUALITY);
+  const { blob, width, height } = await resizeImage(file, MAX_SIDE, QUALITY);
   const path = `${crypto.randomUUID()}.jpg`;
   const { error: uploadError } = await supabase.storage
     .from(BUCKET)

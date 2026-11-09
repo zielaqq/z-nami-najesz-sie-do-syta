@@ -1,4 +1,4 @@
-import { supabaseConfig } from "@/lib/supabase/config";
+import { fetchRest, supabaseConfig } from "@/lib/supabase/config";
 
 /** Jak pokazać zdjęcie główne: `contain` = całe, bez przycinania (plakat z tekstem), `cover` = wypełnia ramkę. */
 export type HeroFit = "contain" | "cover";
@@ -66,13 +66,8 @@ export function rowToHeroImage(row: HeroPhotoRow): HeroImage {
  */
 export async function fetchHeroImage(signal?: AbortSignal): Promise<HeroImage | null> {
   if (!supabaseConfig) return null;
-  const { url, key } = supabaseConfig;
   const request = (columns: string) =>
-    fetch(`${url}/rest/v1/site_settings?${new URLSearchParams({ select: `hero_photo:hero_photos(${columns})`, id: "eq.1" })}`, {
-      headers: { apikey: key, Accept: "application/json" },
-      cache: "no-store",
-      signal,
-    });
+    fetchRest("site_settings", { select: `hero_photo:hero_photos(${columns})`, id: "eq.1" }, signal);
 
   let response = await request(HERO_PHOTO_COLUMNS);
   // Baza bez kolumn `size`/`badge`: wybrane zdjęcie nadal się pokazuje, tylko w pełnej wielkości i bez napisu.

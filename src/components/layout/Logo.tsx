@@ -12,7 +12,6 @@ import { cx } from "@/lib/cx";
 interface LogoProps {
   /** `header` – nagłówek i menu mobilne (mały znak); `footer` – stopka (duży, czytelny napis w znaku). */
   size?: "header" | "footer";
-  className?: string;
 }
 
 /**
@@ -29,7 +28,7 @@ const presets = {
  * Kliknięcie prowadzi na samą górę strony głównej: na innej podstronie przechodzi do `/`, a będąc już na stronie
  * głównej – płynnie przewija na górę (zwykły link do tego samego adresu nie przewijałby) i czyści kotwicę z adresu.
  */
-export function Logo({ size = "header", className }: LogoProps) {
+export function Logo({ size = "header" }: LogoProps) {
   const { logo, name } = siteConfig;
   const preset = presets[size];
   const pathname = usePathname();
@@ -65,7 +64,7 @@ export function Logo({ size = "header", className }: LogoProps) {
       scroll={false}
       onClick={handleClick}
       aria-label={`${name} – strona główna`}
-      className={cx("inline-flex rounded-[3px]", className)}
+      className="inline-flex rounded-[3px]"
     >
       <Image
         src={withBase(logo.src)}

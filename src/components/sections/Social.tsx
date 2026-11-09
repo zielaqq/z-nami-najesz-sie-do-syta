@@ -5,16 +5,15 @@ import { ButtonLink } from "@/components/ui/Button";
 import { FacebookIcon } from "@/components/ui/icons";
 import { Section, SectionHeading, type SectionTone } from "@/components/ui/Section";
 import { siteConfig } from "@/data/site";
-import { getVideos } from "@/lib/content";
+import { videos } from "@/data/videos";
 
 /**
  * „Obserwuj nas”: przycisk do profilu na Facebooku + same nagrania (odtwarzacz, bez treści postów).
- * Nagrania dodajesz w `src/data/videos.ts` (albo w panelu menu). Brak nagrań = tylko przycisk.
+ * Nagrania dodajesz w `src/data/videos.ts`. Brak nagrań = tylko przycisk.
  */
-export async function Social({ tone = "paper" }: { tone?: SectionTone }) {
+export function Social({ tone = "paper" }: { tone?: SectionTone }) {
   const { facebook, facebookReels } = siteConfig.links;
   const { facebookLoadOnClick } = siteConfig.embeds;
-  const videos = await getVideos();
   const hasVideos = videos.length > 0;
 
   return (

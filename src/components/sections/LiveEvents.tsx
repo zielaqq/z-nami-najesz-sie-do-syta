@@ -18,8 +18,8 @@ interface LiveEventsProps {
  */
 export function LiveEvents({ initialEvents }: LiveEventsProps) {
   const live = useUpcomingEvents();
-  const events = live ?? initialEvents ?? null;
-  const visible = Boolean(events && events.length > 0);
+  const events = live ?? initialEvents ?? [];
+  const visible = events.length > 0;
 
   // Sekcja pojawia się dopiero po wczytaniu danych, więc przeglądarka nie zdąży przewinąć do adresu „/#wydarzenia”
   // (np. po kliknięciu linku w stopce z innej podstrony) – robimy to sami, gdy sekcja już jest.
@@ -29,6 +29,6 @@ export function LiveEvents({ initialEvents }: LiveEventsProps) {
     }
   }, [visible]);
 
-  if (!events || events.length === 0) return null;
+  if (!visible) return null;
   return <EventsView events={events} reveal={false} />;
 }

@@ -40,10 +40,6 @@ export function EventForm({ event, onClose, onSaved }: EventFormProps) {
       setNotice({ tone: "error", text: "Wpisz tytuł wydarzenia." });
       return;
     }
-    if (!date) {
-      setNotice({ tone: "error", text: "Wybierz datę wydarzenia." });
-      return;
-    }
     if (endDate && endDate < date) {
       setNotice({ tone: "error", text: "Data zakończenia nie może być wcześniejsza niż data rozpoczęcia." });
       return;

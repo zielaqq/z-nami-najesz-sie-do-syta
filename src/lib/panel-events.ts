@@ -13,13 +13,7 @@ export interface EventRecord {
   description: string;
 }
 
-export interface EventInput {
-  title: string;
-  date: string;
-  end_date: string | null;
-  time_label: string | null;
-  description: string;
-}
+type EventInput = Omit<EventRecord, "id">;
 
 const EVENT_COLUMNS = "id,title,date,end_date,time_label,description";
 

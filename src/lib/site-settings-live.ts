@@ -2,17 +2,12 @@
 
 import { useEffect, useState } from "react";
 
-import { supabaseConfig } from "@/lib/supabase/config";
+import { fetchRest, supabaseConfig } from "@/lib/supabase/config";
 
 /** Czy przycisk „Cały tydzień” ma być widoczny przy menu – ustawia to klientka w panelu. */
 export async function fetchWeeklyMenuVisible(signal?: AbortSignal): Promise<boolean> {
   if (!supabaseConfig) return false;
-  const params = new URLSearchParams({ select: "weekly_menu_visible", id: "eq.1" });
-  const response = await fetch(`${supabaseConfig.url}/rest/v1/site_settings?${params}`, {
-    headers: { apikey: supabaseConfig.key, Accept: "application/json" },
-    cache: "no-store",
-    signal,
-  });
+  const response = await fetchRest("site_settings", { select: "weekly_menu_visible", id: "eq.1" }, signal);
   if (!response.ok) throw new Error(`Ustawienia strony: HTTP ${response.status}`);
   const rows = (await response.json()) as Array<{ weekly_menu_visible: boolean }>;
   return rows[0]?.weekly_menu_visible ?? false;

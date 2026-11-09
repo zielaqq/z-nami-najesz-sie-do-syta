@@ -113,9 +113,3 @@ export function getOpenStatus(now: Date = new Date(), hoursByDay: HoursByDay = d
 
   return { isOpen: false, label: "Zamknięte" };
 }
-
-/** Godziny na dziś, np. „12:00–18:00” (do krótkich podsumowań). */
-export function getTodayHours(now: Date = new Date(), hoursByDay: HoursByDay = defaultHoursByDay()): string | null {
-  const rule = ruleForDay(warsawNow(now).day, hoursByDay);
-  return rule ? `${rule.opens}–${rule.closes}` : null;
-}

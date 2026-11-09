@@ -1,20 +1,8 @@
 import { events, type RestaurantEvent } from "@/data/events";
-import { galleryImages, galleryMeta } from "@/data/gallery";
 import { menuCategories, menuItems, menuMeta, type MenuCategoryId, type MenuItem } from "@/data/menu";
-import { videos, type VideoItem } from "@/data/videos";
 import { todayInWarsaw } from "@/lib/format";
 
-/**
- * ============================================================================
- *  WARSTWA DOSTĘPU DO TREŚCI („szew” pod przyszły CMS / panel administracyjny)
- *
- *  Komponenty pobierają dane WYŁĄCZNIE przez te funkcje. Dziś czytają pliki
- *  z `src/data/`. Aby podłączyć CMS (Sanity, Strapi, Contentful, baza…),
- *  wystarczy zmienić wnętrze tych funkcji – zwracany kształt danych zostaje
- *  ten sam, więc żaden komponent nie wymaga poprawek.
- *  Funkcje są asynchroniczne właśnie po to, by już teraz pasowały do CMS.
- * ============================================================================
- */
+/** Menu i wydarzenia z plików `src/data/` – wersja zapasowa, gdy strona działa bez bazy. */
 
 export interface MenuGroup {
   id: MenuCategoryId;
@@ -33,15 +21,6 @@ export async function getMenu(): Promise<{ isSample: boolean; groups: MenuGroup[
     .filter((group) => group.items.length > 0);
 
   return { isSample: menuMeta.isSample, groups };
-}
-
-export async function getGallery() {
-  return { isPlaceholder: galleryMeta.isPlaceholder, images: galleryImages };
-}
-
-/** Nagrania z Facebooka wyświetlane w galerii (pusta lista = brak bloku „Nagrania”). */
-export async function getVideos(): Promise<VideoItem[]> {
-  return videos;
 }
 
 /** Tylko przyszłe (lub trwające) wydarzenia, od najbliższego. */

@@ -1,6 +1,6 @@
 import type { GalleryCategory } from "@/data/gallery";
 import { GALLERY_COLUMNS, type GalleryRow } from "@/lib/gallery-live";
-import { resizeImageDetailed } from "@/lib/image-resize";
+import { resizeImage } from "@/lib/image-resize";
 import { getSupabase } from "@/lib/supabase/client";
 
 /** Zdjęcie galerii w panelu (wiersz tabeli `gallery_photos`). */
@@ -36,7 +36,7 @@ export async function addPhotos(
     onProgress?.(index, files.length);
     let uploaded: string | null = null;
     try {
-      const { blob, width, height } = await resizeImageDetailed(file, MAX_SIDE, 0.85);
+      const { blob, width, height } = await resizeImage(file, MAX_SIDE, 0.85);
       const path = `${crypto.randomUUID()}.jpg`;
       const { error: uploadError } = await supabase.storage
         .from(BUCKET)
@@ -95,13 +95,11 @@ export async function deletePhoto(photo: GalleryRecord): Promise<void> {
 }
 
 /** Zapisuje kolejność: `ordered` to wszystkie zdjęcia w nowej kolejności (jedno zapytanie – wszystko albo nic). */
-export async function saveGalleryOrder(ordered: GalleryRecord[]): Promise<GalleryRecord[]> {
-  const renumbered = ordered.map((photo, sort_order) => ({ ...photo, sort_order }));
-  if (renumbered.length === 0) return renumbered;
+export async function saveGalleryOrder(ordered: GalleryRecord[]): Promise<void> {
+  if (ordered.length === 0) return;
   const supabase = await getSupabase();
   // Pełne wiersze, bo przy upsercie baza sprawdza wymagane kolumny także dla wiersza, który już istnieje.
-  const { error } = await supabase.from("gallery_photos").upsert(renumbered, { onConflict: "id" });
+  const { error } = await supabase.from("gallery_photos").upsert(ordered, { onConflict: "id" });
   if (error) throw error;
-  return renumbered;
 }
 

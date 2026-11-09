@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 
+import { FilterChip } from "@/components/ui/FilterChip";
 import { Photo } from "@/components/ui/Photo";
 import { Utensils } from "@/components/ui/icons";
 import { isTextOnlyCategory, type MenuCategoryId } from "@/data/menu";
-import { cx } from "@/lib/cx";
 import { formatPrice } from "@/lib/format";
 
 /** Pozycja menu w formie potrzebnej do wyświetlenia (z pliku z danymi albo z bazy menu). */
@@ -114,32 +114,6 @@ export function MenuBrowser({ groups, isSample }: MenuBrowserProps) {
         ))}
       </div>
     </div>
-  );
-}
-
-function FilterChip({
-  pressed,
-  onClick,
-  children,
-}: {
-  pressed: boolean;
-  onClick: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={pressed}
-      onClick={onClick}
-      className={cx(
-        "min-h-11 shrink-0 rounded-[3px] border px-4 text-sm font-semibold tracking-[0.02em] whitespace-nowrap transition-colors duration-200",
-        pressed
-          ? "border-ink bg-ink text-cream"
-          : "border-ink/25 bg-transparent text-ink hover:border-ink hover:bg-ink/5",
-      )}
-    >
-      {children}
-    </button>
   );
 }
 

@@ -1,4 +1,4 @@
-import { resizeImageDetailed } from "@/lib/image-resize";
+import { resizeImage } from "@/lib/image-resize";
 import {
   OFFER_COLUMNS,
   OFFER_PHOTO_COLUMNS,
@@ -65,12 +65,10 @@ export async function saveOfferOrder(ordered: OfferRecord[]): Promise<void> {
   const rows = ordered.map((offer, sort_order) => ({
     id: offer.id,
     title: offer.title,
-    eyebrow: offer.eyebrow,
     description: offer.description,
     show_from: offer.show_from,
     show_until: offer.show_until,
     visible: offer.visible,
-    in_nav: offer.in_nav,
     sort_order,
   }));
   const { error } = await supabase.from("special_offers").upsert(rows, { onConflict: "id" });
@@ -93,7 +91,7 @@ export async function addOfferPhotos(
     onProgress?.(index, files.length);
     let uploaded: string | null = null;
     try {
-      const { blob, width, height } = await resizeImageDetailed(file, MAX_SIDE, QUALITY);
+      const { blob, width, height } = await resizeImage(file, MAX_SIDE, QUALITY);
       const path = `${crypto.randomUUID()}.jpg`;
       const { error: uploadError } = await supabase.storage
         .from(BUCKET)

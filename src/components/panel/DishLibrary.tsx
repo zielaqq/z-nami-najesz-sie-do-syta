@@ -6,9 +6,9 @@ import { useEffect, useState } from "react";
 import { DishForm } from "@/components/panel/DishForm";
 import { NoticeBanner, fieldClass, type PanelNotice } from "@/components/panel/NoticeBanner";
 import { PhotoDownloadPicker } from "@/components/panel/PhotoDownloadPicker";
-import { PhotoLightbox } from "@/components/panel/PhotoLightbox";
 import { buttonClasses } from "@/components/ui/Button";
 import { Download, Eye, EyeOff, Pencil, Plus, Search, Trash2, Utensils } from "@/components/ui/icons";
+import { Lightbox } from "@/components/ui/Lightbox";
 import { menuCategories, type MenuCategoryId } from "@/data/menu";
 import { cx } from "@/lib/cx";
 import { dishCountLabel, dishPhotoUrl, groupDishes, type Dish } from "@/lib/daily-menu";
@@ -249,7 +249,12 @@ export function DishLibrary() {
           onClose={() => setDownloadPickerOpen(false)}
         />
       ) : null}
-      <PhotoLightbox photo={lightbox} onClose={() => setLightbox(null)} />
+      <Lightbox
+        images={lightbox ? [{ src: lightbox.src, alt: lightbox.title, remote: true }] : []}
+        index={lightbox ? 0 : null}
+        onIndexChange={() => {}}
+        onClose={() => setLightbox(null)}
+      />
     </section>
   );
 }

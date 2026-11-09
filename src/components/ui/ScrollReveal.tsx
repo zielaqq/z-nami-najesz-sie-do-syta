@@ -22,11 +22,6 @@ export function ScrollReveal() {
       document.querySelectorAll<HTMLElement>("[data-reveal]:not([data-revealed])"),
     );
 
-    if (!("IntersectionObserver" in window)) {
-      elements.forEach((element) => element.setAttribute("data-revealed", ""));
-      return;
-    }
-
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {

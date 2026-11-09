@@ -54,8 +54,8 @@ AVIF/WebP dla każdego urządzenia; **wgrywaj JPG/PNG/WebP, nie GIF**):
 | Folder / plik | Do czego | Proporcje i rozmiar |
 | --- | --- | --- |
 | `menu/*.jpg` | ilustracje przykładowego menu (`src/data/menu.ts`, zapasowe bez bazy) – nigdzie się nie wyświetlają, menu jest listą bez zdjęć | – |
-| `gallery/*.jpg` | zdjęcia domyślne galerii (własne dodajesz w panelu) | dowolne proporcje, najlepiej min. 1200 px szerokości; realne wymiary wpisz w `gallery.ts` (`width`/`height`); kafelki w siatce mają proporcje 4:5, a w powiększeniu widać całe zdjęcie |
-| zdjęcia w „hero” i „O nas” | po jednym dużym zdjęciu: u góry strony (przycinane do 5:4 na telefonie i 6:7 na desktopie) i w „O nas” (4:5 na desktopie) | są to zdjęcia z `gallery/`; ścieżki wpisane są w `Hero.tsx` i `About.tsx` (pole `src`). Żeby użyć innego, wgraj plik do `gallery/` i zmień `src`. **Użyj nowej nazwy pliku** – przeglądarka i Next.js trzymają stare zdjęcia w cache |
+| `gallery/*.jpg` | zdjęcia domyślne galerii (własne dodajesz w panelu) | dowolne proporcje, najlepiej min. 1200 px szerokości; kafelki w siatce mają proporcje 4:5, a w powiększeniu widać całe zdjęcie |
+| zdjęcia w „hero” i „O nas” | po jednym dużym zdjęciu: u góry strony (przycinane do 5:4 na telefonie i 6:7 na desktopie) i w „O nas” (4:5 na desktopie) | są to zdjęcia z `gallery/`; ścieżki wpisane są w `HeroPhoto.tsx` i `About.tsx` (pole `src`). Żeby użyć innego, wgraj plik do `gallery/` i zmień `src`. **Użyj nowej nazwy pliku** – przeglądarka i Next.js trzymają stare zdjęcia w cache |
 | `og-image.jpg` | podgląd przy udostępnianiu (Facebook, Google) | **1200 × 630 px** – powstaje z logo poleceniem `npm run icons` (adres i telefon są wpisane w `scripts/generate-icons.mjs`) |
 | `logo/logo.png` | logo (patrz niżej) | PNG z przezroczystym tłem, przycięty do zawartości, max 800 px szerokości (obecny: 800 × 685 px) |
 
@@ -63,14 +63,13 @@ AVIF/WebP dla każdego urządzenia; **wgrywaj JPG/PNG/WebP, nie GIF**):
 rozszerzenie, zmień ścieżkę w pliku danych.
 
 **Galeria:** dodawanie, usuwanie i kolejność zdjęć ustawia się w **panelu** (`/panel` → „Galeria”, patrz `docs/PANEL-MENU.md`). Poniżej opisano zdjęcia domyślne z kodu (pokazywane, gdy w bazie nie ma jeszcze żadnych). Galeria na stronie jest rozwijana: 12 zdjęć na start, „Pokaż więcej” dokłada kolejne (stała `PAGE_SIZE` w `GalleryGrid.tsx`). Ma już prawdziwe zdjęcia (wnętrze, ogródek, dania) i filtr „Wnętrze / Ogródek / Dania”. Nowe zdjęcie: wrzuć plik
-do `public/images/gallery/` i dopisz wpis w `gallery.ts`: nazwa pliku, `width`/`height`, `category` (`wnetrze`, `ogrodek` albo
+do `public/images/gallery/` i dopisz wpis w `gallery.ts`: nazwa pliku, `category` (`wnetrze`, `ogrodek` albo
 `dania`) oraz `alt` – krótki opis tego, co widać (ważne dla osób niewidomych i dla SEO). Opcjonalnie `focus` (np. `"50% 60%"`) –
 którą część zdjęcia zachować w kafelku 4:5. Na zdjęciach z gośćmi lub personelem zadbaj o ich zgodę albo zamaż twarze.
 
 > Zdjęcia w galerii oraz w sekcjach „hero” i „O nas” są **prawdziwe** (z lokalu). Tylko obrazy dań w przykładowym menu
-> (`menu/`) to **ilustracje poglądowe** wygenerowane skryptem `npm run images:placeholders`.
-> ⚠ **Nie uruchamiaj go po wgraniu własnych zdjęć dań** – nadpisałby pliki o tych samych nazwach.
-> Kadr zdjęcia w „hero” i „O nas” ustawiasz parametrem `focus` (np. `"50% 60%"`) w `Hero.tsx` i `About.tsx`.
+> (`menu/`) to **ilustracje poglądowe**.
+> Kadr zdjęcia w „hero” i „O nas” ustawiasz parametrem `focus` (np. `"50% 60%"`) w `HeroPhoto.tsx` i `About.tsx`.
 
 ## Nagrania z Facebooka (`src/data/videos.ts`)
 
@@ -93,8 +92,6 @@ Każde nagranie to jeden wpis:
   „Odwiedź nas na Facebooku”, link „Wszystkie nagrania”, stopka i dane dla Google.
 * **Od razu widoczne:** odtwarzacz ładuje się sam, gdy sekcja zbliża się do ekranu. Wersja „najpierw kafelek Odtwórz,
   połączenie z Facebookiem po kliknięciu” (ochrona prywatności): `embeds.facebookLoadOnClick: true` w `src/data/site.ts`.
-* **Miniatura (opcjonalnie, tylko w trybie „po kliknięciu”):** kadr z filmu (pion 9:16) wgraj do `public/images/video/`
-  i dopisz `poster: "/images/video/nazwa.jpg"`.
 
 ## Logo
 
@@ -130,5 +127,4 @@ się nie wyświetla**. Wydarzenie jest widoczne do końca swojego dnia (albo do 
 
 ## Opinie Google i Facebook
 
-Patrz [GOOGLE-OPINIE.md](./GOOGLE-OPINIE.md). Facebook: wtyczka z postami ładuje się po kliknięciu (ochrona prywatności).
-Zmiana tego zachowania: `siteConfig.embeds.loadOnClick` w `src/data/site.ts`.
+Patrz [GOOGLE-OPINIE.md](./GOOGLE-OPINIE.md). Nagrania z Facebooka opisuje sekcja wyżej.

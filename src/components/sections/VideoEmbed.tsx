@@ -1,13 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 import { FacebookIcon, Play } from "@/components/ui/icons";
 import type { VideoItem } from "@/data/videos";
-import { withBase } from "@/lib/base-path";
 import { useCookieConsent } from "@/lib/cookie-consent";
-import { cx } from "@/lib/cx";
 
 interface VideoEmbedProps {
   video: VideoItem;
@@ -54,7 +51,6 @@ export function VideoEmbed({ video, loadOnClick: ownerLoadOnClick }: VideoEmbedP
   // Ręczne kliknięcie zawsze zostaje wczytane – nawet gdyby zgoda później się cofnęła (np. w „Ustawieniach cookies”).
   const [manualSrc, setManualSrc] = useState<string | null>(null);
   const [clicked, setClicked] = useState(false);
-  const dark = Boolean(video.poster);
   // Cofnięcie zgody po automatycznym wczytaniu chowa odtwarzacz z powrotem za kafelek „Odtwórz”.
   const src = manualSrc ?? (loadOnClick ? null : autoSrc);
 
@@ -88,14 +84,7 @@ export function VideoEmbed({ video, loadOnClick: ownerLoadOnClick }: VideoEmbedP
 
   return (
     <figure className="w-full">
-      <div
-        ref={boxRef}
-        className={cx(
-          "relative aspect-[9/16] w-full overflow-hidden",
-          // z miniaturą (zdjęcie) – ciemny kafelek; bez niej – jasny, spójny z resztą strony
-          dark ? "on-dark bg-ink" : "border border-ink/15 bg-paper",
-        )}
-      >
+      <div ref={boxRef} className="relative aspect-[9/16] w-full overflow-hidden border border-ink/15 bg-paper">
         {src ? (
           <iframe
             ref={frameRef}
@@ -111,35 +100,13 @@ export function VideoEmbed({ video, loadOnClick: ownerLoadOnClick }: VideoEmbedP
             type="button"
             onClick={play}
             aria-label={`Odtwórz nagranie: ${video.title}`}
-            className={cx(
-              "group absolute inset-0 flex flex-col items-center justify-center gap-5 px-6 text-center",
-              dark ? "text-cream" : "text-ink",
-            )}
+            className="group absolute inset-0 flex flex-col items-center justify-center gap-5 px-6 text-center text-ink"
           >
-            {video.poster ? (
-              <Image
-                src={withBase(video.poster)}
-                alt=""
-                fill
-                sizes="(min-width: 640px) 300px, 76vw"
-                className="object-cover opacity-70 transition-opacity duration-200 group-hover:opacity-90 motion-reduce:transition-none"
-              />
-            ) : null}
-            <span
-              className={cx(
-                "relative grid size-16 place-items-center rounded-full transition-transform duration-200 group-hover:scale-105 motion-reduce:transition-none",
-                dark ? "bg-cream text-ink" : "bg-ink text-cream",
-              )}
-            >
+            <span className="grid size-16 place-items-center rounded-full bg-ink text-cream transition-transform duration-200 group-hover:scale-105 motion-reduce:transition-none">
               <Play className="ml-1 size-7 fill-current" aria-hidden="true" />
             </span>
-            <span className="relative font-serif text-2xl leading-tight">{video.title}</span>
-            <span
-              className={cx(
-                "relative inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em]",
-                dark ? "text-on-dark-mute" : "text-mute",
-              )}
-            >
+            <span className="font-serif text-2xl leading-tight">{video.title}</span>
+            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-mute">
               <FacebookIcon className="size-4" />
               Nagranie z Facebooka
             </span>

@@ -1,6 +1,6 @@
 import { defaultGalleryAlt, type GalleryCategory, type GalleryImage } from "@/data/gallery";
 import { withBase } from "@/lib/base-path";
-import { supabaseConfig } from "@/lib/supabase/config";
+import { fetchRest, supabaseConfig } from "@/lib/supabase/config";
 
 /** Zdjęcie galerii z bazy (tabela `gallery_photos`). */
 export interface GalleryRow {
@@ -37,8 +37,6 @@ export function rowToImage(row: GalleryRow): GalleryImage {
     remote,
     alt: row.alt?.trim() || row.caption?.trim() || defaultGalleryAlt(row.category),
     caption: row.caption?.trim() || undefined,
-    width: row.width ?? 1200,
-    height: row.height ?? 1500,
     category: row.category,
     focus: row.focus ?? undefined,
   };
@@ -50,12 +48,8 @@ export function rowToImage(row: GalleryRow): GalleryImage {
  */
 export async function fetchGalleryImages(signal?: AbortSignal): Promise<GalleryImage[]> {
   if (!supabaseConfig) return [];
-  const params = new URLSearchParams({ select: GALLERY_COLUMNS, order: "sort_order.asc,created_at.asc" });
-  const response = await fetch(`${supabaseConfig.url}/rest/v1/gallery_photos?${params}`, {
-    headers: { apikey: supabaseConfig.key, Accept: "application/json" },
-    cache: "no-store",
-    signal,
-  });
+  const params = { select: GALLERY_COLUMNS, order: "sort_order.asc,created_at.asc" };
+  const response = await fetchRest("gallery_photos", params, signal);
   if (!response.ok) throw new Error(`Galeria: HTTP ${response.status}`);
   return ((await response.json()) as GalleryRow[]).map(rowToImage);
 }

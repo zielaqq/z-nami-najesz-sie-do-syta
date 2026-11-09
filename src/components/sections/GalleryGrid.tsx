@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 
 import { buttonClasses } from "@/components/ui/Button";
+import { FilterChip } from "@/components/ui/FilterChip";
 import { Lightbox } from "@/components/ui/Lightbox";
 import { galleryCategories, type GalleryCategory, type GalleryImage } from "@/data/gallery";
 import { withBase } from "@/lib/base-path";
@@ -149,31 +150,5 @@ export function GalleryGrid({ images }: GalleryGridProps) {
         }}
       />
     </>
-  );
-}
-
-function FilterChip({
-  pressed,
-  onClick,
-  children,
-}: {
-  pressed: boolean;
-  onClick: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={pressed}
-      onClick={onClick}
-      className={cx(
-        "min-h-11 shrink-0 rounded-[3px] border px-4 text-sm font-semibold tracking-[0.02em] whitespace-nowrap transition-colors duration-200",
-        pressed
-          ? "border-ink bg-ink text-cream"
-          : "border-ink/25 bg-transparent text-ink hover:border-ink hover:bg-ink/5",
-      )}
-    >
-      {children}
-    </button>
   );
 }

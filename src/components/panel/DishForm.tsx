@@ -5,9 +5,9 @@ import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "r
 
 import { GalleryPhotoPicker } from "@/components/panel/GalleryPhotoPicker";
 import { NoticeBanner, fieldClass, type PanelNotice } from "@/components/panel/NoticeBanner";
-import { PhotoLightbox } from "@/components/panel/PhotoLightbox";
 import { buttonClasses } from "@/components/ui/Button";
 import { CloseIcon, ImagePlus, Images, Utensils } from "@/components/ui/icons";
+import { Lightbox } from "@/components/ui/Lightbox";
 import { menuCategories, type MenuCategoryId } from "@/data/menu";
 import { dishPhotoUrl, type Dish } from "@/lib/daily-menu";
 import { describeError, findDuplicateDish, saveDish } from "@/lib/panel-data";
@@ -36,8 +36,7 @@ interface DishFormProps {
 /**
  * Formularz dania w oknie dialogowym: nazwa, kategoria, cena, opis i zdjęcie (nieobowiązkowe – menu na stronie jest
  * listą bez zdjęć niezależnie od tego pola). Zdjęcie można zrobić aparatem, wybrać z galerii telefonu albo wybrać
- * jedno z tych, które są już w galerii restauracji (`GalleryPhotoPicker`). Kliknięcie podglądu powiększa zdjęcie
- * (`PhotoLightbox`).
+ * jedno z tych, które są już w galerii restauracji (`GalleryPhotoPicker`). Kliknięcie podglądu powiększa zdjęcie.
  */
 export function DishForm({ dish, allDishes, onClose, onSaved, onEditExisting, onRestoreExisting }: DishFormProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -268,7 +267,12 @@ export function DishForm({ dish, allDishes, onClose, onSaved, onEditExisting, on
       </form>
     </dialog>
     {pickerOpen ? <GalleryPhotoPicker onClose={() => setPickerOpen(false)} onPicked={onPickedFromGallery} /> : null}
-    <PhotoLightbox photo={lightbox} onClose={() => setLightbox(null)} />
+    <Lightbox
+      images={lightbox ? [{ src: lightbox.src, alt: lightbox.title, remote: true }] : []}
+      index={lightbox ? 0 : null}
+      onIndexChange={() => {}}
+      onClose={() => setLightbox(null)}
+    />
     </>
   );
 }

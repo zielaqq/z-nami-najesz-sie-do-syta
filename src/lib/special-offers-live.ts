@@ -1,5 +1,5 @@
 import { navItems } from "@/data/site";
-import { supabaseConfig } from "@/lib/supabase/config";
+import { fetchRest, supabaseConfig } from "@/lib/supabase/config";
 
 /** Zdjęcie oferty z bazy (tabela `special_offer_photos`). */
 export interface SpecialOfferPhotoRow {
@@ -17,21 +17,17 @@ export interface SpecialOfferPhotoRow {
 export interface SpecialOfferRow {
   id: string;
   title: string;
-  /** Kolumna z dawnego formularza – strona już jej nie pokazuje. */
-  eyebrow: string | null;
   description: string;
   /** RRRR-MM-DD; `null` = bez ograniczenia. Oferta z datą jest ofertą specjalną (patrz `offerKind`). */
   show_from: string | null;
   show_until: string | null;
   visible: boolean;
-  /** Kolumna z dawnego formularza – linki w menu są teraz wspólne dla całego działu (`navItemsWithOffers`). */
-  in_nav: boolean;
   sort_order: number;
   special_offer_photos: SpecialOfferPhotoRow[];
 }
 
 export const OFFER_PHOTO_COLUMNS = "id,offer_id,photo_path,caption,width,height,sort_order";
-export const OFFER_COLUMNS = `id,title,eyebrow,description,show_from,show_until,visible,in_nav,sort_order,special_offer_photos(${OFFER_PHOTO_COLUMNS})`;
+export const OFFER_COLUMNS = `id,title,description,show_from,show_until,visible,sort_order,special_offer_photos(${OFFER_PHOTO_COLUMNS})`;
 
 /** Rodzaj oferty: stała („Oferta”) albo tymczasowa („Oferta specjalna”). */
 export type OfferKind = "regular" | "special";
@@ -155,12 +151,8 @@ export function toSpecialOffers(rows: SpecialOfferRow[], day: string): SpecialOf
  */
 export async function fetchSpecialOffers(day: string, signal?: AbortSignal): Promise<SpecialOffer[]> {
   if (!supabaseConfig) return [];
-  const params = new URLSearchParams({ select: OFFER_COLUMNS, visible: "eq.true", order: "sort_order.asc,created_at.asc" });
-  const response = await fetch(`${supabaseConfig.url}/rest/v1/special_offers?${params}`, {
-    headers: { apikey: supabaseConfig.key, Accept: "application/json" },
-    cache: "no-store",
-    signal,
-  });
+  const params = { select: OFFER_COLUMNS, visible: "eq.true", order: "sort_order.asc,created_at.asc" };
+  const response = await fetchRest("special_offers", params, signal);
   if (!response.ok) throw new Error(`Oferty specjalne: HTTP ${response.status}`);
   return toSpecialOffers((await response.json()) as SpecialOfferRow[], day);
 }

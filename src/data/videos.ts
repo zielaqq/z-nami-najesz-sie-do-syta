@@ -18,11 +18,6 @@ export interface VideoItem {
   caption?: string;
   /** Adres wideo / reela na Facebooku */
   facebookUrl: string;
-  /**
-   * Opcjonalna miniatura (np. kadr z nagrania) wyświetlana na kafelku zamiast jednolitego tła.
-   * Wgraj plik do `public/images/video/` i wpisz ścieżkę, np. "/images/video/impreza.jpg" (pion 9:16).
-   */
-  poster?: string;
 }
 
 export const videos: VideoItem[] = [

@@ -44,12 +44,6 @@ function ReviewsPlaceholder({ googleUrl }: { googleUrl: string }) {
         <ButtonLink href={googleUrl} external variant="secondary" icon={<ArrowUpRight />} className="mt-8 w-full sm:w-auto">
           Zobacz opinie w Google
         </ButtonLink>
-        {process.env.NODE_ENV !== "production" ? (
-          <p className="mt-6 border-l-2 border-accent pl-3 text-sm text-mute">
-            Tryb deweloperski: integracja z Google nie jest skonfigurowana. Ustaw GOOGLE_PLACES_API_KEY i
-            GOOGLE_PLACE_ID – patrz docs/GOOGLE-OPINIE.md.
-          </p>
-        ) : null}
       </div>
 
       <ul className="grid gap-5 md:grid-cols-3 lg:col-span-8">
