@@ -39,10 +39,12 @@ dania jest więc **nieobowiązkowe** (patrz „Nowe danie” niżej) – dodaje 
 
 ### Kolejność dań na stronie
 
-Nad kafelkami są dwa widoki: **„Wybór dań”** (zaznaczasz, co jest dziś) i **„Kolejność na stronie”**. W drugim każde
-wybrane danie ma dwie strzałki: **w lewo** przesuwa je wcześniej, **w prawo** później. Na stronie dania układają się
-od lewej do prawej, rząd po rzędzie (na telefonie od góry do dołu). Kolejność ustawiasz osobno w każdej kategorii,
-zapisuje się sama, a **„Skopiuj z poprzedniego dnia”** kopiuje ją razem z daniami. Nowo dodane danie ląduje na końcu swojej kategorii.
+Zaznaczone dania stoją na początku swojej kategorii, w takiej kolejności jak na stronie. Żeby ją zmienić, **przeciągnij
+kafelek** w nowe miejsce: myszką od razu, a na telefonie najpierw przytrzymaj go chwilę palcem (zwykłe przesunięcie
+palcem dalej przewija stronę). Na stronie dania układają się od lewej do prawej, rząd po rzędzie (na telefonie od góry
+do dołu). Kolejność ustawiasz osobno w każdej kategorii, zapisuje się sama, a **„Skopiuj z poprzedniego dnia”** kopiuje
+ją razem z daniami. Nowo dodane danie ląduje na końcu zaznaczonych w swojej kategorii. Podczas wyszukiwania kafelków
+nie da się przeciągać.
 
 ### Wydarzenia
 
@@ -276,7 +278,8 @@ krok 3.
 * Ustawienia strony (widoczność przycisku „Cały tydzień”, kolejność kategorii, wybrane zdjęcie główne): tabela
   `site_settings` (jeden wiersz, `id=1`), publiczny odczyt `src/lib/site-settings-live.ts`, panel:
   `WeeklyMenuToggle.tsx` + `src/lib/panel-settings.ts` (zdjęcie główne – patrz niżej). Strzałki kolejności kategorii:
-  `CategoryHeading` i `moveCategory` w `TodayEditor.tsx`.
+  `CategoryHeading` i `moveCategory` w `TodayEditor.tsx`. Przeciąganie kafelków dań: `DishTileGrid.tsx` (`@dnd-kit`,
+  ładowane tylko w panelu).
 * Blokada powtórzonych nazw dań: w formularzu `dishNameKey` / `findDuplicateDish` (`src/lib/panel-data.ts`), w bazie
   funkcja `dish_name_key` i wyzwalacz `dishes_block_duplicate_name` (`schema.sql`). Oba miejsca muszą liczyć klucz tak
   samo. Wyzwalacz zamiast unikalnego indeksu, bo indeksu nie dałoby się założyć przy już istniejących powtórkach.

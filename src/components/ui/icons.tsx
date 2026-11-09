@@ -17,6 +17,7 @@ export {
   Download,
   Eye,
   EyeOff,
+  GripVertical,
   ImagePlus,
   Images,
   LogOut,
