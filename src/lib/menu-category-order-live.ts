@@ -7,7 +7,7 @@ import { supabaseConfig } from "@/lib/supabase/config";
 
 const DEFAULT_ORDER: MenuCategoryId[] = menuCategories.map((category) => category.id);
 
-/** Kolejność kategorii menu ustawiona przez klientkę w panelu (zakładka „Baza dań”). */
+/** Kolejność kategorii menu ustawiona przez klientkę w panelu (zakładka „Menu na dziś”, strzałki przy nazwie kategorii). */
 export async function fetchMenuCategoryOrder(signal?: AbortSignal): Promise<MenuCategoryId[]> {
   if (!supabaseConfig) return DEFAULT_ORDER;
   const params = new URLSearchParams({ select: "menu_category_order", id: "eq.1" });

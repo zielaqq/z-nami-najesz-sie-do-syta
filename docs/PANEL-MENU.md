@@ -150,6 +150,12 @@ je przywrócić („Pokaż ukryte”). Kosz **usuwa danie na stałe** z bazy (ra
 nie da się cofnąć, więc w większości przypadków lepiej danie po prostu ukryć okiem. Danie znika też wtedy z menu
 na dni, w których było wcześniej wybrane.
 
+**Powtórzone nazwy:** tej samej nazwy nie da się dodać drugi raz, także gdy danie jest ukryte albo ma inną kategorię.
+Wielkość liter, polskie znaki, interpunkcja i nadmiarowe spacje się nie liczą, więc „Rosół” i „ROSOL!” to ta sama nazwa.
+Formularz od razu pokazuje, jakie danie już jest, z przyciskiem **„Edytuj to danie”** albo, przy ukrytym,
+**„Przywróć to danie”**. Dania o powtórzonej nazwie sprzed tej blokady mają na liście oznaczenie „powtórzone”: zostaw
+jedno, a pozostałym zmień nazwę albo je usuń (usunięte danie znika też z menu na dni, w których było wybrane).
+
 **Pobierz zdjęcia** (przycisk nad listą dań) – zapisuje zdjęcia wybranych dań na Twoim komputerze, tak samo jak w
 Galerii. Widoczne są tylko dania, które mają zdjęcie.
 
@@ -158,10 +164,11 @@ Po co w takim razie zdjęcie dania, skoro menu jest listą? Głównie po to, że
 
 ### Kolejność kategorii
 
-Sekcja **„Kolejność kategorii”** (pod listą dań w „Baza dań”) – strzałki w górę/w dół przy każdej kategorii
-(Obiad dnia, Danie specjalne, Zupy, Drugie dania, Kluski, Ryby, Pierogi, Napoje, Piwo). Kolejność zapisuje się
-od razu po kliknięciu strzałki, bez osobnego przycisku „Zapisz”, i obowiązuje wszędzie: w menu na stronie
-(„Menu na dziś” i „Cały tydzień”), w liście dań w panelu i przy wyborze dań na dany dzień.
+W zakładce **„Menu na dziś”**, po prawej stronie nazwy każdej kategorii (Obiad dnia, Danie specjalne, Zupy, Drugie
+dania, Kluski, Ryby, Pierogi, Napoje, Piwo), są strzałki **w górę / w dół**. Kolejność zapisuje się od razu po
+kliknięciu strzałki, bez osobnego przycisku „Zapisz”, i obowiązuje wszędzie: w menu na stronie („Menu na dziś” i „Cały
+tydzień”), w liście dań w panelu i przy wyborze dań na dany dzień. Kategoria przesuwa się o jedno miejsce wśród tych
+widocznych na ekranie (puste są ukryte). Podczas wyszukiwania dania strzałek przy kategoriach nie ma.
 
 ### Godziny otwarcia
 
@@ -268,7 +275,11 @@ krok 3.
   `HeroPhotoManager`, `HeroPhotoForm`, `src/lib/panel-hero.ts`.
 * Ustawienia strony (widoczność przycisku „Cały tydzień”, kolejność kategorii, wybrane zdjęcie główne): tabela
   `site_settings` (jeden wiersz, `id=1`), publiczny odczyt `src/lib/site-settings-live.ts`, panel:
-  `WeeklyMenuToggle.tsx` + `src/lib/panel-settings.ts` (zdjęcie główne – patrz niżej).
+  `WeeklyMenuToggle.tsx` + `src/lib/panel-settings.ts` (zdjęcie główne – patrz niżej). Strzałki kolejności kategorii:
+  `CategoryHeading` i `moveCategory` w `TodayEditor.tsx`.
+* Blokada powtórzonych nazw dań: w formularzu `dishNameKey` / `findDuplicateDish` (`src/lib/panel-data.ts`), w bazie
+  funkcja `dish_name_key` i wyzwalacz `dishes_block_duplicate_name` (`schema.sql`). Oba miejsca muszą liczyć klucz tak
+  samo. Wyzwalacz zamiast unikalnego indeksu, bo indeksu nie dałoby się założyć przy już istniejących powtórkach.
 * Wydarzenia: publiczny odczyt `src/lib/events-live.ts` (jedno zapytanie na wejście na stronę), sekcja
   `src/components/sections/LiveEvents.tsx`; panel: `EventsManager` i `EventForm` (+ `src/lib/panel-events.ts`).
   Sekcja „Wydarzenia” ma tło „sand”, więc kolory sąsiednich sekcji nie zależą od tego, czy wydarzenia są.

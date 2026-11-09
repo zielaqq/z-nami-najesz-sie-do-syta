@@ -7,7 +7,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode }
 import { NoticeBanner, fieldClass, type PanelNotice } from "@/components/panel/NoticeBanner";
 import { WeeklyMenuToggle } from "@/components/panel/WeeklyMenuToggle";
 import { buttonClasses } from "@/components/ui/Button";
-import { Check, ChevronLeft, ChevronRight, Copy, Search, Utensils } from "@/components/ui/icons";
+import { Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Copy, Search, Utensils } from "@/components/ui/icons";
 import { isTextOnlyCategory, menuCategories, type MenuCategoryId } from "@/data/menu";
 import { cx } from "@/lib/cx";
 import { compareByOrder, dishCountLabel, dishPhotoUrl, groupDishes, type Dish } from "@/lib/daily-menu";
@@ -22,7 +22,7 @@ import {
   setSelected,
   type SelectedDish,
 } from "@/lib/panel-data";
-import { getMenuCategoryOrder } from "@/lib/panel-settings";
+import { getMenuCategoryOrder, setMenuCategoryOrder } from "@/lib/panel-settings";
 
 interface TodayEditorProps {
   /** Przejście do zakładki „Baza dań” (gdy baza jest pusta) */
@@ -35,6 +35,7 @@ type Mode = "select" | "order";
  * Menu na dany dzień. Dwa widoki:
  *  • „Wybór dań” – kafelki ze zdjęciami, dotknięcie = „jest dziś” / „nie ma”,
  *  • „Kolejność na stronie” – strzałki w lewo / w prawo przesuwają danie w obrębie kategorii.
+ * W obu widokach strzałki w górę / w dół przy nazwie kategorii zmieniają kolejność kategorii (na stronie i w panelu).
  * Każda zmiana zapisuje się od razu (bez przycisku „Zapisz”); przy błędzie widok wraca do stanu z bazy.
  */
 export function TodayEditor({ onOpenLibrary }: TodayEditorProps) {
@@ -51,7 +52,7 @@ export function TodayEditor({ onOpenLibrary }: TodayEditorProps) {
   const [announcement, setAnnouncement] = useState("");
   // Zapisy kolejności idą jeden po drugim, żeby wolniejsza odpowiedź nie nadpisała nowszej zmiany.
   const writeQueue = useRef<Promise<unknown>>(Promise.resolve());
-  const pendingFocus = useRef<{ dishId: string; direction: -1 | 1 } | null>(null);
+  const pendingFocus = useRef<{ prefix: string; direction: -1 | 1 } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -120,8 +121,8 @@ export function TodayEditor({ onOpenLibrary }: TodayEditorProps) {
     const target = pendingFocus.current;
     if (!target) return;
     pendingFocus.current = null;
-    const wanted = document.getElementById(`order-${target.dishId}-${target.direction}`) as HTMLButtonElement | null;
-    const other = document.getElementById(`order-${target.dishId}-${-target.direction}`) as HTMLButtonElement | null;
+    const wanted = document.getElementById(`${target.prefix}-${target.direction}`) as HTMLButtonElement | null;
+    const other = document.getElementById(`${target.prefix}-${-target.direction}`) as HTMLButtonElement | null;
     (wanted && !wanted.disabled ? wanted : other)?.focus();
   }, [orderGroups]);
 
@@ -170,7 +171,7 @@ export function TodayEditor({ onOpenLibrary }: TodayEditorProps) {
     ];
     setNotice(null);
     setAnnouncement(`${dish.name}: pozycja ${to + 1} z ${list.length}`);
-    pendingFocus.current = { dishId: dish.id, direction };
+    pendingFocus.current = { prefix: `order-${dish.id}`, direction };
     setSelection({ day, items: full.map((id, sortOrder) => ({ id, sortOrder })) });
 
     writeQueue.current = writeQueue.current
@@ -180,6 +181,33 @@ export function TodayEditor({ onOpenLibrary }: TodayEditorProps) {
         try {
           const fresh = await listSelected(day);
           setSelection((current) => (current && current.day === day ? { day, items: fresh } : current));
+        } catch {
+          /* zostaje widok lokalny; komunikat o błędzie już jest */
+        }
+      });
+  };
+
+  /**
+   * Przesuwa kategorię o jedno miejsce wśród kategorii widocznych na ekranie (`visible`). Zamieniamy ją z widocznym
+   * sąsiadem, bo puste kategorie są ukryte – przesunięcie o nie wyglądałoby tak, jakby strzałka nie działała.
+   */
+  const moveCategory = (id: MenuCategoryId, direction: -1 | 1, visible: MenuCategoryId[]) => {
+    const to = visible.indexOf(id) + direction;
+    if (to < 0 || to >= visible.length) return;
+    const neighbour = visible[to];
+    const next = categoryOrder.map((item) => (item === id ? neighbour : item === neighbour ? id : item));
+    const label = menuCategories.find((category) => category.id === id)?.label ?? id;
+    setNotice(null);
+    setAnnouncement(`Kategoria ${label}: miejsce ${to + 1} z ${visible.length}`);
+    pendingFocus.current = { prefix: `category-${id}`, direction };
+    setCategoryOrder(next);
+
+    writeQueue.current = writeQueue.current
+      .then(() => setMenuCategoryOrder(next))
+      .catch(async (error) => {
+        setNotice({ tone: "error", text: describeError(error) });
+        try {
+          setCategoryOrder(await getMenuCategoryOrder());
         } catch {
           /* zostaje widok lokalny; komunikat o błędzie już jest */
         }
@@ -288,6 +316,9 @@ export function TodayEditor({ onOpenLibrary }: TodayEditorProps) {
       </div>
 
       <NoticeBanner notice={notice} className="mt-4" />
+      <p role="status" aria-live="polite" className="sr-only">
+        {announcement}
+      </p>
 
       {mode === "select" ? (
         <label className="relative mt-6 block">
@@ -331,17 +362,20 @@ export function TodayEditor({ onOpenLibrary }: TodayEditorProps) {
         ) : (
           <>
             <p className="mt-6 max-w-[60ch] text-ink-soft">
-              Strzałkami przesuń danie w lewo albo w prawo. Na stronie dania układają się od lewej do prawej, rząd po rzędzie
-              (na telefonie od góry do dołu). Kolejność dotyczy jednej kategorii – kategorie zawsze idą jedna po drugiej.
+              Strzałkami przesuń danie w lewo albo w prawo, w obrębie jego kategorii. Na stronie dania układają się od lewej
+              do prawej, rząd po rzędzie (na telefonie od góry do dołu). Całą kategorię przesuwasz strzałkami w górę i w dół
+              obok jej nazwy.
             </p>
-            <p role="status" aria-live="polite" className="sr-only">
-              {announcement}
-            </p>
-            {orderGroups.map((group) => (
+            {orderGroups.map((group, index) => (
               <section key={group.id} className="mt-10" aria-labelledby={`order-cat-${group.id}`}>
-                <h3 id={`order-cat-${group.id}`} className="border-b border-ink/25 pb-2 font-serif text-xl">
-                  {group.label}
-                </h3>
+                <CategoryHeading
+                  headingId={`order-cat-${group.id}`}
+                  categoryId={group.id}
+                  label={group.label}
+                  isFirst={index === 0}
+                  isLast={index === orderGroups.length - 1}
+                  onMove={(direction) => moveCategory(group.id, direction, orderGroups.map((item) => item.id))}
+                />
                 <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
                   {group.dishes.map((dish, index) => (
                     <li key={dish.id}>
@@ -361,11 +395,17 @@ export function TodayEditor({ onOpenLibrary }: TodayEditorProps) {
       ) : groups.length === 0 ? (
         <p className="mt-8 text-mute">Brak dań pasujących do „{query.trim()}”.</p>
       ) : (
-        groups.map((group) => (
+        groups.map((group, index) => (
           <section key={group.id} className="mt-10" aria-labelledby={`cat-${group.id}`}>
-            <h3 id={`cat-${group.id}`} className="border-b border-ink/25 pb-2 font-serif text-xl">
-              {group.label}
-            </h3>
+            <CategoryHeading
+              headingId={`cat-${group.id}`}
+              categoryId={group.id}
+              label={group.label}
+              isFirst={index === 0}
+              isLast={index === groups.length - 1}
+              // Podczas wyszukiwania część kategorii jest odfiltrowana, więc kolejności lepiej wtedy nie zmieniać.
+              onMove={needle ? undefined : (direction) => moveCategory(group.id, direction, groups.map((item) => item.id))}
+            />
             <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
               {group.dishes.map((dish) => (
                 <li key={dish.id}>
@@ -552,17 +592,67 @@ function OrderTile({
   );
 }
 
+/** Nazwa kategorii z kreską pod spodem; po prawej strzałki zmieniające kolejność kategorii. */
+function CategoryHeading({
+  headingId,
+  categoryId,
+  label,
+  isFirst,
+  isLast,
+  onMove,
+}: {
+  headingId: string;
+  categoryId: MenuCategoryId;
+  label: string;
+  isFirst: boolean;
+  isLast: boolean;
+  /** Brak = bez strzałek (np. podczas wyszukiwania). */
+  onMove?: (direction: -1 | 1) => void;
+}) {
+  return (
+    <div className="flex min-h-14 items-end justify-between gap-3 border-b border-ink/25 pb-2">
+      <h3 id={headingId} className="font-serif text-xl">
+        {label}
+      </h3>
+      {onMove ? (
+        <div className="flex shrink-0 gap-2">
+          <ArrowButton
+            id={`category-${categoryId}--1`}
+            label={`Przesuń kategorię „${label}” w górę`}
+            disabled={isFirst}
+            onClick={() => onMove(-1)}
+            className="w-11"
+          >
+            <ChevronUp className="size-5" aria-hidden="true" />
+          </ArrowButton>
+          <ArrowButton
+            id={`category-${categoryId}-1`}
+            label={`Przesuń kategorię „${label}” w dół`}
+            disabled={isLast}
+            onClick={() => onMove(1)}
+            className="w-11"
+          >
+            <ChevronDown className="size-5" aria-hidden="true" />
+          </ArrowButton>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function ArrowButton({
   id,
   label,
   disabled,
   onClick,
+  className,
   children,
 }: {
   id: string;
   label: string;
   disabled: boolean;
   onClick: () => void;
+  className?: string;
   children: ReactNode;
 }) {
   return (
@@ -572,7 +662,10 @@ function ArrowButton({
       aria-label={label}
       disabled={disabled}
       onClick={onClick}
-      className="inline-flex h-11 items-center justify-center rounded-[3px] border border-ink/25 text-ink transition-colors hover:border-ink hover:bg-ink/5 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-ink/25 disabled:hover:bg-transparent"
+      className={cx(
+        "inline-flex h-11 items-center justify-center rounded-[3px] border border-ink/25 text-ink transition-colors hover:border-ink hover:bg-ink/5 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-ink/25 disabled:hover:bg-transparent",
+        className,
+      )}
     >
       {children}
     </button>

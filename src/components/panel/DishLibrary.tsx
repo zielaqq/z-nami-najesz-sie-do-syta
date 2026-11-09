@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-import { CategoryOrderManager } from "@/components/panel/CategoryOrderManager";
 import { DishForm } from "@/components/panel/DishForm";
 import { NoticeBanner, fieldClass, type PanelNotice } from "@/components/panel/NoticeBanner";
 import { PhotoDownloadPicker } from "@/components/panel/PhotoDownloadPicker";
@@ -15,7 +14,7 @@ import { cx } from "@/lib/cx";
 import { dishCountLabel, dishPhotoUrl, groupDishes, type Dish } from "@/lib/daily-menu";
 import { safeFileName } from "@/lib/download-file";
 import { formatPrice } from "@/lib/format";
-import { deleteDish, describeError, listDishes, setArchived } from "@/lib/panel-data";
+import { deleteDish, describeError, dishNameKey, listDishes, setArchived } from "@/lib/panel-data";
 import { getMenuCategoryOrder } from "@/lib/panel-settings";
 
 /**
@@ -114,6 +113,15 @@ export function DishLibrary() {
   const activeCount = (dishes ?? []).filter((dish) => !dish.archived).length;
   const hiddenCount = (dishes ?? []).length - activeCount;
 
+  // Nazwy powtórzone sprzed blokady duplikatów – oznaczamy je, żeby dało się posprzątać.
+  const nameCounts = new Map<string, number>();
+  for (const dish of dishes ?? []) {
+    const key = dishNameKey(dish.name);
+    nameCounts.set(key, (nameCounts.get(key) ?? 0) + 1);
+  }
+  const isRepeated = (dish: Dish) => (nameCounts.get(dishNameKey(dish.name)) ?? 0) > 1;
+  const hasRepeatedNames = (dishes ?? []).some(isRepeated);
+
   return (
     <section aria-labelledby="library-title">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -167,7 +175,12 @@ export function DishLibrary() {
         ) : null}
       </div>
 
-      <CategoryOrderManager order={categoryOrder} onSaved={setCategoryOrder} />
+      {hasRepeatedNames ? (
+        <p className="mt-6 max-w-[64ch] text-sm text-ink-soft">
+          Niektóre nazwy powtarzają się w bazie (oznaczone „powtórzone”). Zostaw po jednym daniu, a pozostałe usuń albo zmień
+          im nazwę.
+        </p>
+      ) : null}
 
       {loadError ? (
         <p role="alert" className="mt-8 text-accent-deep">
@@ -196,6 +209,7 @@ export function DishLibrary() {
                 <DishRow
                   key={dish.id}
                   dish={dish}
+                  repeated={isRepeated(dish)}
                   onEdit={() => setEditing(dish)}
                   onToggleArchived={() => void toggleArchived(dish)}
                   onDelete={() => void remove(dish)}
@@ -211,8 +225,14 @@ export function DishLibrary() {
         <DishForm
           key={editing === "new" ? "new" : editing.id}
           dish={editing === "new" ? null : editing}
+          allDishes={dishes ?? []}
           onClose={() => setEditing(null)}
           onSaved={onSaved}
+          onEditExisting={setEditing}
+          onRestoreExisting={(existing) => {
+            setEditing(null);
+            void toggleArchived(existing);
+          }}
         />
       ) : null}
       {downloadPickerOpen ? (
@@ -236,12 +256,14 @@ export function DishLibrary() {
 
 function DishRow({
   dish,
+  repeated,
   onEdit,
   onToggleArchived,
   onDelete,
   onPreview,
 }: {
   dish: Dish;
+  repeated: boolean;
   onEdit: () => void;
   onToggleArchived: () => void;
   onDelete: () => void;
@@ -269,6 +291,7 @@ function DishRow({
         <p className="font-serif text-lg leading-snug">
           {dish.name}
           {dish.archived ? <span className="ml-2 text-xs font-sans font-semibold uppercase tracking-wide text-mute">ukryte</span> : null}
+          {repeated ? <span className="ml-2 text-xs font-sans font-semibold uppercase tracking-wide text-accent-deep">powtórzone</span> : null}
         </p>
         <p className="text-sm text-mute">
           {dish.price != null ? formatPrice(dish.price) : "bez ceny"}

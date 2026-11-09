@@ -10,7 +10,7 @@ import { buttonClasses } from "@/components/ui/Button";
 import { CloseIcon, ImagePlus, Images, Utensils } from "@/components/ui/icons";
 import { menuCategories, type MenuCategoryId } from "@/data/menu";
 import { dishPhotoUrl, type Dish } from "@/lib/daily-menu";
-import { describeError, saveDish } from "@/lib/panel-data";
+import { describeError, findDuplicateDish, saveDish } from "@/lib/panel-data";
 
 /** Cena z pola tekstowego: pusta → null („bez ceny”), błędna → undefined. Przecinek i kropka są dozwolone. */
 function parsePrice(text: string): number | null | undefined {
@@ -23,8 +23,14 @@ function parsePrice(text: string): number | null | undefined {
 interface DishFormProps {
   /** null = nowe danie */
   dish: Dish | null;
+  /** Wszystkie dania (także ukryte) – do wykrywania powtórzonych nazw. */
+  allDishes: Dish[];
   onClose: () => void;
   onSaved: (dish: Dish) => void;
+  /** Otwiera zamiast tego formularza edycję dania, które ma już taką nazwę. */
+  onEditExisting: (dish: Dish) => void;
+  /** Przywraca ukryte danie, które ma już taką nazwę. */
+  onRestoreExisting: (dish: Dish) => void;
 }
 
 /**
@@ -33,7 +39,7 @@ interface DishFormProps {
  * jedno z tych, które są już w galerii restauracji (`GalleryPhotoPicker`). Kliknięcie podglądu powiększa zdjęcie
  * (`PhotoLightbox`).
  */
-export function DishForm({ dish, onClose, onSaved }: DishFormProps) {
+export function DishForm({ dish, allDishes, onClose, onSaved, onEditExisting, onRestoreExisting }: DishFormProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [name, setName] = useState(dish?.name ?? "");
   const [category, setCategory] = useState<MenuCategoryId>(dish?.category ?? "drugie-dania");
@@ -76,11 +82,17 @@ export function DishForm({ dish, onClose, onSaved }: DishFormProps) {
     setPickerOpen(false);
   };
 
+  const duplicate = findDuplicateDish(name, allDishes, dish);
+
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) {
       setNotice({ tone: "error", text: "Wpisz nazwę dania." });
+      return;
+    }
+    if (duplicate) {
+      setNotice({ tone: "error", text: "Takie danie już jest w bazie – zmień nazwę albo użyj istniejącego." });
       return;
     }
     const parsed = parsePrice(price);
@@ -129,18 +141,36 @@ export function DishForm({ dish, onClose, onSaved }: DishFormProps) {
         </div>
 
         <div className="space-y-5 overflow-y-auto px-5 py-5">
-          <label className="block text-sm font-semibold">
-            Nazwa dania
-            <input
-              type="text"
-              required
-              maxLength={120}
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              className={fieldClass}
-              placeholder="np. Kotlet schabowy z ziemniakami"
-            />
-          </label>
+          <div>
+            <label className="block text-sm font-semibold">
+              Nazwa dania
+              <input
+                type="text"
+                required
+                maxLength={120}
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                className={fieldClass}
+                placeholder="np. Kotlet schabowy z ziemniakami"
+              />
+            </label>
+            {duplicate ? (
+              <div role="alert" className="mt-2 rounded-[3px] border border-accent/40 bg-accent/5 p-3 text-sm text-ink-soft">
+                <p>
+                  <strong className="font-semibold text-ink">Takie danie już jest w bazie:</strong> „{duplicate.name}”,{" "}
+                  {menuCategories.find((item) => item.id === duplicate.category)?.label ?? duplicate.category}
+                  {duplicate.archived ? " (ukryte)" : ""}.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => (duplicate.archived ? onRestoreExisting(duplicate) : onEditExisting(duplicate))}
+                  className={buttonClasses("secondary", "sm", "mt-2")}
+                >
+                  {duplicate.archived ? "Przywróć to danie" : "Edytuj to danie"}
+                </button>
+              </div>
+            ) : null}
+          </div>
 
           <label className="block text-sm font-semibold">
             Kategoria

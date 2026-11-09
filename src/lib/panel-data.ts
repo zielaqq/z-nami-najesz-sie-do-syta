@@ -14,6 +14,9 @@ const BUCKET = "dish-photos";
 export function describeError(error: unknown): string {
   console.error("[panel]", error);
   const { message = "", code = "" } = (error ?? {}) as { message?: string; code?: string };
+  if (/danie o takiej nazwie/i.test(message)) {
+    return "Takie danie już jest w bazie. Zmień nazwę albo znajdź istniejące danie na liście (także wśród ukrytych).";
+  }
   if (code === "PGRST205" || /could not find the table|schema cache/i.test(message)) {
     return "W bazie brakuje tabeli. Administrator strony musi uruchomić aktualny plik supabase/schema.sql (SQL Editor w Supabase).";
   }
@@ -147,6 +150,30 @@ export async function copyFromPreviousDay(
     if (insertError) throw insertError;
   }
   return { from, added };
+}
+
+/**
+ * Klucz do porównywania nazw dań: bez wielkości liter, polskich znaków, interpunkcji i nadmiarowych spacji, więc
+ * „Rosół”, „ROSOL” i „rosół!” to ta sama nazwa. Tak samo liczy go baza (`dish_name_key` w supabase/schema.sql).
+ */
+export function dishNameKey(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/ł/g, "l")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+/**
+ * Inne danie o tej samej nazwie (także ukryte) albo null. Przy edycji niezmieniona nazwa nie jest duplikatem, więc
+ * danie z powtórzoną nazwą sprzed blokady da się dalej poprawiać (np. cenę).
+ */
+export function findDuplicateDish(name: string, dishes: Dish[], self: Dish | null): Dish | null {
+  const key = dishNameKey(name);
+  if (!key || (self && dishNameKey(self.name) === key)) return null;
+  return dishes.find((dish) => dish.id !== self?.id && dishNameKey(dish.name) === key) ?? null;
 }
 
 export interface DishInput {
